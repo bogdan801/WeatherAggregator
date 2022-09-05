@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_c_0_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_c_0_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_1_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_1_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_2_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_2_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_3_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_4_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_r_4_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_rs_4_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_2_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_2_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_3_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_3_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_4_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_5_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_1_s_5_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_c_0_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_c_0_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_c_0_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_r_1_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_r_2_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_rs_4_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_2_s_4_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_1_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_2_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_3_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_4_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_5_dn.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_c_c_0_d.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_c_c_0_n.xml" value="0.2005" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
