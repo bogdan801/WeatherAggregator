@@ -4,14 +4,70 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.core.text.isDigitsOnly
 import com.bogdan801.weatheraggregator.domain.model.Cloudiness.*
 
 data class SkyCondition(
-    val cloudiness: Cloudiness = Clear,
-    val precipitation: Precipitation = Precipitation.None,
-    val timeOfDay: TimeOfDay = TimeOfDay.Day
+    private var _cloudiness: Cloudiness = Clear,
+    private var _precipitation: Precipitation = Precipitation.None,
+    private var _timeOfDay: TimeOfDay = TimeOfDay.Day
 ){
     private var imageName = "ic_c_c_0_d"
+
+    val cloudiness get() = _cloudiness
+    val precipitation get() = _precipitation
+    val timeOfDay get() = _timeOfDay
+    val descriptor get() = imageName.substring(3)
+
+    constructor(descriptor: String):this() {
+        val parts = descriptor.split('_')
+        if(parts.size != 4) return
+
+        val cloudiness = when(parts[0]){
+            "c" -> Clear
+            "1" -> LittleCloudy
+            "2" -> CloudyWithClearing
+            "3" -> Cloudy
+            "4" -> Gloomy
+            else -> return
+        }
+
+        if(!parts[2].isDigitsOnly()) return
+
+        val precipitation = when(parts[1]){
+            "c" -> Precipitation.None
+            "r" -> {
+                val level = parts[2].toInt()
+                if(level !in 0..6) return
+                Precipitation.Rain(RainLevel.values()[level-1])
+            }
+            "rs" -> {
+                val level = parts[2].toInt()
+                if(level !in 0..4) return
+                Precipitation.RainWithSnow(RainWithSnowLevel.values()[level-1])
+            }
+            "s" -> {
+                val level = parts[2].toInt()
+                if(level !in 0..6) return
+                Precipitation.Snow(SnowLevel.values()[level-1])
+            }
+            else -> return
+        }
+
+        val timeOfDay = when(parts[3]){
+            "d"-> TimeOfDay.Day
+            "n"-> TimeOfDay.Night
+            "dn"-> TimeOfDay.Day
+            else -> return
+        }
+
+        _cloudiness = cloudiness
+        _precipitation = precipitation
+        _timeOfDay = timeOfDay
+
+        imageName = getResourceName()
+    }
+
 
     init {
         imageName = getResourceName()
@@ -19,9 +75,9 @@ data class SkyCondition(
 
     private fun getResourceName(): String = buildString {
         append("ic_")
-        when (cloudiness) {
+        when (_cloudiness) {
             Clear -> {
-                when(timeOfDay){
+                when(_timeOfDay){
                     TimeOfDay.Day -> append("c_c_0_d")
                     TimeOfDay.Night -> append("c_c_0_n")
                 }
@@ -31,12 +87,12 @@ data class SkyCondition(
             Cloudy -> append("3_")
             Gloomy -> append("4_")
         }
-        if(cloudiness == Clear) return@buildString
+        if(_cloudiness == Clear) return@buildString
 
-        when (precipitation) {
+        when (_precipitation) {
             is Precipitation.None -> append("c_0_")
             is Precipitation.Rain -> {
-                when (precipitation.level) {
+                when ((_precipitation as Precipitation.Rain).level) {
                     RainLevel.One -> append("r_1_")
                     RainLevel.Two -> append("r_2_")
                     RainLevel.Three -> append("r_3_")
@@ -46,7 +102,7 @@ data class SkyCondition(
                 }
             }
             is Precipitation.RainWithSnow -> {
-                when (precipitation.level) {
+                when ((_precipitation as Precipitation.RainWithSnow).level) {
                     RainWithSnowLevel.One -> append("rs_1_")
                     RainWithSnowLevel.Two -> append("rs_2_")
                     RainWithSnowLevel.Three -> append("rs_3_")
@@ -54,7 +110,7 @@ data class SkyCondition(
                 }
             }
             is Precipitation.Snow -> {
-                when (precipitation.level) {
+                when ((_precipitation as Precipitation.Snow).level) {
                     SnowLevel.One -> append("s_1_")
                     SnowLevel.Two -> append("s_2_")
                     SnowLevel.Three -> append("s_3_")
@@ -64,11 +120,11 @@ data class SkyCondition(
                 }
             }
         }
-        if(cloudiness == Cloudy || cloudiness == Gloomy){
+        if(_cloudiness == Cloudy || _cloudiness == Gloomy){
             append("dn")
         }
         else{
-            when(timeOfDay){
+            when(_timeOfDay){
                 TimeOfDay.Day -> append("d")
                 TimeOfDay.Night -> append("n")
             }

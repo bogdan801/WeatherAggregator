@@ -18,8 +18,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val skyCondition = SkyCondition(
-            Cloudiness.CloudyWithClearing,
-            Precipitation.Snow(SnowLevel.Five),
+            Cloudiness.Gloomy,
+            Precipitation.Rain(RainLevel.Five),
             TimeOfDay.Night
         )
 
@@ -30,6 +30,10 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ){
+                        Text(
+                            modifier = Modifier.align(Alignment.TopStart),
+                            text = skyCondition.descriptor
+                        )
                         Image(
                             modifier = Modifier
                                 .size(150.dp),
