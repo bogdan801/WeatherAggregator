@@ -3,6 +3,8 @@ package com.bogdan801.weatheraggregator.data.mapper
 import com.bogdan801.weatheraggregator.data.localdb.entities.DayWeatherEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherDataEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherSliceEntity
+import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
+import com.bogdan801.weatheraggregator.data.localdb.relations.DayWithSlicesJunction
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlinx.datetime.toLocalDate
 
@@ -57,7 +59,6 @@ fun WeatherSlice.toWeatherSliceEntity(): WeatherSliceEntity = WeatherSliceEntity
     }
 )
 
-
 fun DayWeatherEntity.toDayWeatherCondition(): DayWeatherCondition = DayWeatherCondition(
     dayID = dayID,
     dataID = dataID,
@@ -94,4 +95,26 @@ fun WeatherData.toWeatherDataEntity(): WeatherDataEntity = WeatherDataEntity(
     url = url,
     currentSkyCondition = currentSkyCondition.descriptor,
     currentTemperature = currentTemperature
+)
+
+fun DayWithSlicesJunction.toDayWeatherCondition(): DayWeatherCondition = DayWeatherCondition(
+    dayID = dayWeatherEntity.dayID,
+    dataID = dayWeatherEntity.dataID,
+    date = dayWeatherEntity.date.toLocalDate(),
+    skyCondition = SkyCondition(dayWeatherEntity.skyCondition),
+    dayTemperature = dayWeatherEntity.dayTemperature,
+    nightTemperature = dayWeatherEntity.nightTemperature,
+    weatherByHours = slices.map { it.toWeatherSlice() }
+)
+
+
+fun DataWithDaysJunction.toWeatherData(): WeatherData = WeatherData(
+    dataID = weatherDataEntity.dataID,
+    currentDate = weatherDataEntity.currentDate.toLocalDate(),
+    currentLocation = weatherDataEntity.currentLocation,
+    domain = WeatherSourceDomain.values()[weatherDataEntity.domain],
+    url = weatherDataEntity.url,
+    currentSkyCondition = SkyCondition(weatherDataEntity.currentSkyCondition),
+    currentTemperature = weatherDataEntity.currentTemperature,
+    weatherByDates = days.map { it.toDayWeatherCondition() }
 )
