@@ -68,7 +68,6 @@ data class SkyCondition(
         imageName = getResourceName()
     }
 
-
     init {
         imageName = getResourceName()
     }
@@ -184,5 +183,3 @@ sealed class Precipitation{
     data class Snow(val level: SnowLevel = SnowLevel.One): Precipitation()
     data class RainWithSnow(val level: RainWithSnowLevel = RainWithSnowLevel.One): Precipitation()
 }
-
-
