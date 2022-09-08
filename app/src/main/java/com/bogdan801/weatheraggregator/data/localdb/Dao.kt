@@ -1,9 +1,7 @@
 package com.bogdan801.weatheraggregator.data.localdb
 
+import androidx.room.*
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
 import com.bogdan801.weatheraggregator.data.localdb.entities.DayWeatherEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherDataEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherSliceEntity
@@ -36,11 +34,21 @@ interface Dao {
     @Query("DELETE FROM weathersliceentity WHERE sliceID == :sliceID")
     suspend fun deleteWeatherSliceEntity(sliceID: Int)
 
+    @Query("DELETE FROM weathersliceentity WHERE dayID == :dayID AND time == :time")
+    suspend fun deleteWeatherSliceEntityByDayIDAndTime(dayID: Int, time: String)
+
     @Query("DELETE FROM dayweatherentity WHERE dayID == :dayID")
     suspend fun deleteDayWeatherEntity(dayID: Int)
 
+    @Query("DELETE FROM dayweatherentity WHERE date == :date AND dataID == :dataID")
+    suspend fun deleteDayWeatherEntityByDateAndDataID(date: String, dataID: Int)
+
+
     @Query("DELETE FROM weatherdataentity WHERE dataID == :dataID")
     suspend fun deleteWeatherDataEntity(dataID: Int)
+
+    @Query("DELETE FROM weatherdataentity WHERE domain == :domain")
+    suspend fun deleteWeatherDataEntityByDomain(domain: Int)
 
     //select
     @Query("SELECT * FROM weatherdataentity")
@@ -50,11 +58,13 @@ interface Dao {
     fun getAllDayWeatherEntitiesForAGivenDataID(dataID: Int): Flow<List<DayWeatherEntity>>
 
     @Query("SELECT * FROM weathersliceentity  WHERE dayID == :dayID")
-    fun getAllSliceEntitiesForAGivenDayID(dayID: Int): Flow<List<WeatherSliceEntity>>
+    suspend fun getAllSliceEntitiesForAGivenDayID(dayID: Int): List<WeatherSliceEntity>
 
+    @Transaction
     @Query("SELECT * FROM dayweatherentity WHERE dataID == :dataID")
     fun getDayEntitiesWithSliceEntitiesByDataID(dataID: Int): Flow<List<DayWithSlicesJunction>>
 
+    @Transaction
     @Query("SELECT * FROM weatherdataentity")
     fun getWeatherDataEntitiesWithDayEntities(): Flow<List<DataWithDaysJunction>>
 }

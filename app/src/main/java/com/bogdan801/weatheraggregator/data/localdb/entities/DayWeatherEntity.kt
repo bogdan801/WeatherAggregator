@@ -1,9 +1,19 @@
 package com.bogdan801.weatheraggregator.data.localdb.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = WeatherDataEntity::class,
+            parentColumns = ["dataID"],
+            childColumns = ["dataID"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class DayWeatherEntity(
     @PrimaryKey(autoGenerate = true)
     val dayID: Int,

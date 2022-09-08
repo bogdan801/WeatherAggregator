@@ -3,6 +3,8 @@ package com.bogdan801.weatheraggregator.di
 import android.content.Context
 import androidx.room.Room
 import com.bogdan801.weatheraggregator.data.localdb.Database
+import com.bogdan801.weatheraggregator.data.repository.RepositoryImpl
+import com.bogdan801.weatheraggregator.domain.repository.Repository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,10 +31,9 @@ object AppModule {
     @Provides
     fun provideDao(db :Database) = db.dbDao
 
-
-    /*@Provides
+    @Provides
     @Singleton
     fun provideRepository(db: Database): Repository {
         return RepositoryImpl(db.dbDao)
-    }*/
+    }
 }
