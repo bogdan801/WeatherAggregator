@@ -118,3 +118,4 @@ fun DataWithDaysJunction.toWeatherData(): WeatherData = WeatherData(
     currentTemperature = weatherDataEntity.currentTemperature,
     weatherByDates = days.map { it.toDayWeatherCondition() }
 )
+

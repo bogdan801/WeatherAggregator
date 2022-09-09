@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.Flow
 interface Dao {
     //insert
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWeatherDataEntity(weatherDataEntity: WeatherDataEntity)
+    suspend fun insertWeatherDataEntity(weatherDataEntity: WeatherDataEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDayWeatherEntity(dayWeatherEntity: DayWeatherEntity)
+    suspend fun insertDayWeatherEntity(dayWeatherEntity: DayWeatherEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWeatherSliceEntity(weatherSliceEntity: WeatherSliceEntity)

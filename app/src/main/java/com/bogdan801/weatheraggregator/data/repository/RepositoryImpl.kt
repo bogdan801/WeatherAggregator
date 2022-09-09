@@ -1,29 +1,30 @@
 package com.bogdan801.weatheraggregator.data.repository
 
 import com.bogdan801.weatheraggregator.data.localdb.Dao
-import com.bogdan801.weatheraggregator.data.mapper.toDayWeatherEntity
-import com.bogdan801.weatheraggregator.data.mapper.toWeatherData
-import com.bogdan801.weatheraggregator.data.mapper.toWeatherDataEntity
-import com.bogdan801.weatheraggregator.data.mapper.toWeatherSliceEntity
+import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
+import com.bogdan801.weatheraggregator.data.mapper.*
 import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
 import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 class RepositoryImpl(private val dao: Dao) : Repository {
     //INSERT
     override suspend fun insertWeatherData(weatherData: WeatherData) {
         dao.deleteWeatherDataEntityByDomain(weatherData.domain.ordinal)
 
-        dao.insertWeatherDataEntity(weatherData.toWeatherDataEntity())
+        val dataID = dao.insertWeatherDataEntity(weatherData.toWeatherDataEntity()).toInt()
         weatherData.weatherByDates.forEach { day ->
-            dao.insertDayWeatherEntity(day.toDayWeatherEntity())
+            val dayID = dao.insertDayWeatherEntity(day.toDayWeatherEntity().copy(dataID = dataID)).toInt()
             day.weatherByHours.forEach { slice ->
-                dao.insertWeatherSliceEntity(slice.toWeatherSliceEntity())
+                dao.insertWeatherSliceEntity(slice.toWeatherSliceEntity().copy(dayID = dayID))
             }
         }
     }
@@ -31,9 +32,9 @@ class RepositoryImpl(private val dao: Dao) : Repository {
     override suspend fun insertDayWeather(dayWeatherCondition: DayWeatherCondition) {
         dao.deleteDayWeatherEntityByDateAndDataID(dayWeatherCondition.date.toString(), dayWeatherCondition.dataID)
 
-        dao.insertDayWeatherEntity(dayWeatherCondition.toDayWeatherEntity())
+        val dayID = dao.insertDayWeatherEntity(dayWeatherCondition.toDayWeatherEntity()).toInt()
         dayWeatherCondition.weatherByHours.forEach { slice ->
-            dao.insertWeatherSliceEntity(slice.toWeatherSliceEntity())
+            dao.insertWeatherSliceEntity(slice.toWeatherSliceEntity().copy(dayID = dayID))
         }
     }
 
@@ -60,9 +61,14 @@ class RepositoryImpl(private val dao: Dao) : Repository {
     }
 
     //SELECT
-    override fun getAllWeatherDataFromCache(): Flow<List<WeatherData>> {
-
-        return flow {  }
+    override fun getAllWeatherDataFromCache(): Flow<List<WeatherData>> = dao.getWeatherDataEntitiesWithDayEntities().map {
+        it.map { junction ->
+            junction.toWeatherData().apply {
+                this.weatherByDates.forEach { day ->
+                    day.weatherByHours = dao.getAllSliceEntitiesForAGivenDayID(day.dayID).map { entity -> entity.toWeatherSlice() }
+                }
+            }
+        }
     }
 
 

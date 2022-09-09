@@ -4,13 +4,13 @@ import kotlinx.datetime.LocalDate
 
 data class WeatherData(
     val dataID: Int = 0,
-    val currentDate: LocalDate = LocalDate(2022, 0, 1),
+    val currentDate: LocalDate = LocalDate(2022, 1, 1),
     val currentLocation: String = "Desnianske",
     val domain: WeatherSourceDomain = WeatherSourceDomain.Meta,
     val url: String = "https://pogoda.meta.ua/ua/Chernihivska/Koropskyi/Sverdlovka/",
     val currentSkyCondition: SkyCondition = SkyCondition("c_c_0_d"),
     val currentTemperature: Int = 0,
-    val weatherByDates: List<DayWeatherCondition> = listOf()
+    var weatherByDates: List<DayWeatherCondition> = listOf()
 )
 
 
