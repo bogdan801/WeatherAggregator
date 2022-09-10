@@ -50,7 +50,6 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
@@ -101,4 +100,7 @@ dependencies {
     //dataStore
     def datastore_version = "1.0.0"
     implementation "androidx.datastore:datastore-preferences:$datastore_version"
+
+    //gson
+    implementation "com.google.code.gson:gson:2.9.0"
 }

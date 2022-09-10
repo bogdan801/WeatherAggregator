@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +30,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = WeatherData(
+        /*val data = WeatherData(
             currentDate = getCurrentDate(),
             domain = WeatherSourceDomain.Meta,
             url = "https://pogoda.meta.ua/ua/Chernihivska/Koropskyi/Sverdlovka/",
@@ -72,28 +74,18 @@ class MainActivity : ComponentActivity() {
             //repo.insertWeatherData(data)
             //repo.deleteAllWeatherData()
             dataFromDB = repo.getAllWeatherDataFromCache().first()
-        }
+        }*/
 
+        val oblastList = getOblastListFromFile(this)
 
-
+        println()
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ){
-
-                        Column {
-                            dataFromDB.forEach { data ->
-                                data.weatherByDates.forEach { day ->
-                                    day.weatherByHours.forEach { hour ->
-                                        Text(text = "${hour.time} ${hour.precipitationProbability}")
-                                    }
-                                }
-                            }
+                    LazyColumn(Modifier.fillMaxSize().padding(horizontal = 8.dp)){
+                        items(oblastList[24].listOfRegions[7].locations.map { it.name }){ name ->
+                            Text(text = name)
                         }
-
                     }
                 }
             }
