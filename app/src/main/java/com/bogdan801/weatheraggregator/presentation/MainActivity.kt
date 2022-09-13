@@ -13,11 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.bogdan801.weatheraggregator.data.localdb.Dao
+import com.bogdan801.weatheraggregator.data.remote.parsing.getWeatherDataFromMeta
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -76,17 +78,21 @@ class MainActivity : ComponentActivity() {
             dataFromDB = repo.getAllWeatherDataFromCache().first()
         }*/
 
-        val oblastList = getOblastListFromFile(this)
+        //val oblastList = getOblastListFromFile(this)
+
+        lifecycleScope.launch(Dispatchers.Default) {
+            getWeatherDataFromMeta(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
+        }
 
         println()
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    LazyColumn(Modifier.fillMaxSize().padding(horizontal = 8.dp)){
+                    /*LazyColumn(Modifier.fillMaxSize().padding(horizontal = 8.dp)){
                         items(oblastList[24].listOfRegions[7].locations.map { it.name }){ name ->
                             Text(text = name)
                         }
-                    }
+                    }*/
                 }
             }
         }
