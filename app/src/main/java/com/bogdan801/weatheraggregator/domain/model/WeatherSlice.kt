@@ -9,12 +9,27 @@ sealed class Wind{
     data class SouthWest(val power: Int): Wind()
     data class West     (val power: Int): Wind()
     data class NorthWest(val power: Int): Wind()
+
+    companion object{
+        fun get(direction: String, power: Int): Wind  = when(direction){
+            "N"  -> North(power)
+            "NE" -> NorthEast(power)
+            "E"  -> East(power)
+            "SE" -> SouthEast(power)
+            "S"  -> South(power)
+            "SW" -> SouthWest(power)
+            "W"  -> West(power)
+            "NW" -> NorthWest(power)
+            else -> North(power)
+        }
+    }
 }
 
 data class WeatherSlice(
     val sliceID: Int = 0,
     val dayID: Int = 0,
     val time: String = "00:00",
+    val temperature: Int = 0,
     val skyCondition: SkyCondition = SkyCondition("c_c_0_d"),
     val precipitationProbability: Int = 0,
     val pressure: Int = 760,

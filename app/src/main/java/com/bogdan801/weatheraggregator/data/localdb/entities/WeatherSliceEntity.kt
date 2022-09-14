@@ -19,6 +19,7 @@ data class WeatherSliceEntity(
     val sliceID: Int,
     val dayID: Int,
     val time: String,
+    val temperature: Int,
     val skyCondition: String,
     val precipitationProbability: Int,
     val pressure: Int,
