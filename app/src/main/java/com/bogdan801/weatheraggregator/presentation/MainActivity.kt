@@ -1,29 +1,23 @@
 package com.bogdan801.weatheraggregator.presentation
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.bogdan801.weatheraggregator.data.localdb.Dao
 import com.bogdan801.weatheraggregator.data.remote.parsing.getWeatherDataFromMeta
-import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -80,11 +74,14 @@ class MainActivity : ComponentActivity() {
 
         //val oblastList = getOblastListFromFile(this)
 
+        var data:  WeatherData
         lifecycleScope.launch(Dispatchers.Default) {
-            getWeatherDataFromMeta(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
+            val elapsed = measureTimeMillis {
+                data = getWeatherDataFromMeta(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
+            }
+            Log.d("puk", elapsed.toString())
         }
 
-        println()
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
@@ -93,6 +90,13 @@ class MainActivity : ComponentActivity() {
                             Text(text = name)
                         }
                     }*/
+                    
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Text(text = "Дізєль лох")
+                    }
                 }
             }
         }
