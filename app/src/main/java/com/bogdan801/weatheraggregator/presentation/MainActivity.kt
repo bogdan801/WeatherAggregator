@@ -9,7 +9,8 @@ import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.bogdan801.weatheraggregator.data.remote.parsing.getWeatherDataFromMeta
+import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFromMeta
+import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
@@ -77,9 +78,9 @@ class MainActivity : ComponentActivity() {
         var data:  WeatherData
         lifecycleScope.launch(Dispatchers.Default) {
             val elapsed = measureTimeMillis {
-                data = getWeatherDataFromMeta(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
+                data = getWeatherDataFromSinoptik(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
             }
-            Log.d("puk", elapsed.toString())
+            //Log.d("puk", elapsed.toString())
         }
 
         setContent {
@@ -95,7 +96,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ){
-                        Text(text = "Дізєль лох")
+                        Text(text = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське").toSinoptikLocation().link)
                     }
                 }
             }

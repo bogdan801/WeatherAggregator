@@ -1,6 +1,5 @@
-package com.bogdan801.weatheraggregator.data.remote.parsing
+package com.bogdan801.weatheraggregator.data.remote.parsing.meta
 
-import android.util.Log
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlinx.datetime.DatePeriod
@@ -8,10 +7,7 @@ import kotlinx.datetime.plus
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 
-class ParsingException(reason: String) : Exception(reason)
-
-
-suspend fun getWeatherDataFromMeta(location: Location): WeatherData {
+fun getWeatherDataFromMeta(location: Location): WeatherData {
     val baseUrl = "https://pogoda.meta.ua"
     val url = baseUrl + location.link
     val baseDocument = Jsoup
@@ -147,8 +143,4 @@ private fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
         }
         else -> throw Exception("Invalid Meta sky descriptor: ${parts[0]}")
     }
-}
-
-suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData{
-    return WeatherData()
 }
