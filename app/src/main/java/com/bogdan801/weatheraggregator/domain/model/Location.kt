@@ -22,7 +22,7 @@ data class Location(
     val link: String,
     val name: String
 ){
-    fun toSinoptikLocation(): Location = copy(link = "/погода-${name.lowercase()}")
+    fun toSinoptikLocation(): Location = copy(link = "/погода-${name.lowercase().replace(" ", "-")}")
 }
 
 fun turnJSONtoOblastList(jsonString: String): List<Oblast>{
