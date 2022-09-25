@@ -77,10 +77,12 @@ class MainActivity : ComponentActivity() {
 
         var data:  WeatherData
         lifecycleScope.launch(Dispatchers.Default) {
+            val location = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське")
             val elapsed = measureTimeMillis {
-                data = getWeatherDataFromSinoptik(Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське"))
+                data = getWeatherDataFromSinoptik(location)
             }
-            //Log.d("puk", elapsed.toString())
+
+            Log.d("puk", "$elapsed")
         }
 
         setContent {
