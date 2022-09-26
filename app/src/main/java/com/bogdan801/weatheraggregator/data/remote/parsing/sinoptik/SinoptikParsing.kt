@@ -12,9 +12,8 @@ import org.jsoup.nodes.TextNode
 import org.jsoup.select.NodeFilter
 
 fun getWeatherDataFromSinoptik(location: Location): WeatherData {
-    val sLocation = location.toSinoptikLocation()
     val baseUrl = "https://ua.sinoptik.ua"
-    val url = baseUrl + sLocation.link
+    val url = baseUrl + location.link
 
     val baseDocument = Jsoup
         .connect(url)

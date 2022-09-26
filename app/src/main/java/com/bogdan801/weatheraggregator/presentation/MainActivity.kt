@@ -27,51 +27,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /*val data = WeatherData(
-            currentDate = getCurrentDate(),
-            domain = WeatherSourceDomain.Meta,
-            url = "https://pogoda.meta.ua/ua/Chernihivska/Koropskyi/Sverdlovka/",
-            currentSkyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Five)),
-            currentTemperature = -25,
-            weatherByDates = listOf(
-                DayWeatherCondition(
-                    date = getCurrentDate(),
-                    skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                    dayTemperature = -20,
-                    nightTemperature = -30,
-                    weatherByHours = listOf(
-                        WeatherSlice(
-                            time = "06:00",
-                            skyCondition = SkyCondition("4_s_5_d"),
-                            precipitationProbability = 99
-                        ),
-                        WeatherSlice(
-                            time = "09:00",
-                            skyCondition = SkyCondition("4_s_3_d"),
-                            precipitationProbability = 88
-                        ),
-                        WeatherSlice(
-                            time = "12:00",
-                            skyCondition = SkyCondition("4_s_2_d"),
-                            precipitationProbability = 32
-                        ),
-                        WeatherSlice(
-                            time = "15:00",
-                            skyCondition = SkyCondition("4_c_0_d"),
-                            precipitationProbability = 0
-                        )
-                    )
-                )
-            )
-        )
-
-        lateinit var dataFromDB: List<WeatherData>
-
-        runBlocking{
-            //repo.insertWeatherData(data)
-            //repo.deleteAllWeatherData()
-            dataFromDB = repo.getAllWeatherDataFromCache().first()
-        }*/
 
         //val oblastList = getOblastListFromFile(this)
 
@@ -79,7 +34,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.Default) {
             val location = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське")
             val elapsed = measureTimeMillis {
-                data = getWeatherDataFromSinoptik(location)
+                data = getWeatherDataFromSinoptik(location.toSinoptikLocation())
             }
 
             Log.d("puk", "$elapsed")
@@ -88,18 +43,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    /*LazyColumn(Modifier.fillMaxSize().padding(horizontal = 8.dp)){
-                        items(oblastList[24].listOfRegions[7].locations.map { it.name }){ name ->
-                            Text(text = name)
-                        }
-                    }*/
-                    
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ){
-                        Text(text = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське").toSinoptikLocation().link)
-                    }
+
                 }
             }
         }
