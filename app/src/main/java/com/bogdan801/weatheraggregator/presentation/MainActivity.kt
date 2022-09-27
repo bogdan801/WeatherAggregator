@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +14,7 @@ import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFr
 import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import com.bogdan801.weatheraggregator.presentation.composables.WeatherDataViewer
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -30,11 +32,11 @@ class MainActivity : ComponentActivity() {
 
         //val oblastList = getOblastListFromFile(this)
 
-        var data:  WeatherData
+        val dataState = mutableStateOf(WeatherData())
         lifecycleScope.launch(Dispatchers.Default) {
             val location = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське")
             val elapsed = measureTimeMillis {
-                data = getWeatherDataFromSinoptik(location.toSinoptikLocation())
+                dataState.value = getWeatherDataFromMeta(location)
             }
 
             Log.d("puk", "$elapsed")
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-
+                    WeatherDataViewer(data = dataState.value)
                 }
             }
         }
