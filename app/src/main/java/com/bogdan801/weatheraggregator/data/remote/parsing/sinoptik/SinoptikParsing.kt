@@ -61,12 +61,15 @@ fun getWeatherDataFromSinoptik(location: Location): WeatherData {
         timeRow.childNodes().forEachIndexed { index, node ->
             if(node is Element){
                 val time = node.text().filter { it != ' ' }
+                if(time == "15:00"){
+                    println()
+                }
                 val temperature = (temperatureRow.childNodes()[index].childNodes()[0] as TextNode).text().filter { it.isDigit() ||  it == '-' }.toInt()
                 val skyCondition = getSkyConditionFromSinoptik(iconsRow.childNodes()[index].childNodes()[1].attributes()["class"].substring(11))
                 val precipitationProbability = (precipitationProbabilityRow.childNodes()[index].childNodes()[0] as TextNode).text()
                 val pressure = (pressureRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
                 val humidity = (humidityRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
-                val windDir = windRow.childNodes()[index].childNodes()[1].attributes()["class"].last().toString()
+                val windDir = windRow.childNodes()[index].childNodes()[1].attributes()["class"].toString().split('-')[1]
                 val windPow = (windRow.childNodes()[index].childNodes()[1].childNodes()[0] as TextNode).text().toDouble().toInt()
                 slices.add(
                     WeatherSlice(

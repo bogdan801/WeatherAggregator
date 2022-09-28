@@ -1,5 +1,11 @@
 package com.bogdan801.weatheraggregator.domain.model
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+
 sealed class Wind{
     data class North    (val power: Int): Wind()
     data class NorthEast(val power: Int): Wind()
