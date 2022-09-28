@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 data = metaDataState.value
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         item {

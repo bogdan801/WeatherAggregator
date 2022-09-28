@@ -4,9 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -32,9 +29,19 @@ import kotlinx.datetime.plus
 @Composable
 fun WeatherDataViewer(
     modifier: Modifier = Modifier,
-    data: WeatherData
+    data: WeatherData,
+    isLoading: Boolean = data.weatherByDates.isEmpty()
 ){
-    if(data.weatherByDates.isNotEmpty()){
+    if (isLoading){
+        Box(
+            modifier = modifier
+                .height(340.dp),
+            contentAlignment = Alignment.Center
+        ){
+            Text(text = "O", fontSize = 46.sp, color = Color(0xFF118ABB))
+        }
+    }
+    else {
         var currentSkyCondition by remember{ mutableStateOf(data.currentSkyCondition)}
         var date by remember{ mutableStateOf(data.currentDate)}
         var currentTemperature by remember{ mutableStateOf(data.currentTemperature)}
@@ -42,7 +49,8 @@ fun WeatherDataViewer(
         Column(
             modifier = modifier
                 .background(Color.White)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 8.dp)
+                .height(340.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -65,7 +73,6 @@ fun WeatherDataViewer(
                         Image(
                             modifier = Modifier
                                 .size(16.dp),
-                                //.offset(y = 1.dp),
                             painter = when(data.domain){
                                 WeatherSourceDomain.Meta -> painterResource(R.drawable.ic_meta)
                                 WeatherSourceDomain.Sinoptik -> painterResource(R.drawable.ic_sinoptik)
@@ -89,13 +96,13 @@ fun WeatherDataViewer(
                 Column(modifier = Modifier
                     .width(60.dp)
                 ) {
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Час",         fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Хмарність",   fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Температура", fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Опади, %",       fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Тиск, мм",        fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Вологість, %",   fontSize = 10.sp)
-                    Text(modifier = Modifier.padding(vertical = spacing), text = "Вітер, м/с",       fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Час",          fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Хмарність",    fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Температура",  fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Опади, %",     fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Тиск, мм",     fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Вологість, %", fontSize = 10.sp)
+                    Text(modifier = Modifier.padding(vertical = spacing), text = "Вітер, м/с",   fontSize = 10.sp)
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 data.weatherByDates[selectedDayIndex].weatherByHours.forEachIndexed { index, slice->
@@ -113,24 +120,24 @@ fun WeatherDataViewer(
                             contentDescription = ""
                         )
                         Text(modifier = Modifier.padding(vertical = spacing), text = slice.temperature.toDegree(), fontSize = 10.sp)
-                        Text(modifier = Modifier.padding(vertical = spacing), text = slice.precipitationProbability.toString(), fontSize = 10.sp)
+                        Text(modifier = Modifier.padding(vertical = spacing), text = if(slice.precipitationProbability>=0) slice.precipitationProbability.toString() else "-", fontSize = 10.sp)
                         Text(modifier = Modifier.padding(vertical = spacing), text = slice.pressure.toString(), fontSize = 10.sp)
                         Text(modifier = Modifier.padding(vertical = spacing), text = slice.humidity.toString(), fontSize = 10.sp)
                         Row(verticalAlignment = Alignment.CenterVertically){
                             Icon(
                                 modifier = Modifier
                                     .width(8.dp)
-                                    .aspectRatio(3f/2)
+                                    .aspectRatio(3f / 2)
                                     .rotate(
-                                        when(slice.wind){
-                                            is Wind.East      -> 0f
-                                            is Wind.NorthEast -> 315f
-                                            is Wind.North     -> 270f
-                                            is Wind.NorthWest -> 225f
-                                            is Wind.West      -> 180f
-                                            is Wind.SouthWest -> 135f
-                                            is Wind.South     -> 90f
+                                        when (slice.wind) {
+                                            is Wind.East -> 0f
                                             is Wind.SouthEast -> 45f
+                                            is Wind.South -> 90f
+                                            is Wind.SouthWest -> 135f
+                                            is Wind.West -> 180f
+                                            is Wind.NorthWest -> 225f
+                                            is Wind.North -> 270f
+                                            is Wind.NorthEast -> 315f
                                         }
                                     ),
                                 painter = painterResource(id = R.drawable.ic_arrow),
@@ -159,8 +166,10 @@ fun WeatherDataViewer(
 
             Row(
                 modifier = Modifier
-                    .padding(vertical = 8.dp)
+                    .padding(top = 8.dp)
                     .widthIn(max = 400.dp)
+                    .height(75.dp),
+                verticalAlignment = Alignment.CenterVertically
             ){
                 data.weatherByDates.forEachIndexed { index, day ->
                     Box(modifier = Modifier
@@ -213,8 +222,6 @@ fun WeatherDataViewer(
 
         }
     }
-
-
 }
 
 
