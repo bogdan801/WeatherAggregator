@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -35,10 +36,13 @@ fun WeatherDataViewer(
     if (isLoading){
         Box(
             modifier = modifier
-                .height(340.dp),
+                .height(340.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFFF2F2F2)),
             contentAlignment = Alignment.Center
         ){
-            Text(text = "O", fontSize = 46.sp, color = Color(0xFF118ABB))
+            CircularProgressIndicator(color = Color(0xFF118ABB))
         }
     }
     else {
