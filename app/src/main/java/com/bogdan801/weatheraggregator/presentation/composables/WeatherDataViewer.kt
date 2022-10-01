@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.composables
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,12 +37,38 @@ fun WeatherDataViewer(
     isLoading: Boolean = data.weatherByDates.isEmpty()
 ){
     if (isLoading){
+        val shimmerColors = remember {
+            listOf(
+                Color.LightGray.copy(alpha = 0.6f),
+                Color.LightGray.copy(alpha = 0.2f),
+                Color.LightGray.copy(alpha = 0.6f)
+            )
+        }
+        
+        val transition = rememberInfiniteTransition()
+        val transitionAnimation = transition.animateFloat(
+            initialValue = -400f,
+            targetValue = 1000f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 1000,
+                    easing = LinearEasing
+                )
+            )
+        )
+
+        val brush = Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset(transitionAnimation.value, transitionAnimation.value),
+            end = Offset(transitionAnimation.value + 400f, transitionAnimation.value + 400f)
+        )
+        
         Box(
             modifier = modifier
                 .height(340.dp)
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFFF2F2F2)),
+                .background(brush),
             contentAlignment = Alignment.Center
         ){
             CircularProgressIndicator(color = Color(0xFF118ABB))
@@ -175,6 +204,9 @@ fun WeatherDataViewer(
                     .height(75.dp),
                 verticalAlignment = Alignment.CenterVertically
             ){
+                /*BoxWithConstraints() {
+                    
+                }*/
                 data.weatherByDates.forEachIndexed { index, day ->
                     Box(modifier = Modifier
                         .padding(4.dp)
@@ -372,6 +404,62 @@ val d = WeatherData(
                 WeatherSlice(
                     time = "15:00",
                     skyCondition = SkyCondition("4_s_2_d"),
+                    precipitationProbability = 0
+                )
+            )
+        ),
+        DayWeatherCondition(
+            date = getCurrentDate() + DatePeriod(days = 5),
+            skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
+            dayTemperature = -20,
+            nightTemperature = -30,
+            weatherByHours = listOf(
+                WeatherSlice(
+                    time = "06:00",
+                    skyCondition = SkyCondition("4_s_5_d"),
+                    precipitationProbability = 99
+                ),
+                WeatherSlice(
+                    time = "09:00",
+                    skyCondition = SkyCondition("4_s_3_d"),
+                    precipitationProbability = 88
+                ),
+                WeatherSlice(
+                    time = "12:00",
+                    skyCondition = SkyCondition("4_s_2_d"),
+                    precipitationProbability = 32
+                ),
+                WeatherSlice(
+                    time = "15:00",
+                    skyCondition = SkyCondition("4_c_0_d"),
+                    precipitationProbability = 0
+                )
+            )
+        ),
+        DayWeatherCondition(
+            date = getCurrentDate() + DatePeriod(days = 6),
+            skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
+            dayTemperature = -20,
+            nightTemperature = -30,
+            weatherByHours = listOf(
+                WeatherSlice(
+                    time = "06:00",
+                    skyCondition = SkyCondition("4_s_5_d"),
+                    precipitationProbability = 99
+                ),
+                WeatherSlice(
+                    time = "09:00",
+                    skyCondition = SkyCondition("4_s_3_d"),
+                    precipitationProbability = 88
+                ),
+                WeatherSlice(
+                    time = "12:00",
+                    skyCondition = SkyCondition("4_s_2_d"),
+                    precipitationProbability = 32
+                ),
+                WeatherSlice(
+                    time = "15:00",
+                    skyCondition = SkyCondition("4_c_0_d"),
                     precipitationProbability = 0
                 )
             )
