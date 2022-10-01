@@ -1,9 +1,7 @@
 package com.bogdan801.weatheraggregator.presentation.composables
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -122,7 +120,7 @@ fun WeatherDataViewer(
                 }
             }
             Row(modifier = Modifier
-                .fillMaxWidth()
+                .widthIn(max = 400.dp)
                 .padding(vertical = 4.dp, horizontal = 4.dp)
             ) {
                 val spacing = 2.dp
@@ -197,65 +195,68 @@ fun WeatherDataViewer(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .widthIn(max = 400.dp)
-                    .height(75.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                /*BoxWithConstraints() {
-                    
-                }*/
-                data.weatherByDates.forEachIndexed { index, day ->
-                    Box(modifier = Modifier
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .weight(1f)
-                        .aspectRatio(1f)
-                        .background(
-                            if (selectedDayIndex == index)
-                                Color(0xFFE3ECF7)
-                            else Color(0xFFF1F7FA)
-                        )
-                        .clickable {
-                            selectedDayIndex = index
-                            if (index == 0) {
-                                currentSkyCondition = data.currentSkyCondition
-                                currentTemperature = data.currentTemperature
-                                date = data.currentDate
-                            } else {
-                                currentSkyCondition = day.skyCondition
-                                currentTemperature = day.dayTemperature
-                                date = day.date
+
+            BoxWithConstraints(modifier = Modifier
+                .padding(top = 8.dp)
+                .widthIn(max = 400.dp)
+                .height(75.dp)
+            ) {
+                val scope = this
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    data.weatherByDates.forEachIndexed { index, day ->
+                        Box(modifier = Modifier
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .width((scope.maxWidth - 40.dp) / 5)
+                            .aspectRatio(1f)
+                            .background(
+                                if (selectedDayIndex == index)
+                                    Color(0xFFE3ECF7)
+                                else Color(0xFFF1F7FA)
+                            )
+                            .clickable {
+                                selectedDayIndex = index
+                                if (index == 0) {
+                                    currentSkyCondition = data.currentSkyCondition
+                                    currentTemperature = data.currentTemperature
+                                    date = data.currentDate
+                                } else {
+                                    currentSkyCondition = day.skyCondition
+                                    currentTemperature = day.dayTemperature
+                                    date = day.date
+                                }
                             }
+                        ){
+                            Text(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(4.dp),
+                                text = day.date.toFormattedString(),
+                                fontSize = 10.sp
+                            )
+                            Image(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .align(Alignment.Center),
+                                painter = day.skyCondition.getPainterResource(),
+                                contentDescription = ""
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(4.dp),
+                                text = day.nightTemperature.toDegree() + "  " + day.dayTemperature.toDegree(),
+                                fontSize = 10.sp
+                            )
                         }
-                    ){
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(4.dp),
-                            text = day.date.toFormattedString(),
-                            fontSize = 10.sp
-                        )
-                        Image(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .align(Alignment.Center),
-                            painter = day.skyCondition.getPainterResource(),
-                            contentDescription = ""
-                        )
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(4.dp),
-                            text = day.nightTemperature.toDegree() + "  " + day.dayTemperature.toDegree(),
-                            fontSize = 10.sp
-                        )
                     }
                 }
             }
-
         }
     }
 }
