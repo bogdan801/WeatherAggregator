@@ -195,7 +195,6 @@ fun WeatherDataViewer(
                 }
             }
 
-
             BoxWithConstraints(modifier = Modifier
                 .padding(top = 8.dp)
                 .widthIn(max = 400.dp)
@@ -260,7 +259,6 @@ fun WeatherDataViewer(
         }
     }
 }
-
 
 val d = WeatherData(
     currentDate = getCurrentDate(),
