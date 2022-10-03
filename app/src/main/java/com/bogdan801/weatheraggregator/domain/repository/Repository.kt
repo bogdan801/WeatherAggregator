@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.domain.repository
 
+import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
@@ -23,4 +24,6 @@ interface Repository {
 
     //network
     suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: String): WeatherData
+
+    fun getApi():OpenWeatherApi
 }

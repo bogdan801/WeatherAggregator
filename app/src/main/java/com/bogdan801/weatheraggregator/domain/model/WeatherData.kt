@@ -14,8 +14,8 @@ data class WeatherData(
 )
 
 
-enum class WeatherSourceDomain(domain: String) {
+enum class WeatherSourceDomain(val domain: String) {
     Meta("https://pogoda.meta.ua/ua/"),
     Sinoptik("https://ua.sinoptik.ua/%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0-"),
-    GisMeteo("https://www.gismeteo.ua/ua/")
+    OpenWeather("https://api.openweathermap.org")
 }

@@ -1,4 +1,4 @@
-package com.bogdan801.weatheraggregator.data.remote.api.dto
+package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
 data class TimeStamp(
     val clouds: Clouds,

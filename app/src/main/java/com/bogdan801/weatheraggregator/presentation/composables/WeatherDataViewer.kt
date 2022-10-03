@@ -107,7 +107,7 @@ fun WeatherDataViewer(
                             painter = when(data.domain){
                                 WeatherSourceDomain.Meta -> painterResource(R.drawable.ic_meta)
                                 WeatherSourceDomain.Sinoptik -> painterResource(R.drawable.ic_sinoptik)
-                                WeatherSourceDomain.GisMeteo -> painterResource(R.drawable.ic_gismeteo)
+                                WeatherSourceDomain.OpenWeather -> painterResource(R.drawable.ic_open_weather)
                             },
                             contentDescription = ""
                         )

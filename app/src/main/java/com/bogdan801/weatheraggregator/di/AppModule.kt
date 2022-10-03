@@ -3,13 +3,18 @@ package com.bogdan801.weatheraggregator.di
 import android.content.Context
 import androidx.room.Room
 import com.bogdan801.weatheraggregator.data.localdb.Database
+import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.data.repository.RepositoryImpl
+import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -29,11 +34,21 @@ object AppModule {
             .build()
 
     @Provides
+    @Singleton
+    fun provideOpenWeatherApi(db: Database): OpenWeatherApi {
+        return Retrofit.Builder()
+            .baseUrl(WeatherSourceDomain.OpenWeather.domain)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenWeatherApi::class.java)
+    }
+
+    @Provides
     fun provideDao(db :Database) = db.dbDao
 
     @Provides
     @Singleton
-    fun provideRepository(db: Database): Repository {
-        return RepositoryImpl(db.dbDao)
+    fun provideRepository(db: Database, api: OpenWeatherApi): Repository {
+        return RepositoryImpl(db.dbDao, api)
     }
 }

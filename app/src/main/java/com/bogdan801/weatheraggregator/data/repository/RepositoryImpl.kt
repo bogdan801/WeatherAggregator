@@ -3,6 +3,7 @@ package com.bogdan801.weatheraggregator.data.repository
 import com.bogdan801.weatheraggregator.data.localdb.Dao
 import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
 import com.bogdan801.weatheraggregator.data.mapper.*
+import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 
-class RepositoryImpl(private val dao: Dao) : Repository {
+class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeatherApi) : Repository {
     //INSERT
     override suspend fun insertWeatherData(weatherData: WeatherData) {
         dao.deleteWeatherDataEntityByDomain(weatherData.domain.ordinal)
@@ -79,4 +80,6 @@ class RepositoryImpl(private val dao: Dao) : Repository {
     ): WeatherData {
         TODO("Not yet implemented")
     }
+
+    override fun getApi():OpenWeatherApi = openWeatherApi
 }
