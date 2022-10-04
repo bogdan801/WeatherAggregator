@@ -1,10 +1,16 @@
 package com.bogdan801.weatheraggregator.domain.model
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+data class WeatherSlice(
+    val sliceID: Int = 0,
+    val dayID: Int = 0,
+    val time: String = "00:00",
+    val temperature: Int = 0,
+    val skyCondition: SkyCondition = SkyCondition("c_c_0_d"),
+    val precipitationProbability: Int = 0,
+    val pressure: Int = 760,
+    val humidity: Int = 0,
+    val wind: Wind = Wind.North(0)
+)
 
 sealed class Wind{
     data class North    (val power: Int): Wind()
@@ -30,15 +36,3 @@ sealed class Wind{
         }
     }
 }
-
-data class WeatherSlice(
-    val sliceID: Int = 0,
-    val dayID: Int = 0,
-    val time: String = "00:00",
-    val temperature: Int = 0,
-    val skyCondition: SkyCondition = SkyCondition("c_c_0_d"),
-    val precipitationProbability: Int = 0,
-    val pressure: Int = 760,
-    val humidity: Int = 0,
-    val wind: Wind = Wind.North(0)
-)

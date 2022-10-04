@@ -35,7 +35,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOpenWeatherApi(db: Database): OpenWeatherApi {
+    fun provideOpenWeatherApi(): OpenWeatherApi {
         return Retrofit.Builder()
             .baseUrl(WeatherSourceDomain.OpenWeather.domain)
             .addConverterFactory(GsonConverterFactory.create())

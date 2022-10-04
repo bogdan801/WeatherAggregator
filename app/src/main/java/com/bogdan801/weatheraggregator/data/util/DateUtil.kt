@@ -8,3 +8,7 @@ fun getCurrentDate(): LocalDate = Clock.System.now().toLocalDateTime(currentSyst
 
 fun LocalDate.toFormattedString() =
     "${dayOfMonth.toString().padStart(2, '0')}.${monthNumber.toString().padStart(2, '0')}.$year"
+
+fun LocalDateTime.toFormattedTime() =
+    "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+
