@@ -1,6 +1,8 @@
 package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
 import com.bogdan801.weatheraggregator.domain.model.*
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDate
 import kotlinx.datetime.toLocalDateTime
 
@@ -20,8 +22,16 @@ data class OpenWeatherDto(
                 slicesByDays[dayIndex].add(timeStamp.toWeatherSlice())
             }
             else{
-                val currentDate = timeStamp.dt_txt.split(' ')[0]
-                val lastDate = list[index-1].dt_txt.split(' ')[0]
+                val currentDate = Instant
+                    .fromEpochMilliseconds(timeStamp.dt.toLong()*1000)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+
+                val lastDate = Instant
+                    .fromEpochMilliseconds(list[index-1].dt.toLong()*1000)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+
                 if(currentDate == lastDate){
                     slicesByDays[dayIndex].add(timeStamp.toWeatherSlice())
                 }
@@ -36,7 +46,13 @@ data class OpenWeatherDto(
         }
 
         val days = mutableListOf<DayWeatherCondition>()
-        val dates = list.map { it.dt_txt.split(' ')[0] }.distinct().map { it.toLocalDate() }
+        val dates = list.map {
+            Instant
+                .fromEpochMilliseconds(it.dt.toLong()*1000)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+        }.distinct()
+
         for (i in 0..4){
             days.add(
                 DayWeatherCondition(
