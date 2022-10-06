@@ -1,20 +1,15 @@
 package com.bogdan801.weatheraggregator.data.repository
 
+import com.bogdan801.weatheraggregator.BuildConfig
 import com.bogdan801.weatheraggregator.data.localdb.Dao
-import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
 import com.bogdan801.weatheraggregator.data.mapper.*
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
-import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
-import com.bogdan801.weatheraggregator.domain.model.WeatherData
-import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
-import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
+import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFromMeta
+import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
+import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeatherApi) : Repository {
     //INSERT
@@ -72,14 +67,24 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         }
     }
 
-
     //NETWORK
     override suspend fun getWeatherDataFromNetwork(
         domain: WeatherSourceDomain,
-        location: String
-    ): WeatherData {
-        TODO("Not yet implemented")
+        location: Location
+    ): WeatherData = when(domain) {
+        WeatherSourceDomain.Meta -> {
+            getWeatherDataFromMeta(location)
+        }
+        WeatherSourceDomain.Sinoptik -> {
+            getWeatherDataFromSinoptik(location.toSinoptikLocation())
+        }
+        WeatherSourceDomain.OpenWeather -> {
+            val apiKey = BuildConfig.API_KEY
+            val locInfo = openWeatherApi.getLocationInfo(location.name + ",ua", apiKey)[0]
+            openWeatherApi.getWeatherData(locInfo.lat.toString(), locInfo.lon.toString(), "metric", apiKey).toWeatherData(location)
+        }
     }
+
 
     override fun getApi():OpenWeatherApi = openWeatherApi
 }

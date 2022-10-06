@@ -1,10 +1,8 @@
 package com.bogdan801.weatheraggregator.domain.repository
 
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
-import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
-import com.bogdan801.weatheraggregator.domain.model.WeatherData
-import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
-import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
+import com.bogdan801.weatheraggregator.domain.model.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 interface Repository {
@@ -23,7 +21,7 @@ interface Repository {
     fun getAllWeatherDataFromCache(): Flow<List<WeatherData>>
 
     //network
-    suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: String): WeatherData
+    suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: Location): WeatherData
 
     fun getApi():OpenWeatherApi
 }

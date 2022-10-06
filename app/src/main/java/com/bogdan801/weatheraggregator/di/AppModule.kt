@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.di
 
 import android.content.Context
 import androidx.room.Room
+import com.bogdan801.weatheraggregator.BuildConfig
 import com.bogdan801.weatheraggregator.data.localdb.Database
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.data.repository.RepositoryImpl
