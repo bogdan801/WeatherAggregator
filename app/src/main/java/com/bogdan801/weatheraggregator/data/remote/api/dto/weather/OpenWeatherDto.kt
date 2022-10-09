@@ -57,8 +57,8 @@ data class OpenWeatherDto(
             days.add(
                 DayWeatherCondition(
                     date = dates[i],
-                    skyCondition = slicesByDays[i][slicesByDays[i].lastIndex/2].skyCondition,
-                    dayTemperature = slicesByDays[i][slicesByDays[i].lastIndex/2].temperature,
+                    skyCondition = if(slicesByDays[i].size == 8) slicesByDays[i][5].skyCondition else slicesByDays[i][slicesByDays[i].size/2].skyCondition,
+                    dayTemperature = if(slicesByDays[i].size == 8) slicesByDays[i][5].temperature else slicesByDays[i][slicesByDays[i].size/2].temperature,
                     nightTemperature = slicesByDays[i][slicesByDays[i].lastIndex].temperature,
                     weatherByHours = slicesByDays[i]
                 )

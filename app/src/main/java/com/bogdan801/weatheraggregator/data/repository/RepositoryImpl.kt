@@ -3,13 +3,18 @@ package com.bogdan801.weatheraggregator.data.repository
 import com.bogdan801.weatheraggregator.BuildConfig
 import com.bogdan801.weatheraggregator.data.localdb.Dao
 import com.bogdan801.weatheraggregator.data.mapper.*
+import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
+import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFromMeta
 import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.net.UnknownHostException
+import kotlin.coroutines.coroutineContext
 
 class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeatherApi) : Repository {
     //INSERT
@@ -79,12 +84,38 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
             getWeatherDataFromSinoptik(location.toSinoptikLocation())
         }
         WeatherSourceDomain.OpenWeather -> {
-            val apiKey = BuildConfig.API_KEY
-            val locInfo = openWeatherApi.getLocationInfo(location.name + ",ua", apiKey)[0]
-            openWeatherApi.getWeatherData(locInfo.lat.toString(), locInfo.lon.toString(), "metric", apiKey).toWeatherData(location)
+            try {
+                val apiKey = BuildConfig.API_KEY
+                val locInfo = openWeatherApi.getLocationInfo(location.name + ",ua", apiKey).let {
+                    if(it.isEmpty()) throw WrongUrlException("Wrong URL. Location: ${location.name} doesn't exist")
+                    it[0]
+                }
+                openWeatherApi.getWeatherData(locInfo.lat.toString(), locInfo.lon.toString(), "metric", apiKey).toWeatherData(location)
+            }
+            catch (e: UnknownHostException){
+                throw NoConnectionException("No internet connection")
+            }
         }
     }
 
+    override suspend fun getWeatherDataFromNetwork(domains: List<WeatherSourceDomain>, location: Location): List<WeatherData>{
+        var output = listOf<WeatherData>()
+
+        coroutineScope {
+            val list = mutableListOf<Deferred<WeatherData>>()
+            domains.forEach { domain ->
+                val data = async {
+                    getWeatherDataFromNetwork(domain, location)
+                }
+                list.add(data)
+            }
+
+            output = list.map { it.await() }
+        }
+
+        return output
+    }
 
     override fun getApi():OpenWeatherApi = openWeatherApi
 }
+

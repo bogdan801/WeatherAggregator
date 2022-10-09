@@ -11,15 +11,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.bogdan801.weatheraggregator.BuildConfig
-import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFromMeta
-import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.composables.WeatherDataViewer
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,26 +37,18 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch(Dispatchers.Default) {
             try {
-                repo.insertWeatherData(repo.getWeatherDataFromNetwork(WeatherSourceDomain.Meta, location))
+                val list = repo.getWeatherDataFromNetwork(listOf(WeatherSourceDomain.Meta, WeatherSourceDomain.Sinoptik, WeatherSourceDomain.OpenWeather), location)
+
+                list.forEach { data ->
+                    repo.insertWeatherData(data)
+                }
             }
-            catch (e: Exception){}
+            catch (e: Exception){
+                println(e)
+            }
         }
 
         lifecycleScope.launch(Dispatchers.Default) {
-            try {
-                repo.insertWeatherData(repo.getWeatherDataFromNetwork(WeatherSourceDomain.Sinoptik, location))
-            }
-            catch (e: Exception){}
-        }
-
-        lifecycleScope.launch(Dispatchers.Default){
-            try {
-                repo.insertWeatherData(repo.getWeatherDataFromNetwork(WeatherSourceDomain.OpenWeather, location))
-            }
-            catch (e: Exception){}
-        }
-
-        lifecycleScope.launch {
             repo.getAllWeatherDataFromCache().collect{ data ->
                 dataList.value = data
             }

@@ -23,5 +23,7 @@ interface Repository {
     //network
     suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: Location): WeatherData
 
+    suspend fun getWeatherDataFromNetwork(domains: List<WeatherSourceDomain>, location: Location): List<WeatherData>
+
     fun getApi():OpenWeatherApi
 }

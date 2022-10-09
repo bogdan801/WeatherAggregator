@@ -1,110 +1,123 @@
 package com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik
 
 import android.util.Log
+import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
+import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
+import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.NodeFilter
+import java.net.UnknownHostException
 
 fun getWeatherDataFromSinoptik(location: Location): WeatherData {
     val baseUrl = "https://ua.sinoptik.ua"
     val url = baseUrl + location.link
 
-    val baseDocument = Jsoup
-        .connect(url)
-        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-        .referrer("https://www.google.com")
-        .get()
-
-    val currentDate = getCurrentDate()
-    val currentLocation = location.name
-    val domain = WeatherSourceDomain.Sinoptik
-
-    val currentTemperature = (baseDocument.getElementsByClass("today-temp")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
-
-    val iconSrc = baseDocument.getElementsByClass("img")[0].childNodes()[1].attributes()["src"]
-    val currentSkyCondition = getSkyConditionFromSinoptik(iconSrc.substring(iconSrc.lastIndex-7..iconSrc.lastIndex-4))
-
-    val days = mutableListOf<DayWeatherCondition>()
-    for (i in 0..4){
-        val date = currentDate + DatePeriod(days = i)
-        val document = Jsoup
-            .connect("$url/$date")
+    try {
+        val baseDocument = Jsoup
+            .connect(url)
             .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
             .referrer("https://www.google.com")
             .get()
 
+        val currentDate = getCurrentDate()
+        val currentLocation = location.name
+        val domain = WeatherSourceDomain.Sinoptik
 
-        val dayTopPanel = document.getElementById("bd${i+1}")!!
+        val currentTemperature = (baseDocument.getElementsByClass("today-temp")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
 
-        val daySkyCondition = getSkyConditionFromSinoptik(dayTopPanel.getElementsByClass("weatherIco")[0].attributes()["class"].substring(11))
-        val dayTemperature = (dayTopPanel.getElementsByClass("max")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
-        val nightTemperature = (dayTopPanel.getElementsByClass("min")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
+        val iconSrc = baseDocument.getElementsByClass("img")[0].childNodes()[1].attributes()["src"]
+        val currentSkyCondition = getSkyConditionFromSinoptik(iconSrc.substring(iconSrc.lastIndex-7..iconSrc.lastIndex-4))
 
-        val slices = mutableListOf<WeatherSlice>()
+        val days = mutableListOf<DayWeatherCondition>()
+        for (i in 0..4){
+            val date = currentDate + DatePeriod(days = i)
+            val document = Jsoup
+                .connect("$url/$date")
+                .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                .referrer("https://www.google.com")
+                .get()
 
-        val weatherDetails = document.getElementsByClass("weatherDetails")[0].childNodes()[3]
 
-        val timeRow = weatherDetails.childNodes()[1]
-        val temperatureRow = weatherDetails.childNodes()[5]
-        val iconsRow = weatherDetails.childNodes()[3]
-        val precipitationProbabilityRow = weatherDetails.childNodes()[15]
-        val pressureRow = weatherDetails.childNodes()[9]
-        val humidityRow = weatherDetails.childNodes()[11]
-        val windRow = weatherDetails.childNodes()[13]
+            val dayTopPanel = document.getElementById("bd${i+1}")!!
 
-        timeRow.childNodes().forEachIndexed { index, node ->
-            if(node is Element){
-                val time = node.text().filter { it != ' ' }
-                if(time == "15:00"){
-                    println()
-                }
-                val temperature = (temperatureRow.childNodes()[index].childNodes()[0] as TextNode).text().filter { it.isDigit() ||  it == '-' }.toInt()
-                val skyCondition = getSkyConditionFromSinoptik(iconsRow.childNodes()[index].childNodes()[1].attributes()["class"].substring(11))
-                val precipitationProbability = (precipitationProbabilityRow.childNodes()[index].childNodes()[0] as TextNode).text()
-                val pressure = (pressureRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
-                val humidity = (humidityRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
-                val windDir = windRow.childNodes()[index].childNodes()[1].attributes()["class"].toString().split('-')[1]
-                val windPow = (windRow.childNodes()[index].childNodes()[1].childNodes()[0] as TextNode).text().toDouble().toInt()
-                slices.add(
-                    WeatherSlice(
-                        time = if(time.length!=5) "0$time" else time,
-                        temperature = temperature,
-                        skyCondition = skyCondition,
-                        precipitationProbability = if (precipitationProbability == "-") -1 else precipitationProbability.toInt(),
-                        pressure = pressure,
-                        humidity = humidity,
-                        wind = Wind.get(windDir, windPow)
+            val daySkyCondition = getSkyConditionFromSinoptik(dayTopPanel.getElementsByClass("weatherIco")[0].attributes()["class"].substring(11))
+            val dayTemperature = (dayTopPanel.getElementsByClass("max")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
+            val nightTemperature = (dayTopPanel.getElementsByClass("min")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
+
+            val slices = mutableListOf<WeatherSlice>()
+
+            val weatherDetails = document.getElementsByClass("weatherDetails")[0].childNodes()[3]
+
+            val timeRow = weatherDetails.childNodes()[1]
+            val temperatureRow = weatherDetails.childNodes()[5]
+            val iconsRow = weatherDetails.childNodes()[3]
+            val precipitationProbabilityRow = weatherDetails.childNodes()[15]
+            val pressureRow = weatherDetails.childNodes()[9]
+            val humidityRow = weatherDetails.childNodes()[11]
+            val windRow = weatherDetails.childNodes()[13]
+
+            timeRow.childNodes().forEachIndexed { index, node ->
+                if(node is Element){
+                    val time = node.text().filter { it != ' ' }
+                    if(time == "15:00"){
+                        println()
+                    }
+                    val temperature = (temperatureRow.childNodes()[index].childNodes()[0] as TextNode).text().filter { it.isDigit() ||  it == '-' }.toInt()
+                    val skyCondition = getSkyConditionFromSinoptik(iconsRow.childNodes()[index].childNodes()[1].attributes()["class"].substring(11))
+                    val precipitationProbability = (precipitationProbabilityRow.childNodes()[index].childNodes()[0] as TextNode).text()
+                    val pressure = (pressureRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
+                    val humidity = (humidityRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
+                    val windDir = windRow.childNodes()[index].childNodes()[1].attributes()["class"].toString().split('-')[1]
+                    val windPow = (windRow.childNodes()[index].childNodes()[1].childNodes()[0] as TextNode).text().toDouble().toInt()
+                    slices.add(
+                        WeatherSlice(
+                            time = if(time.length!=5) "0$time" else time,
+                            temperature = temperature,
+                            skyCondition = skyCondition,
+                            precipitationProbability = if (precipitationProbability == "-") -1 else precipitationProbability.toInt(),
+                            pressure = pressure,
+                            humidity = humidity,
+                            wind = Wind.get(windDir, windPow)
+                        )
                     )
-                )
+                }
             }
+
+            days.add(
+                DayWeatherCondition(
+                    date = date,
+                    skyCondition = daySkyCondition,
+                    dayTemperature = dayTemperature,
+                    nightTemperature = nightTemperature,
+                    weatherByHours = slices.toList()
+                )
+            )
         }
 
-        days.add(
-            DayWeatherCondition(
-                date = date,
-                skyCondition = daySkyCondition,
-                dayTemperature = dayTemperature,
-                nightTemperature = nightTemperature,
-                weatherByHours = slices.toList()
-            )
+        return WeatherData(
+            currentDate = currentDate,
+            currentLocation = currentLocation,
+            domain = domain,
+            url = url,
+            currentSkyCondition = currentSkyCondition,
+            currentTemperature = currentTemperature,
+            weatherByDates = days.toList()
         )
     }
+    catch (e: UnknownHostException){
+        throw NoConnectionException("No internet connection")
+    }
+    catch (e: HttpStatusException){
+        throw WrongUrlException("Wrong URL. Status: ${e.statusCode}. URL: ${e.url}")
+    }
 
-    return WeatherData(
-        currentDate = currentDate,
-        currentLocation = currentLocation,
-        domain = domain,
-        url = url,
-        currentSkyCondition = currentSkyCondition,
-        currentTemperature = currentTemperature,
-        weatherByDates = days.toList()
-    )
 }
 
 private fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): SkyCondition {
