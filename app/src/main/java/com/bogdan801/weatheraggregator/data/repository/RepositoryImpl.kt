@@ -61,6 +61,10 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         dao.deleteAllWeatherDataEntities()
     }
 
+    override suspend fun deleteWeatherDataByDomain(domain: WeatherSourceDomain) {
+        dao.deleteWeatherDataEntityByDomain(domain.ordinal)
+    }
+
     //SELECT
     override fun getAllWeatherDataFromCache(): Flow<List<WeatherData>> = dao.getWeatherDataEntitiesWithDayEntities().map {
         it.map { junction ->
@@ -68,6 +72,14 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
                 this.weatherByDates.forEach { day ->
                     day.weatherByHours = dao.getAllSliceEntitiesForAGivenDayID(day.dayID).map { entity -> entity.toWeatherSlice() }
                 }
+            }
+        }
+    }
+
+    override fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData> = dao.getWeatherDataEntityByDomain(domain.ordinal).map { junction ->
+        junction.toWeatherData().apply {
+            this.weatherByDates.forEach { day ->
+                day.weatherByHours = dao.getAllSliceEntitiesForAGivenDayID(day.dayID).map { entity -> entity.toWeatherSlice() }
             }
         }
     }

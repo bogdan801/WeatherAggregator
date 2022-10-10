@@ -16,9 +16,11 @@ interface Repository {
     suspend fun deleteDayWeatherCondition(dayID: Int)
     suspend fun deleteWeatherData(dataID: Int)
     suspend fun deleteAllWeatherData()
+    suspend fun deleteWeatherDataByDomain(domain: WeatherSourceDomain)
 
     //select
     fun getAllWeatherDataFromCache(): Flow<List<WeatherData>>
+    fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData>
 
     //network
     suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: Location): WeatherData

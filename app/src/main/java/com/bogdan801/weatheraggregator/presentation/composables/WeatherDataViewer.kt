@@ -7,6 +7,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.*
 import com.bogdan801.weatheraggregator.domain.model.*
 import androidx.compose.ui.Alignment
@@ -32,9 +35,31 @@ import kotlinx.datetime.plus
 fun WeatherDataViewer(
     modifier: Modifier = Modifier,
     data: WeatherData,
-    isLoading: Boolean = data.weatherByDates.isEmpty()
+    isLoading: Boolean = data.weatherByDates.isEmpty(),
+    error: String? = null
 ){
-    if (isLoading){
+    if(error!=null){
+        Box(
+            modifier = modifier
+                .height(340.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(color = Color.Gray.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ){
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    modifier = Modifier.size(48.dp),
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Error",
+                    tint = Color.Red
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = error, color = Color.Red)
+            }
+        }
+    }
+    else if (isLoading){
         val shimmerColors = remember {
             listOf(
                 Color.LightGray.copy(alpha = 0.6f),
