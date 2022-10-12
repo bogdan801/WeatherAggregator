@@ -12,6 +12,8 @@ import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.net.UnknownHostException
 import kotlin.coroutines.coroutineContext
@@ -77,11 +79,11 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
     }
 
     override fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData> = dao.getWeatherDataEntityByDomain(domain.ordinal).map { junction ->
-        junction.toWeatherData().apply {
+        junction?.toWeatherData()?.apply {
             this.weatherByDates.forEach { day ->
                 day.weatherByHours = dao.getAllSliceEntitiesForAGivenDayID(day.dayID).map { entity -> entity.toWeatherSlice() }
             }
-        }
+        } ?: WeatherData()
     }
 
     //NETWORK

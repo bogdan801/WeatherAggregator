@@ -7,10 +7,9 @@ import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.domain.util.Resource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
 class GetWeatherDataUseCase @Inject constructor(
@@ -19,20 +18,19 @@ class GetWeatherDataUseCase @Inject constructor(
     operator fun invoke(location: Location, domain: WeatherSourceDomain): Flow<Resource<WeatherData>> = flow {
         emit(Resource.Loading())
 
-        val cachedData = repository.getWeatherDataByDomain(domain).first()
+        val dataFromDB = repository.getWeatherDataByDomain(domain).first()
+        val cachedData = if(dataFromDB.isEmpty) null else dataFromDB
 
         emit(Resource.Loading(data = cachedData))
 
         try {
             val networkData = repository.getWeatherDataFromNetwork(domain, location)
 
-            repository.deleteWeatherDataByDomain(domain)
             repository.insertWeatherData(networkData)
 
-            repository.getWeatherDataByDomain(domain).collect{ data ->
+            repository.getWeatherDataByDomain(domain).cancellable().collect{ data ->
                 emit(Resource.Success(data = data))
             }
-            //emit(Resource.Success(data = networkData))
         }
         catch (e: WrongUrlException){
             emit(

@@ -70,5 +70,5 @@ interface Dao {
 
     @Transaction
     @Query("SELECT * FROM weatherdataentity WHERE domain == :domain")
-    fun getWeatherDataEntityByDomain(domain: Int): Flow<DataWithDaysJunction>
+    fun getWeatherDataEntityByDomain(domain: Int): Flow<DataWithDaysJunction?>
 }

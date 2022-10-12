@@ -11,7 +11,9 @@ data class WeatherData(
     val currentSkyCondition: SkyCondition = SkyCondition("c_c_0_d"),
     val currentTemperature: Int = 0,
     var weatherByDates: List<DayWeatherCondition> = listOf()
-)
+){
+    val isEmpty: Boolean get() = weatherByDates.isEmpty()
+}
 
 
 enum class WeatherSourceDomain(val domain: String) {

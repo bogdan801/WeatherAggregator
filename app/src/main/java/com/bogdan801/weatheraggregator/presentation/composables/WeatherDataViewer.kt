@@ -8,7 +8,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.*
 import com.bogdan801.weatheraggregator.domain.model.*
@@ -30,6 +29,7 @@ import com.bogdan801.weatheraggregator.data.util.toFormattedString
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
+import java.time.DayOfWeek
 
 @Composable
 fun WeatherDataViewer(
@@ -97,7 +97,7 @@ fun WeatherDataViewer(
             CircularProgressIndicator(color = Color(0xFF118ABB))
         }
     }
-    else {
+    else if(!data.isEmpty) {
         var currentSkyCondition by remember{ mutableStateOf(data.currentSkyCondition)}
         var date by remember{ mutableStateOf(data.currentDate)}
         var currentTemperature by remember{ mutableStateOf(data.currentTemperature)}
@@ -256,17 +256,46 @@ fun WeatherDataViewer(
                                 }
                             }
                         ){
-                            Text(
+                            Column(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .padding(4.dp),
-                                text = day.date.toFormattedString(),
-                                fontSize = 10.sp
-                            )
+                                    .padding(top = 2.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                val red = Color(0xFFE73C3C)
+                                Text(
+                                    text = when(day.date.dayOfWeek){
+                                        DayOfWeek.MONDAY    -> "Понеділок"
+                                        DayOfWeek.TUESDAY   -> "Вівторок"
+                                        DayOfWeek.WEDNESDAY -> "Середа"
+                                        DayOfWeek.THURSDAY  -> "Четвер"
+                                        DayOfWeek.FRIDAY    -> "П'ятниця"
+                                        DayOfWeek.SATURDAY  -> "Субота"
+                                        DayOfWeek.SUNDAY    -> "Неділя"
+                                    },
+                                    fontSize = 10.sp,
+                                    color = when(day.date.dayOfWeek){
+                                        DayOfWeek.SATURDAY -> red
+                                        DayOfWeek.SUNDAY   -> red
+                                        else               -> Color.Black
+                                    }
+                                )
+                                Text(
+                                    modifier = Modifier.offset(y = (-2).dp),
+                                    text = day.date.toFormattedString(),
+                                    fontSize = 8.sp,
+                                    color = when(day.date.dayOfWeek){
+                                        DayOfWeek.SATURDAY -> red
+                                        DayOfWeek.SUNDAY   -> red
+                                        else               -> Color.Black
+                                    }
+                                )
+                            }
                             Image(
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .align(Alignment.Center),
+                                    .align(Alignment.Center)
+                                    .offset(y = 2.dp),
                                 painter = day.skyCondition.getPainterResource(),
                                 contentDescription = ""
                             )
@@ -281,6 +310,18 @@ fun WeatherDataViewer(
                     }
                 }
             }
+        }
+    }
+    else{
+        Box(
+            modifier = modifier
+                .height(340.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ){
+            Text(text = "Дані відсутні")
         }
     }
 }

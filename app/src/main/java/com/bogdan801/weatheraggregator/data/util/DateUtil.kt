@@ -12,3 +12,4 @@ fun LocalDate.toFormattedString() =
 fun LocalDateTime.toFormattedTime() =
     "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
 
+
