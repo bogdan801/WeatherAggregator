@@ -182,4 +182,28 @@ sealed class Precipitation{
     data class Rain(val level: RainLevel = RainLevel.One): Precipitation()
     data class Snow(val level: SnowLevel = SnowLevel.One): Precipitation()
     data class RainWithSnow(val level: RainWithSnowLevel = RainWithSnowLevel.One): Precipitation()
+
+    fun getOrdinal(): Int = when(this){
+        is None -> 0
+        is Rain -> 1
+        is RainWithSnow -> 2
+        is Snow -> 3
+    }
+
+    fun getPower(): Int = when(this){
+        is None -> 0
+        is Rain -> level.ordinal
+        is RainWithSnow -> level.ordinal
+        is Snow -> level.ordinal
+    }
+
+    companion object {
+        fun getPrecipitation(type: Int, power: Int): Precipitation = when(type){
+            0 -> None
+            1 -> Rain(RainLevel.values()[power])
+            2 -> RainWithSnow(if(power in 0..4) RainWithSnowLevel.values()[power] else RainWithSnowLevel.Thunder)
+            3 -> Snow(SnowLevel.values()[power])
+            else -> None
+        }
+    }
 }
