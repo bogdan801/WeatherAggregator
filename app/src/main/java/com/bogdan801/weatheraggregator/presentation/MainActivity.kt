@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.presentation
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.domain.usecase.GetWeatherDataUseCase
@@ -114,17 +116,37 @@ class MainActivity : ComponentActivity() {
                 useCase(location, dataState.value.data.domain).cancellable().collect{ resource ->
                     when(resource){
                         is Resource.Loading -> {
-                            dataState.value = WeatherDataState(
-                                data = resource.data ?: WeatherData(),
-                                isLoading = true
-                            )
+                            if(resource.data != null){
+                                dataState.value = WeatherDataState(
+                                    data = resource.data,
+                                    isLoading = false
+                                )
+                            }
+                            else{
+                                dataState.value = WeatherDataState(
+                                    data = resource.data ?: WeatherData(),
+                                    isLoading = true
+                                )
+                            }
                         }
                         is Resource.Error -> {
-                            dataState.value = WeatherDataState(
-                                data = resource.data ?: WeatherData(),
-                                isLoading = false,
-                                error = resource.message
-                            )
+                            if(resource.e is NoConnectionException){
+                                dataState.value = WeatherDataState(
+                                    data = resource.data ?: WeatherData(),
+                                    isLoading = false
+                                )
+                                this@MainActivity.runOnUiThread{
+                                    Toast.makeText(this@MainActivity, resource.message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            else{
+                                dataState.value = WeatherDataState(
+                                    data = resource.data ?: WeatherData(),
+                                    isLoading = false,
+                                    error = resource.message
+                                )
+                            }
+
                         }
                         is Resource.Success -> {
                             dataState.value = WeatherDataState(

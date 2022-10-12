@@ -6,12 +6,23 @@
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
-            <type value="SERIAL_NUMBER" />
-            <value value="b797d48f" />
+            <type value="VIRTUAL_DEVICE_PATH" />
+            <value value="C:\Users\Xiaomi\.android\avd\Pixel_3_API_30_1.avd" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2022-10-12T12:13:48.176385900Z" />
+    <timeTargetWasSelectedWithDropDown value="2022-10-12T17:38:11.186748100Z" />
+    <runningDeviceTargetsSelectedWithDialog>
+      <Target>
+        <type value="RUNNING_DEVICE_TARGET" />
+        <deviceKey>
+          <Key>
+            <type value="VIRTUAL_DEVICE_PATH" />
+            <value value="C:\Users\Xiaomi\.android\avd\Pixel_3_API_30_1.avd" />
+          </Key>
+        </deviceKey>
+      </Target>
+    </runningDeviceTargetsSelectedWithDialog>
   </component>
 </project>

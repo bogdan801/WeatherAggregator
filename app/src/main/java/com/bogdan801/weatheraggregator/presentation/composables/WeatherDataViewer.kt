@@ -133,6 +133,7 @@ fun WeatherDataViewer(
                                 WeatherSourceDomain.Meta -> painterResource(R.drawable.ic_meta)
                                 WeatherSourceDomain.Sinoptik -> painterResource(R.drawable.ic_sinoptik)
                                 WeatherSourceDomain.OpenWeather -> painterResource(R.drawable.ic_open_weather)
+                                else -> painterResource(R.drawable.ic_average)
                             },
                             contentDescription = ""
                         )
@@ -233,34 +234,37 @@ fun WeatherDataViewer(
                     verticalAlignment = Alignment.CenterVertically
                 ){
                     data.weatherByDates.forEachIndexed { index, day ->
-                        Box(modifier = Modifier
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .width((scope.maxWidth - 40.dp) / 5)
-                            .aspectRatio(1f)
-                            .background(
-                                if (selectedDayIndex == index)
-                                    Color(0xFFE3ECF7)
-                                else Color(0xFFF1F7FA)
-                            )
-                            .clickable {
-                                selectedDayIndex = index
-                                if (index == 0) {
-                                    currentSkyCondition = data.currentSkyCondition
-                                    currentTemperature = data.currentTemperature
-                                    date = data.currentDate
-                                } else {
-                                    currentSkyCondition = day.skyCondition
-                                    currentTemperature = day.dayTemperature
-                                    date = day.date
-                                }
-                            }
+                        Column(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(5.dp))
+                                .width((scope.maxWidth - 40.dp) / 5)
+                                .aspectRatio(1f)
+                                .background(
+                                    if (selectedDayIndex == index)
+                                        Color(0xFFE3ECF7)
+                                    else Color(0xFFF1F7FA)
+                                )
+                                .clickable {
+                                    selectedDayIndex = index
+                                    if (index == 0) {
+                                        currentSkyCondition = data.currentSkyCondition
+                                        currentTemperature = data.currentTemperature
+                                        date = data.currentDate
+                                    } else {
+                                        currentSkyCondition = day.skyCondition
+                                        currentTemperature = day.dayTemperature
+                                        date = day.date
+                                    }
+                                },
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ){
                             Column(
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 2.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                    .padding(top = 2.dp)
+                                    .weight(0.4f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 val red = Color(0xFFE73C3C)
                                 Text(
@@ -294,15 +298,14 @@ fun WeatherDataViewer(
                             Image(
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .align(Alignment.Center)
-                                    .offset(y = 2.dp),
+                                    .weight(0.3f),
                                 painter = day.skyCondition.getPainterResource(),
                                 contentDescription = ""
                             )
                             Text(
                                 modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(4.dp),
+                                    .padding(4.dp)
+                                    .weight(0.3f),
                                 text = day.nightTemperature.toDegree() + "  " + day.dayTemperature.toDegree(),
                                 fontSize = 10.sp
                             )

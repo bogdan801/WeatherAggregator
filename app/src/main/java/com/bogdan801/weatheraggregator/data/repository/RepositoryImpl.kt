@@ -110,6 +110,7 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
                 throw NoConnectionException("No internet connection")
             }
         }
+        else -> WeatherData()
     }
 
     override suspend fun getWeatherDataFromNetwork(domains: List<WeatherSourceDomain>, location: Location): List<WeatherData>{

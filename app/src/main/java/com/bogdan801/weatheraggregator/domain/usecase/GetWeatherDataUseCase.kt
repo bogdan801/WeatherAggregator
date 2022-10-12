@@ -36,7 +36,8 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 Resource.Error(
                     message = "Даний населений пункт не знайдено",
-                    data = cachedData
+                    data = cachedData,
+                    e = e
                 )
             )
         }
@@ -44,7 +45,8 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 Resource.Error(
                     message = "Відсутнє з'єднання з інтернетом",
-                    data = cachedData
+                    data = cachedData,
+                    e = e
                 )
             )
         }
