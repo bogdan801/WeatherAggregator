@@ -55,7 +55,7 @@ fun getWeatherDataFromMeta(location: Location): WeatherData {
                 val humidity = (slice.getElementsByClass("city__forecast-humidity")[0].childNodes()[0] as TextNode).text().toInt()
                 val windPower = (slice.getElementsByClass("city__forecast-wind")[0].childNodes()[0] as TextNode).text().filter { it != ' ' }.toInt()
                 val windDirection = slice.getElementsByClass("city__forecast-wind")[0].childNodes()[1].attributes()["title"]
-                val wind = Wind.get(windDirection, windPower)
+                val wind = Wind.create(windDirection, windPower)
 
                 slices.add(
                     WeatherSlice(

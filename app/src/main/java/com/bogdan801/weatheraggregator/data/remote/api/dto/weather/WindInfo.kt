@@ -21,6 +21,6 @@ data class WindInfo(
         }
         val pow: Int = speed.toInt()
 
-        return Wind.get(dir, pow)
+        return Wind.create(dir, pow)
     }
 }

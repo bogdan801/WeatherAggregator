@@ -23,7 +23,7 @@ sealed class Wind{
     data class NorthWest(val power: Int): Wind()
 
     companion object{
-        fun get(direction: String, power: Int): Wind  = when(direction){
+        fun create(direction: String, power: Int): Wind  = when(direction){
             "N"  -> North(power)
             "NE" -> NorthEast(power)
             "E"  -> East(power)
@@ -34,5 +34,39 @@ sealed class Wind{
             "NW" -> NorthWest(power)
             else -> North(power)
         }
+
+        fun create(direction: Int, power: Int): Wind  = when(direction){
+            0  -> North(power)
+            1 -> NorthEast(power)
+            2  -> East(power)
+            3 -> SouthEast(power)
+            4  -> South(power)
+            5 -> SouthWest(power)
+            6  -> West(power)
+            7 -> NorthWest(power)
+            else -> North(power)
+        }
+    }
+
+    fun getWindPower(): Int = when(this){
+        is North -> power
+        is NorthEast -> power
+        is East -> power
+        is SouthEast -> power
+        is South -> power
+        is SouthWest -> power
+        is West -> power
+        is NorthWest -> power
+    }
+
+    fun getWindOrdinal(): Int = when(this){
+        is North     -> 0
+        is NorthEast -> 1
+        is East      -> 2
+        is SouthEast -> 3
+        is South     -> 4
+        is SouthWest -> 5
+        is West      -> 6
+        is NorthWest -> 7
     }
 }

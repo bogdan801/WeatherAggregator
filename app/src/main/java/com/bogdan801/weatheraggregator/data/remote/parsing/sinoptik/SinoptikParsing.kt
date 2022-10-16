@@ -1,6 +1,5 @@
 package com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik
 
-import android.util.Log
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 
@@ -12,7 +11,6 @@ import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
-import org.jsoup.select.NodeFilter
 import java.net.UnknownHostException
 
 fun getWeatherDataFromSinoptik(location: Location): WeatherData {
@@ -84,7 +82,7 @@ fun getWeatherDataFromSinoptik(location: Location): WeatherData {
                             precipitationProbability = if (precipitationProbability == "-") -1 else precipitationProbability.toInt(),
                             pressure = pressure,
                             humidity = humidity,
-                            wind = Wind.get(windDir, windPow)
+                            wind = Wind.create(windDir, windPow)
                         )
                     )
                 }
