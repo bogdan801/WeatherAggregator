@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.domain.usecase
 
+import com.bogdan801.weatheraggregator.data.util.timeToHoursInt
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlin.math.roundToInt
 
@@ -10,6 +11,7 @@ class GetAverageWeatherDataUseCase {
 
         val sum = trustLevels.sum()
         val normalizedTrustLevels = trustLevels.map { it/sum }
+
 
 
         return WeatherData(
@@ -67,7 +69,10 @@ class GetAverageWeatherDataUseCase {
         return Wind.create(averageDir, averagePower)
     }
 
-    private fun averageOut(dataList: List<WeatherSlice>, trustLevels: List<Double>): WeatherSlice{
+    private fun averageOut(dataList: List<WeatherSlice>, levels: List<Double>): WeatherSlice{
+        val sum = levels.sum()
+        val trustLevels = levels.map { it/sum }
+
         val averageTime = dataList.map{ it.time }.groupBy { it }.maxByOrNull { it.value.size }!!.key
         val averagePrecipitation = let {
             val allProbs = dataList.map { it.precipitationProbability }
@@ -96,6 +101,53 @@ class GetAverageWeatherDataUseCase {
             pressure = averageOut(dataList.map { it.pressure }, trustLevels),
             humidity = averageOut(dataList.map { it.humidity }, trustLevels),
             wind = averageOut(dataList.map { it.wind }, trustLevels)
+        )
+    }
+
+    private fun averageOut(dataList: List<DayWeatherCondition>, trustLevels: List<Double>): DayWeatherCondition{
+        val averageSlicesList = let{
+            val listOfSlices = mutableListOf<MutableList<Pair<WeatherSlice, Int>>>()
+
+            for(i in 0..23 step 3){
+                listOfSlices.add(mutableListOf())
+                dataList.forEachIndexed { index, item ->
+                    val foundSlices = mutableListOf<WeatherSlice>()
+                    for (j in 0..2){
+                        val foundSlice = item.weatherByHours.find { it.time.timeToHoursInt() == i+j}
+                        if(foundSlice != null) {
+                            foundSlices.add(foundSlice)
+                        }
+                    }
+                    if(foundSlices.isNotEmpty()){
+                        val averagedSliceByHours = averageOut(foundSlices, List(foundSlices.size){ 1.0/foundSlices.size })
+                        listOfSlices[i * 3].add(
+                            averagedSliceByHours to index
+                        )
+                    }
+                }
+            }
+
+            val outputList = mutableListOf<WeatherSlice>()
+
+            listOfSlices.forEach{ listOfPairs ->
+                if(listOfPairs.isNotEmpty()){
+                    val slicesList = listOfPairs.map { it.first }
+                    val trustValuesList  = listOfPairs.map { it.second }.map { id -> trustLevels[id] }
+                    outputList.add(
+                        averageOut(slicesList, trustValuesList)
+                    )
+                }
+            }
+
+            return@let outputList.toList()
+        }
+
+        return DayWeatherCondition(
+            date = dataList[0].date,
+            skyCondition = averageOut(dataList.map { it.skyCondition }, trustLevels),
+            dayTemperature = averageOut(dataList.map { it.dayTemperature }, trustLevels),
+            nightTemperature = averageOut(dataList.map { it.nightTemperature }, trustLevels),
+            weatherByHours = averageSlicesList
         )
     }
 }
