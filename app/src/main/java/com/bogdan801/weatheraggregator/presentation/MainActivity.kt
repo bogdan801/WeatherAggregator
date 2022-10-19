@@ -5,8 +5,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import com.bogdan801.weatheraggregator.domain.usecase.GetAverageWeatherDataUseCase
 import com.bogdan801.weatheraggregator.domain.usecase.GetWeatherDataUseCase
 import com.bogdan801.weatheraggregator.domain.util.Resource
 import com.bogdan801.weatheraggregator.presentation.composables.WeatherDataViewer
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.cancellable
 import javax.inject.Inject
 
 data class WeatherDataState(
-    val data: WeatherData,
+    val data: WeatherData = WeatherData(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -62,17 +63,26 @@ class MainActivity : ComponentActivity() {
             )
         )
 
-        val useCase = GetWeatherDataUseCase(repo)
+        val averageState = mutableStateOf(
+            WeatherDataState(
+                WeatherData(domain = WeatherSourceDomain.Average)
+            )
+        )
 
-        var jobs = updateData(useCase, dataStateList, location)
+        val useCase = GetWeatherDataUseCase(repo)
+        val avgUseCase = GetAverageWeatherDataUseCase()
+
+        var jobs = updateData(useCase, avgUseCase, dataStateList, averageState, location)
 
         setContent {
             WeatherAggregatorTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-
                     Box(modifier = Modifier.fillMaxSize()){
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(dataStateList){ dataState ->
+                        Column(modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                        ) {
+                            dataStateList.forEach { dataState ->
                                 WeatherDataViewer(
                                     modifier = Modifier.fillMaxWidth(),
                                     data = dataState.value.data,
@@ -81,9 +91,14 @@ class MainActivity : ComponentActivity() {
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
-                            item{
-                                Spacer(modifier = Modifier.height(64.dp))
-                            }
+
+                            WeatherDataViewer(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = averageState.value.data,
+                                isLoading = averageState.value.isLoading,
+                                error = averageState.value.error
+                            )
+                            Spacer(modifier = Modifier.height(80.dp))
                         }
 
                         Row(
@@ -96,7 +111,7 @@ class MainActivity : ComponentActivity() {
                                 onClick = {
                                     jobs.forEach { it.cancel() }
 
-                                    jobs = updateData(useCase, dataStateList, location)
+                                    jobs = updateData(useCase, avgUseCase, dataStateList, averageState, location)
                                 }
                             ) {
                                 Text(text = "Оновити")
@@ -108,7 +123,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun updateData(useCase: GetWeatherDataUseCase, dataStateList: List<MutableState<WeatherDataState>>, location: Location): List<Job> {
+    private fun updateData(useCase: GetWeatherDataUseCase, avgUseCase: GetAverageWeatherDataUseCase, dataStateList: List<MutableState<WeatherDataState>>, avgState: MutableState<WeatherDataState>, location: Location): List<Job> {
         val jobs = mutableListOf<Job>()
 
         dataStateList.forEach { dataState ->
@@ -128,6 +143,7 @@ class MainActivity : ComponentActivity() {
                                     isLoading = true
                                 )
                             }
+                            avgState.value = WeatherDataState(isLoading = true)
                         }
                         is Resource.Error -> {
                             if(resource.e is NoConnectionException){
@@ -146,11 +162,15 @@ class MainActivity : ComponentActivity() {
                                     error = resource.message
                                 )
                             }
-
+                            avgState.value = WeatherDataState(error = "Виникла помилка")
                         }
                         is Resource.Success -> {
                             dataState.value = WeatherDataState(
                                 data = resource.data ?: WeatherData(),
+                                isLoading = false
+                            )
+                            avgState.value = WeatherDataState(
+                                data = avgUseCase(dataStateList.map { it.value.data }, List(dataStateList.size){ 1.0/dataStateList.size }),
                                 isLoading = false
                             )
                         }

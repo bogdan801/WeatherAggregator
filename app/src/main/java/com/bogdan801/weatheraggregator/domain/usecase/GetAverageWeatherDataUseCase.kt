@@ -13,6 +13,27 @@ class GetAverageWeatherDataUseCase {
         val normalizedTrustLevels = trustLevels.map { it/sum }
 
 
+        val allDayWithDomainIdPairs = mutableListOf<Pair<DayWeatherCondition, Int>>()
+
+        dataList.forEachIndexed { id, data ->
+            data.weatherByDates.forEach { day ->
+                allDayWithDomainIdPairs.add(day to id)
+            }
+        }
+
+        val groupedList = allDayWithDomainIdPairs.groupBy {
+            it.first.date
+        }
+
+        val averageDaysList = mutableListOf<DayWeatherCondition>()
+
+        groupedList.keys.forEach { date ->
+            val days = groupedList[date]!!.map { it.first }
+            val levels = groupedList[date]!!.map { normalizedTrustLevels[it.second] }
+            averageDaysList.add(
+                averageOut(days, levels)
+            )
+        }
 
         return WeatherData(
             currentDate = dataList[0].currentDate,
@@ -20,7 +41,8 @@ class GetAverageWeatherDataUseCase {
             domain = WeatherSourceDomain.Average,
             url = "average",
             currentSkyCondition = averageOut(dataList.map { it.currentSkyCondition }, normalizedTrustLevels),
-            currentTemperature = averageOut(dataList.map { it.currentTemperature }, normalizedTrustLevels)
+            currentTemperature = averageOut(dataList.map { it.currentTemperature }, normalizedTrustLevels),
+            weatherByDates = averageDaysList
         )
     }
 
@@ -104,7 +126,10 @@ class GetAverageWeatherDataUseCase {
         )
     }
 
-    private fun averageOut(dataList: List<DayWeatherCondition>, trustLevels: List<Double>): DayWeatherCondition{
+    private fun averageOut(dataList: List<DayWeatherCondition>, levels: List<Double>): DayWeatherCondition{
+        val sum = levels.sum()
+        val trustLevels = levels.map { it/sum }
+
         val averageSlicesList = let{
             val listOfSlices = mutableListOf<MutableList<Pair<WeatherSlice, Int>>>()
 
@@ -120,7 +145,7 @@ class GetAverageWeatherDataUseCase {
                     }
                     if(foundSlices.isNotEmpty()){
                         val averagedSliceByHours = averageOut(foundSlices, List(foundSlices.size){ 1.0/foundSlices.size })
-                        listOfSlices[i * 3].add(
+                        listOfSlices[listOfSlices.lastIndex].add(
                             averagedSliceByHours to index
                         )
                     }
