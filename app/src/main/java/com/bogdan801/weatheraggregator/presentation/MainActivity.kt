@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
         //val oblastList = getOblastListFromFile(this)
 
-        val location = Location(link = "/ua/Chernihivska/Koropskyi/Sverdlovka/", "Деснянське")
+        val location = Location(metaLink = "/ua/Chernihivska/Koropskyi/Sverdlovka/", sinoptikLink = "//ua.sinoptik.ua/погода-деснянське","Деснянське")
 
         val dataStateList = listOf(
             mutableStateOf(

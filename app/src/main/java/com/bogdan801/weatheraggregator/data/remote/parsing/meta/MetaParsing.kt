@@ -13,7 +13,7 @@ import java.net.UnknownHostException
 
 fun getWeatherDataFromMeta(location: Location): WeatherData {
     val baseUrl = "https://pogoda.meta.ua"
-    val url = baseUrl + location.link
+    val url = baseUrl + location.metaLink
 
     try {
         val baseDocument = Jsoup

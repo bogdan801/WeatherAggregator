@@ -19,11 +19,10 @@ data class Region(
 )
 
 data class Location(
-    val link: String,
+    val metaLink: String,
+    val sinoptikLink: String,
     val name: String
-){
-    fun toSinoptikLocation(): Location = copy(link = "/погода-${name.lowercase().replace(" ", "-")}")
-}
+)
 
 fun turnJSONtoOblastList(jsonString: String): List<Oblast>{
     val gson = Gson()

@@ -95,7 +95,7 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
             getWeatherDataFromMeta(location)
         }
         WeatherSourceDomain.Sinoptik -> {
-            getWeatherDataFromSinoptik(location.toSinoptikLocation())
+            getWeatherDataFromSinoptik(location)
         }
         WeatherSourceDomain.OpenWeather -> {
             try {
