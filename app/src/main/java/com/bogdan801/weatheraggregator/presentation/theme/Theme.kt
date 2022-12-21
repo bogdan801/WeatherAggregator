@@ -5,25 +5,53 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
-)
+enum class Theme {
+    Auto,
+    Light,
+    Dark
+}
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = thirdLight,
+    primaryVariant = secondLight,
+    secondary = firstLight,
+    secondaryVariant = fourthLight,
+    onSurface = fifthLight,
+    surface = sixthLight,
+    onPrimary = seventhLight,
+    onSecondary = eighthLight,
+    error = ninth,
+    background = Color.White
+)
+
+private val DarkColorPalette = darkColors(
+    primary = thirdDark,
+    primaryVariant = secondDark,
+    secondary = firstDark,
+    secondaryVariant = fourthDark,
+    onSurface = fifthDark,
+    surface = sixthDark,
+    onPrimary = seventhDark,
+    onSecondary = eighthDark,
+    error = ninth,
+    background = Color.Black
 )
 
 @Composable
-fun WeatherAggregatorTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+fun WeatherAggregatorTheme(theme: Theme = Theme.Auto, content: @Composable () -> Unit) {
+    val colors = when (theme) {
+        Theme.Light -> LightColorPalette
+        Theme.Dark -> DarkColorPalette
+        Theme.Auto -> {
+            if(isSystemInDarkTheme()){
+                DarkColorPalette
+            }
+            else{
+                LightColorPalette
+            }
+        }
     }
 
     MaterialTheme(
