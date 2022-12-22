@@ -33,8 +33,20 @@
         <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_4_dn.xml" value="0.2005" />
         <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_3_s_5_dn.xml" value="0.2005" />
         <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_arrow.xml" value="0.1325" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_auto.xml" value="0.126" />
         <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_c_c_0_d.xml" value="0.2005" />
         <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_c_c_0_n.xml" value="0.2005" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_cancel.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_dark_mode.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_data_sources.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_data_sources_unselected.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_error.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_expand.xml" value="0.1" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_light_mode.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_location.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_search.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_weather.xml" value="0.126" />
+        <entry key="..\:/projects/WeatherAggregator/app/src/main/res/drawable/ic_weather_unselected.xml" value="0.126" />
       </map>
     </option>
   </component>
