@@ -1,5 +1,7 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import android.graphics.Bitmap
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,23 +10,22 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.applyCanvas
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
-import com.bogdan801.weatheraggregator.presentation.util.interpolateColor
 
 @Composable
 fun HomeScreen(
@@ -32,6 +33,7 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel()
 ){
     val context = LocalContext.current
+    val view = LocalView.current
 
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -39,7 +41,12 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         snackbarHost = {scaffoldState.snackbarHostState}
     ) {
-        Box(modifier = Modifier
+        val imageState = remember { mutableStateOf<ImageBitmap?>(null) }
+        val iconCoordinates = remember { mutableStateOf(Offset.Zero) }
+
+        val isAnimating = remember { mutableStateOf(false)}
+
+        Column(modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
@@ -79,11 +86,27 @@ fun HomeScreen(
                 }
 
                 var count by remember { mutableStateOf(viewModel.themeState.value.ordinal) }
+                val isSystemDark = isSystemInDarkTheme()
                 IconButton(
-                    modifier = Modifier.padding(end = 8.dp),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .onGloballyPositioned { coordinates ->
+                            iconCoordinates.value = coordinates.boundsInRoot().center
+                        },
                     onClick = {
                         count++
                         viewModel.setTheme(count % 3, context)
+
+                        if(count % 3 == 2 || (count % 3 == 0 && isSystemDark))
+                        isAnimating.value = true
+
+
+                        val bmp = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888).applyCanvas {
+                            view.draw(this)
+                        }
+                        imageState.value = bmp.asImageBitmap()
+
+
                     },
                 ) {
                     Icon(
@@ -99,7 +122,27 @@ fun HomeScreen(
                     )
                 }
             }
+
         }
+
+        val radiusState by animateFloatAsState(targetValue = if (isAnimating.value) 4000f else 0f)
+
+
+        Box(modifier = Modifier
+            .fillMaxSize()
+            //.graphicsLayer(alpha = 0.99f)
+            .drawBehind {
+                if (imageState.value != null) {
+                    //drawImage(imageState.value!!)
+                    drawCircle(
+                        color = Color.Black,
+                        radius = radiusState,
+                        center = iconCoordinates.value,
+                        blendMode = BlendMode.Xor
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -108,7 +151,9 @@ fun HomeScreen(
 fun PreviewMain() {
     WeatherAggregatorTheme(Theme.Light) {
         Row(
-            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colors.secondary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colors.secondary),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
