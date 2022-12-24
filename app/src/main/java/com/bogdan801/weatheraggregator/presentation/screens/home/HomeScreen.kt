@@ -32,9 +32,13 @@ import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController? = null,
@@ -72,7 +76,11 @@ fun HomeScreen(
                 )
             )
         ) {
+            //current tab state
+            val pageState = rememberPagerState()
+
             Column(modifier = Modifier.fillMaxSize()) {
+                //top bar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -146,8 +154,34 @@ fun HomeScreen(
                         )
                     }
                 }
+
+                HorizontalPager(
+                    count = 2,
+                    modifier = Modifier.fillMaxSize(),
+                    state = pageState
+                ) { index ->
+                    when(index){
+                        0 -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize().padding(bottom = 104.dp),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(text = "1")
+                            }
+                        }
+                        1 -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize().padding(bottom = 104.dp),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(text = "2")
+                            }
+                        }
+                    }
+                }
             }
-            
+
+            //bottom bar
             Box(
                 modifier = Modifier
                     .padding(12.dp)
@@ -160,7 +194,6 @@ fun HomeScreen(
                     )
                     .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colors.secondaryVariant)
-                ,
             ) {
                 Row(modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -170,8 +203,12 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(80.dp, 60.dp)
                             .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f))
-                            .clickable {},
+                            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f - ((pageState.currentPageOffset + pageState.currentPage)/10)))
+                            .clickable {
+                                coroutineScope.launch {
+                                    pageState.animateScrollToPage(0)
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -183,7 +220,10 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
                                         .padding(bottom = 3.dp),
-                                    painter = painterResource(id = R.drawable.ic_weather),
+                                    painter = painterResource(
+                                        id = if(pageState.currentPage == 0) R.drawable.ic_weather
+                                             else R.drawable.ic_weather_unselected
+                                    ),
                                     contentDescription = "Select Weather",
                                     tint = MaterialTheme.colors.primary
                                 )
@@ -198,12 +238,17 @@ fun HomeScreen(
                         }
 
                     }
+
                     Box(
                         modifier = Modifier
                             .size(80.dp, 60.dp)
                             .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = 0.0f))
-                            .clickable {},
+                            .background(MaterialTheme.colors.primary.copy(alpha = (pageState.currentPageOffset + pageState.currentPage)/10))
+                            .clickable {
+                                coroutineScope.launch {
+                                    pageState.animateScrollToPage(1)
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -215,7 +260,10 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
                                         .padding(bottom = 3.dp),
-                                    painter = painterResource(id = R.drawable.ic_data_sources_unselected),
+                                    painter = painterResource(
+                                        id = if(pageState.currentPage == 1) R.drawable.ic_data_sources
+                                             else R.drawable.ic_data_sources_unselected
+                                    ),
                                     contentDescription = "Select Weather Source",
                                     tint = MaterialTheme.colors.primary
                                 )
