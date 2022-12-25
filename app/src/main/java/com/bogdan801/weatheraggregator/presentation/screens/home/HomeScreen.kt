@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import android.content.res.Configuration
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -19,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -29,6 +31,7 @@ import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
+import com.bogdan801.weatheraggregator.presentation.composables.BottomBar
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -45,6 +48,7 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val view = LocalView.current
+    val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
 
     val scaffoldState = rememberScaffoldState()
@@ -160,14 +164,61 @@ fun HomeScreen(
                 ) { index ->
                     when(index){
                         0 -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(bottom = 104.dp),
-                                contentAlignment = Alignment.Center
-                            ){
-                                Text(text = "1")
+                            val firstPart: @Composable (BoxScope.() -> Unit) = {
+                                Text("first")
                             }
+
+                            val secondPart: @Composable (BoxScope.() -> Unit) = {
+                                Text("second")
+                            }
+
+                            when (configuration.orientation) {
+                                Configuration.ORIENTATION_PORTRAIT -> {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(bottom = 104.dp)
+                                    ){
+                                        Box(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color.Red)
+                                            .weight(4f)
+                                        ){
+                                            firstPart(this)
+                                        }
+                                        Box(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color.Green)
+                                            .weight(5.5f)
+                                        ){
+                                            secondPart(this)
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(bottom = 104.dp)
+                                    ){
+                                        Box(modifier = Modifier
+                                            .fillMaxHeight()
+                                            .background(Color.Red)
+                                            .weight(1f)
+                                        ){
+                                            firstPart(this)
+                                        }
+                                        Box(modifier = Modifier
+                                            .fillMaxHeight()
+                                            .background(Color.Green)
+                                            .weight(1f)
+                                        ){
+                                            secondPart(this)
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                         1 -> {
                             Box(
@@ -184,115 +235,10 @@ fun HomeScreen(
             }
 
             //bottom bar
-            Box(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .size(280.dp, 80.dp)
-                    .align(Alignment.BottomCenter)
-                    .shadow(
-                        elevation = 5.dp,
-                        shape = MaterialTheme.shapes.large,
-                        spotColor = Color.Black.copy(alpha = 0.3f)
-                    )
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colors.secondaryVariant)
-            ) {
-                Row(modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp, 60.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f - ((pageState.currentPageOffset + pageState.currentPage) / 10)))
-                            .clickable {
-                                coroutineScope.launch {
-                                    pageState.animateScrollToPage(0)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(modifier = Modifier.weight(2f)){
-                                AnimatedContent(
-                                    targetState = pageState.currentPage == 0,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(bottom = 3.dp),
-                                    transitionSpec = {
-                                        fadeIn() with fadeOut()
-                                    }
-                                ) { isOnZeroPage ->
-                                    Icon(
-                                        painter = painterResource(
-                                            id = if(isOnZeroPage) R.drawable.ic_weather
-                                            else R.drawable.ic_weather_unselected
-                                        ),
-                                        contentDescription = "Select Weather",
-                                        tint = MaterialTheme.colors.primary
-                                    )
-                                }
-                            }
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = "Weather",
-                                style = MaterialTheme.typography.caption,
-                                color = MaterialTheme.colors.primary,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp, 60.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = (pageState.currentPageOffset + pageState.currentPage) / 10))
-                            .clickable {
-                                coroutineScope.launch {
-                                    pageState.animateScrollToPage(1)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(modifier = Modifier.weight(2f)){
-                                AnimatedContent(
-                                    targetState = pageState.currentPage == 1,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(bottom = 3.dp),
-                                    transitionSpec = {
-                                        fadeIn() with fadeOut()
-                                    }
-                                ) { isOnPageOne ->
-                                    Icon(
-                                        painter = painterResource(
-                                            id = if(isOnPageOne) R.drawable.ic_data_sources
-                                            else R.drawable.ic_data_sources_unselected
-                                        ),
-                                        contentDescription = "Select Weather Source",
-                                        tint = MaterialTheme.colors.primary
-                                    )
-                                }
-                            }
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = "Data Sources",
-                                style = MaterialTheme.typography.caption,
-                                color = MaterialTheme.colors.primary
-                            )
-                        }
-                    }
-                }
-            }
+            BottomBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                pageState = pageState
+            )
         }
         
         //canvas that displays an animated theme transition
