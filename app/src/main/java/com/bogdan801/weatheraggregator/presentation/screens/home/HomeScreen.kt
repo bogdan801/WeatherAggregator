@@ -1,6 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
-import android.graphics.Bitmap
+import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.applyCanvas
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -38,7 +37,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController? = null,
@@ -78,7 +77,6 @@ fun HomeScreen(
         ) {
             //current tab state
             val pageState = rememberPagerState()
-
             Column(modifier = Modifier.fillMaxSize()) {
                 //top bar
                 Row(
@@ -163,7 +161,9 @@ fun HomeScreen(
                     when(index){
                         0 -> {
                             Box(
-                                modifier = Modifier.fillMaxSize().padding(bottom = 104.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 104.dp),
                                 contentAlignment = Alignment.Center
                             ){
                                 Text(text = "1")
@@ -171,7 +171,9 @@ fun HomeScreen(
                         }
                         1 -> {
                             Box(
-                                modifier = Modifier.fillMaxSize().padding(bottom = 104.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 104.dp),
                                 contentAlignment = Alignment.Center
                             ){
                                 Text(text = "2")
@@ -203,7 +205,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(80.dp, 60.dp)
                             .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f - ((pageState.currentPageOffset + pageState.currentPage)/10)))
+                            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f - ((pageState.currentPageOffset + pageState.currentPage) / 10)))
                             .clickable {
                                 coroutineScope.launch {
                                     pageState.animateScrollToPage(0)
@@ -216,17 +218,24 @@ fun HomeScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Box(modifier = Modifier.weight(2f)){
-                                Icon(
+                                AnimatedContent(
+                                    targetState = pageState.currentPage == 0,
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
                                         .padding(bottom = 3.dp),
-                                    painter = painterResource(
-                                        id = if(pageState.currentPage == 0) R.drawable.ic_weather
-                                             else R.drawable.ic_weather_unselected
-                                    ),
-                                    contentDescription = "Select Weather",
-                                    tint = MaterialTheme.colors.primary
-                                )
+                                    transitionSpec = {
+                                        fadeIn() with fadeOut()
+                                    }
+                                ) { isOnZeroPage ->
+                                    Icon(
+                                        painter = painterResource(
+                                            id = if(isOnZeroPage) R.drawable.ic_weather
+                                            else R.drawable.ic_weather_unselected
+                                        ),
+                                        contentDescription = "Select Weather",
+                                        tint = MaterialTheme.colors.primary
+                                    )
+                                }
                             }
                             Text(
                                 modifier = Modifier.weight(1f),
@@ -236,14 +245,13 @@ fun HomeScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
-
                     }
 
                     Box(
                         modifier = Modifier
                             .size(80.dp, 60.dp)
                             .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colors.primary.copy(alpha = (pageState.currentPageOffset + pageState.currentPage)/10))
+                            .background(MaterialTheme.colors.primary.copy(alpha = (pageState.currentPageOffset + pageState.currentPage) / 10))
                             .clickable {
                                 coroutineScope.launch {
                                     pageState.animateScrollToPage(1)
@@ -256,17 +264,24 @@ fun HomeScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Box(modifier = Modifier.weight(2f)){
-                                Icon(
+                                AnimatedContent(
+                                    targetState = pageState.currentPage == 1,
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
                                         .padding(bottom = 3.dp),
-                                    painter = painterResource(
-                                        id = if(pageState.currentPage == 1) R.drawable.ic_data_sources
-                                             else R.drawable.ic_data_sources_unselected
-                                    ),
-                                    contentDescription = "Select Weather Source",
-                                    tint = MaterialTheme.colors.primary
-                                )
+                                    transitionSpec = {
+                                        fadeIn() with fadeOut()
+                                    }
+                                ) { isOnPageOne ->
+                                    Icon(
+                                        painter = painterResource(
+                                            id = if(isOnPageOne) R.drawable.ic_data_sources
+                                            else R.drawable.ic_data_sources_unselected
+                                        ),
+                                        contentDescription = "Select Weather Source",
+                                        tint = MaterialTheme.colors.primary
+                                    )
+                                }
                             }
                             Text(
                                 modifier = Modifier.weight(1f),
@@ -275,7 +290,6 @@ fun HomeScreen(
                                 color = MaterialTheme.colors.primary
                             )
                         }
-
                     }
                 }
             }
@@ -306,85 +320,6 @@ fun HomeScreen(
 @Preview
 fun PreviewMain() {
     WeatherAggregatorTheme(Theme.Light) {
-        Box(
-            modifier = Modifier
-                .padding(12.dp)
-                .size(280.dp, 80.dp)
-                .shadow(
-                    elevation = 5.dp,
-                    shape = MaterialTheme.shapes.large,
-                    spotColor = Color.Black.copy(alpha = 0.3f)
-                )
-                .clip(MaterialTheme.shapes.large)
-                .background(MaterialTheme.colors.secondaryVariant)
-            ,
-        ) {
-            Row(modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp, 60.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(modifier = Modifier.weight(2f)){
-                            Icon(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 3.dp),
-                                painter = painterResource(id = R.drawable.ic_weather),
-                                contentDescription = "Select Weather",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = "Weather",
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.primary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
 
-                }
-                Box(
-                    modifier = Modifier
-                        .size(80.dp, 60.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colors.primary.copy(alpha = 0.0f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(modifier = Modifier.weight(2f)){
-                            Icon(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 3.dp),
-                                painter = painterResource(id = R.drawable.ic_data_sources_unselected),
-                                contentDescription = "Select Weather Source",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = "Data Sources",
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.primary
-                        )
-                    }
-
-                }
-            }
-        }
     }
 }
