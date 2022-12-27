@@ -60,7 +60,7 @@ fun HomeScreen(
         val isAnimating = remember { mutableStateOf(false)}
         val animatable = remember { Animatable(50f) }
         
-        Box(modifier = Modifier
+        BoxWithConstraints(modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
@@ -175,7 +175,7 @@ fun HomeScreen(
                                 ){
                                     Box(modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.Red)
+                                        //.background(Color.Red)
                                         .weight(4f),
                                         contentAlignment = Alignment.Center
                                     ){
@@ -183,7 +183,7 @@ fun HomeScreen(
                                     }
                                     Box(modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.Green)
+                                        //.background(Color.Green)
                                         .weight(5.5f),
                                         contentAlignment = Alignment.Center
                                     ){
@@ -199,7 +199,7 @@ fun HomeScreen(
                                 ){
                                     Box(modifier = Modifier
                                         .fillMaxHeight()
-                                        .background(Color.Red)
+                                        //.background(Color.Red)
                                         .weight(1f),
                                         contentAlignment = Alignment.Center
                                     ){
@@ -207,7 +207,7 @@ fun HomeScreen(
                                     }
                                     Box(modifier = Modifier
                                         .fillMaxHeight()
-                                        .background(Color.Green)
+                                        //.background(Color.Green)
                                         .weight(1f),
                                         contentAlignment = Alignment.Center
                                     ){
@@ -217,33 +217,36 @@ fun HomeScreen(
                             }
                         }
                         1 -> {
-                            BoxWithConstraints(
-                                modifier = Modifier
-                                    .fillMaxSize()
+                            Box(modifier = Modifier.fillMaxSize().padding(bottom = if(isPortrait) 211.dp else 118.dp),
+                                contentAlignment = Alignment.Center
                             ){
-                                val yOffset = if(isPortrait) (212 - (211 * (pageState.currentPage+currentPageOffset))).dp else 1.dp
-                                Card (
-                                    modifier = Modifier
-                                        .requiredWidth(maxWidth + 2.dp)
-                                        .height(if(isPortrait) 211.dp else 118.dp)
-                                        .align(Alignment.BottomCenter)
-                                        .offset(y = yOffset)
-                                        .padding(end = if(!isPortrait) 104.dp else 0.dp),
-                                    shape = RoundedCornerShape(
-                                        topStart = if(isPortrait) 20.dp else 0.dp,
-                                        topEnd = 20.dp
-                                    ),
-                                    backgroundColor = MaterialTheme.colors.secondary,
-                                    border = BorderStroke(
-                                        width = 1.dp,
-                                        color = Color.White.copy(alpha = 0.2f)
-                                    )
-                                ){}
+                                Text(text = "third")
                             }
                         }
                     }
                 }
             }
+
+            //trust levels panel
+            val height = if(isPortrait) 211 else 118
+            val yOffset = ((height+2) - (height * (pageState.currentPage+pageState.currentPageOffset))).dp
+            Card (
+                modifier = Modifier
+                    .requiredWidth(maxWidth + 4.dp)
+                    .height(height.dp)
+                    .align(Alignment.BottomCenter)
+                    .offset(y = yOffset)
+                    .padding(end = if (!isPortrait) 104.dp else 0.dp),
+                shape = RoundedCornerShape(
+                    topStart = if(isPortrait) 20.dp else 0.dp,
+                    topEnd = 20.dp
+                ),
+                backgroundColor = MaterialTheme.colors.secondary,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.2f)
+                )
+            ){}
 
             //bottom bar
             BottomBar(
