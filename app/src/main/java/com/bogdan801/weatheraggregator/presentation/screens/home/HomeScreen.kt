@@ -1,13 +1,13 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.content.res.Configuration
-import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,7 +36,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController? = null,
@@ -45,6 +45,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val view = LocalView.current
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+    val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
 
     val scaffoldState = rememberScaffoldState()
@@ -64,11 +65,8 @@ fun HomeScreen(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        MaterialTheme.colors.secondary,
-                        if ((viewModel.themeState.value == Theme.Dark) ||
-                            (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
-                        ) MaterialTheme.colors.secondary
-                        else MaterialTheme.colors.primaryVariant
+                        if (isDarkTheme) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.secondary,
+                        if (isDarkTheme) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.primaryVariant
                     ),
                     start = Offset.Zero,
                     end = Offset.Infinite
@@ -104,7 +102,7 @@ fun HomeScreen(
 
                     var count by remember { mutableStateOf(viewModel.themeState.value.ordinal) }
                     var isEnabled by remember { mutableStateOf(true) }
-                    val isDarkTheme = isSystemInDarkTheme()
+                    val isSystemInDarkTheme = isSystemInDarkTheme()
                     IconButton(
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -118,7 +116,7 @@ fun HomeScreen(
                             viewModel.setTheme(currentOrdinal, context)
 
                             //animated transition between themes
-                            if((currentOrdinal == 2) || (currentOrdinal == 1 && isDarkTheme) || (currentOrdinal == 0 && !isDarkTheme)){
+                            if((currentOrdinal == 2) || (currentOrdinal == 1 && isSystemInDarkTheme) || (currentOrdinal == 0 && !isSystemInDarkTheme)){
                                 coroutineScope.launch {
                                     isEnabled = false
 
@@ -178,14 +176,16 @@ fun HomeScreen(
                                     Box(modifier = Modifier
                                         .fillMaxWidth()
                                         .background(Color.Red)
-                                        .weight(4f)
+                                        .weight(4f),
+                                        contentAlignment = Alignment.Center
                                     ){
                                         firstPart(this)
                                     }
                                     Box(modifier = Modifier
                                         .fillMaxWidth()
                                         .background(Color.Green)
-                                        .weight(5.5f)
+                                        .weight(5.5f),
+                                        contentAlignment = Alignment.Center
                                     ){
                                         secondPart(this)
                                     }
@@ -200,14 +200,16 @@ fun HomeScreen(
                                     Box(modifier = Modifier
                                         .fillMaxHeight()
                                         .background(Color.Red)
-                                        .weight(1f)
+                                        .weight(1f),
+                                        contentAlignment = Alignment.Center
                                     ){
                                         firstPart(this)
                                     }
                                     Box(modifier = Modifier
                                         .fillMaxHeight()
                                         .background(Color.Green)
-                                        .weight(1f)
+                                        .weight(1f),
+                                        contentAlignment = Alignment.Center
                                     ){
                                         secondPart(this)
                                     }
@@ -215,13 +217,28 @@ fun HomeScreen(
                             }
                         }
                         1 -> {
-                            Box(
+                            BoxWithConstraints(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(bottom = 104.dp),
-                                contentAlignment = Alignment.Center
                             ){
-                                Text(text = "2")
+                                val yOffset = if(isPortrait) (212 - (211 * (pageState.currentPage+currentPageOffset))).dp else 1.dp
+                                Card (
+                                    modifier = Modifier
+                                        .requiredWidth(maxWidth + 2.dp)
+                                        .height(if(isPortrait) 211.dp else 118.dp)
+                                        .align(Alignment.BottomCenter)
+                                        .offset(y = yOffset)
+                                        .padding(end = if(!isPortrait) 104.dp else 0.dp),
+                                    shape = RoundedCornerShape(
+                                        topStart = if(isPortrait) 20.dp else 0.dp,
+                                        topEnd = 20.dp
+                                    ),
+                                    backgroundColor = MaterialTheme.colors.secondary,
+                                    border = BorderStroke(
+                                        width = 1.dp,
+                                        color = Color.White.copy(alpha = 0.2f)
+                                    )
+                                ){}
                             }
                         }
                     }

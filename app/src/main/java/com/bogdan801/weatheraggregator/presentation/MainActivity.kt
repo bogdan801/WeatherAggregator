@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -35,7 +36,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherAggregatorTheme(theme.value) {
                 //setting up system bars color
-                rememberSystemUiController().setSystemBarsColor(MaterialTheme.colors.secondary)
+                val statusBar = when(theme.value){
+                    Theme.Auto -> if(isSystemInDarkTheme()) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.secondary
+                    Theme.Light -> MaterialTheme.colors.secondary
+                    Theme.Dark -> MaterialTheme.colors.primaryVariant
+                }
+                val systemUiController = rememberSystemUiController()
+                systemUiController.setNavigationBarColor(MaterialTheme.colors.secondary)
+                systemUiController.setStatusBarColor(statusBar)
 
                 Surface(modifier = Modifier.fillMaxSize()){
                     Navigation(navController = rememberNavController())
