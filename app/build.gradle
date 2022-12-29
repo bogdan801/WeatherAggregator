@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 
-
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
 }
@@ -21,7 +20,6 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-
 
         Properties properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
@@ -77,6 +75,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
     //system UI controller
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
+    //swipe refresh
+    implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist_version"
 
     //hilt
     def hilt_version = "2.42"

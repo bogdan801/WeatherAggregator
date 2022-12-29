@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
                 systemUiController.setStatusBarColor(statusBar)
                 systemUiController.setNavigationBarColor(MaterialTheme.colors.secondary)
 
+                //screens and navigation
                 Navigation(navController = rememberNavController())
             }
         }
