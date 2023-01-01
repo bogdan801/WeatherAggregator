@@ -18,10 +18,12 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -47,6 +49,7 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val view = LocalView.current
+    val localDensity = LocalDensity.current
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
@@ -181,7 +184,71 @@ fun HomeScreen(
                         when(index){
                             0 -> {
                                 val firstPart: @Composable (BoxScope.() -> Unit) = {
-                                    Text("first")
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        Column(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 24.dp)) {
+                                            Text(
+                                                text = "Desnianske,\nUkraine",
+                                                style = MaterialTheme.typography.h2,
+                                                color = MaterialTheme.colors.onSurface
+                                            )
+                                            Text(
+                                                text = "Tue, Oct 28",
+                                                style = MaterialTheme.typography.h5,
+                                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
+                                            )
+                                        }
+
+                                        val rowWidth = remember{ mutableStateOf(0.dp)}
+                                        val rowHeight = remember{ mutableStateOf(0.dp)}
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .onGloballyPositioned { coordinates ->
+                                                    rowWidth.value =
+                                                        with(localDensity) { coordinates.size.width.toDp() }
+                                                    rowHeight.value =
+                                                        with(localDensity) { coordinates.size.height.toDp() }
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ){
+                                            val imagePadding = 12.dp
+                                            val maxSize = 200.dp
+                                            val sizeByWidth = min(rowWidth.value / 2 - (imagePadding * 2), maxSize)
+                                            val sizeByHeight = min(rowHeight.value - (imagePadding * 2), maxSize)
+                                            Image(
+                                                modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
+                                                painter = painterResource(id = R.drawable.ic_1_r_2_d),
+                                                contentDescription = "Current condition"
+                                            )
+
+                                            Spacer(modifier = Modifier.width(32.dp))
+
+                                            Row {
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                    Text(
+                                                        text = "19",
+                                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
+                                                        style = MaterialTheme.typography.h1
+                                                    )
+                                                    Text(
+                                                        modifier = Modifier.offset(y = (-20).dp),
+                                                        text = "Rainy",
+                                                        color = MaterialTheme.colors.onSurface,
+                                                        style = MaterialTheme.typography.h3
+                                                    )
+                                                }
+                                                Text(
+                                                    modifier = Modifier.offset(y = 10.dp),
+                                                    text = "°C",
+                                                    color = MaterialTheme.colors.onSurface,
+                                                    style = MaterialTheme.typography.h5
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
 
                                 val secondPart: @Composable (BoxScope.() -> Unit) = {
@@ -205,7 +272,7 @@ fun HomeScreen(
                                         Box(modifier = Modifier
                                             .fillMaxWidth()
                                             //.background(Color.Green)
-                                            .weight(5.5f),
+                                            .weight(5f),
                                             contentAlignment = Alignment.Center
                                         ){
                                             secondPart(this)
