@@ -181,8 +181,8 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                bottom = if(isPortrait)  104.dp else 0.dp,
-                                end    = if(!isPortrait) 104.dp else 0.dp
+                                bottom = if (isPortrait) 104.dp else 0.dp,
+                                end = if (!isPortrait) 104.dp else 0.dp
                             ),
                         state = pageState,
                         isHorizontal = isPortrait
@@ -208,54 +208,53 @@ fun HomeScreen(
                                                 )
                                             }
 
-                                            val rowWidth = remember{ mutableStateOf(0.dp)}
-                                            val rowHeight = remember{ mutableStateOf(0.dp)}
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .onGloballyPositioned { coordinates ->
-                                                        rowWidth.value =
-                                                            with(localDensity) { coordinates.size.width.toDp() }
-                                                        rowHeight.value =
-                                                            with(localDensity) { coordinates.size.height.toDp() }
-                                                    },
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.Center
-                                            ){
-                                                val imagePadding = 12.dp
-                                                val maxSize = 200.dp
-                                                val sizeByWidth = min(rowWidth.value / 2 - (imagePadding * 2), maxSize)
-                                                val sizeByHeight = min(rowHeight.value - (imagePadding * 2), maxSize)
-                                                Image(
-                                                    modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
-                                                    painter = painterResource(id = R.drawable.ic_1_r_2_d),
-                                                    contentDescription = "Current condition"
-                                                )
-
-                                                Spacer(modifier = Modifier.width(32.dp))
-
-                                                Row {
-                                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                        Text(
-                                                            text = "19",
-                                                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
-                                                            style = MaterialTheme.typography.h1
-                                                        )
-                                                        Text(
-                                                            modifier = Modifier.offset(y = (-20).dp),
-                                                            text = "Rainy",
-                                                            color = MaterialTheme.colors.onSurface,
-                                                            style = MaterialTheme.typography.h3
-                                                        )
-                                                    }
-                                                    Text(
-                                                        modifier = Modifier.offset(y = 10.dp),
-                                                        text = "°C",
-                                                        color = MaterialTheme.colors.onSurface,
-                                                        style = MaterialTheme.typography.h5
+                                            BoxWithConstraints(modifier = Modifier.fillMaxSize()){
+                                                val width = maxWidth
+                                                val height = maxHeight
+                                                Row(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ){
+                                                    val imagePadding = 8.dp
+                                                    val maxSize = 300.dp
+                                                    val sizeByWidth = min(width / 2 - (imagePadding * 2), maxSize)
+                                                    val sizeByHeight = min(height - (imagePadding * 2), maxSize)
+                                                    Spacer(modifier = Modifier.width(24.dp))
+                                                    Image(
+                                                        modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
+                                                        painter = painterResource(id = R.drawable.ic_1_r_2_d),
+                                                        contentDescription = "Current condition"
                                                     )
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ){
+                                                        Row {
+                                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                                Text(
+                                                                    text = "19",
+                                                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
+                                                                    style = MaterialTheme.typography.h1
+                                                                )
+                                                                Text(
+                                                                    modifier = Modifier.offset(y = (-20).dp),
+                                                                    text = "Rainy",
+                                                                    color = MaterialTheme.colors.onSurface,
+                                                                    style = MaterialTheme.typography.h3
+                                                                )
+                                                            }
+                                                            Text(
+                                                                modifier = Modifier.offset(y = 10.dp),
+                                                                text = "°C",
+                                                                color = MaterialTheme.colors.onSurface,
+                                                                style = MaterialTheme.typography.h5
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
+
+
                                         }
                                     },
                                     secondPart = {
