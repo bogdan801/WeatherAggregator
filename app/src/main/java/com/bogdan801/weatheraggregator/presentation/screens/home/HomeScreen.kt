@@ -28,6 +28,7 @@ import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
+import com.bogdan801.weatheraggregator.presentation.composables.AdaptiveDoubleLayout
 import com.bogdan801.weatheraggregator.presentation.composables.AdaptivePager
 import com.bogdan801.weatheraggregator.presentation.composables.BottomBar
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
@@ -177,132 +178,92 @@ fun HomeScreen(
                     //pager
                     AdaptivePager(
                         count = 2,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                bottom = if(isPortrait)  104.dp else 0.dp,
+                                end    = if(!isPortrait) 104.dp else 0.dp
+                            ),
                         state = pageState,
                         isHorizontal = isPortrait
                     ) { index ->
                         when(index){
                             0 -> {
-                                val firstPart: @Composable (BoxScope.() -> Unit) = {
-                                    Column(modifier = Modifier.fillMaxSize()) {
-                                        Column(modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 24.dp)) {
-                                            Text(
-                                                text = "Desnianske,\nUkraine",
-                                                style = MaterialTheme.typography.h2,
-                                                color = MaterialTheme.colors.onSurface
-                                            )
-                                            Text(
-                                                text = "Tue, Oct 28",
-                                                style = MaterialTheme.typography.h5,
-                                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
-                                            )
-                                        }
-
-                                        val rowWidth = remember{ mutableStateOf(0.dp)}
-                                        val rowHeight = remember{ mutableStateOf(0.dp)}
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .onGloballyPositioned { coordinates ->
-                                                    rowWidth.value =
-                                                        with(localDensity) { coordinates.size.width.toDp() }
-                                                    rowHeight.value =
-                                                        with(localDensity) { coordinates.size.height.toDp() }
-                                                },
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ){
-                                            val imagePadding = 12.dp
-                                            val maxSize = 200.dp
-                                            val sizeByWidth = min(rowWidth.value / 2 - (imagePadding * 2), maxSize)
-                                            val sizeByHeight = min(rowHeight.value - (imagePadding * 2), maxSize)
-                                            Image(
-                                                modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
-                                                painter = painterResource(id = R.drawable.ic_1_r_2_d),
-                                                contentDescription = "Current condition"
-                                            )
-
-                                            Spacer(modifier = Modifier.width(32.dp))
-
-                                            Row {
-                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Text(
-                                                        text = "19",
-                                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
-                                                        style = MaterialTheme.typography.h1
-                                                    )
-                                                    Text(
-                                                        modifier = Modifier.offset(y = (-20).dp),
-                                                        text = "Rainy",
-                                                        color = MaterialTheme.colors.onSurface,
-                                                        style = MaterialTheme.typography.h3
-                                                    )
-                                                }
+                                AdaptiveDoubleLayout(
+                                    modifier = Modifier.fillMaxSize(),
+                                    firstPart = {
+                                        Column(modifier = Modifier.fillMaxSize()) {
+                                            Column(modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 24.dp)) {
                                                 Text(
-                                                    modifier = Modifier.offset(y = 10.dp),
-                                                    text = "°C",
-                                                    color = MaterialTheme.colors.onSurface,
-                                                    style = MaterialTheme.typography.h5
+                                                    text = "Desnianske,\nUkraine",
+                                                    style = MaterialTheme.typography.h2,
+                                                    color = MaterialTheme.colors.onSurface
+                                                )
+                                                Text(
+                                                    text = "Tue, Oct 28",
+                                                    style = MaterialTheme.typography.h5,
+                                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
                                                 )
                                             }
-                                        }
-                                    }
-                                }
 
-                                val secondPart: @Composable (BoxScope.() -> Unit) = {
-                                    Text("second")
-                                }
+                                            val rowWidth = remember{ mutableStateOf(0.dp)}
+                                            val rowHeight = remember{ mutableStateOf(0.dp)}
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .onGloballyPositioned { coordinates ->
+                                                        rowWidth.value =
+                                                            with(localDensity) { coordinates.size.width.toDp() }
+                                                        rowHeight.value =
+                                                            with(localDensity) { coordinates.size.height.toDp() }
+                                                    },
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ){
+                                                val imagePadding = 12.dp
+                                                val maxSize = 200.dp
+                                                val sizeByWidth = min(rowWidth.value / 2 - (imagePadding * 2), maxSize)
+                                                val sizeByHeight = min(rowHeight.value - (imagePadding * 2), maxSize)
+                                                Image(
+                                                    modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
+                                                    painter = painterResource(id = R.drawable.ic_1_r_2_d),
+                                                    contentDescription = "Current condition"
+                                                )
 
-                                if(isPortrait){
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(bottom = 104.dp)
-                                    ){
-                                        Box(modifier = Modifier
-                                            .fillMaxWidth()
-                                            //.background(Color.Red)
-                                            .weight(4f),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            firstPart(this)
+                                                Spacer(modifier = Modifier.width(32.dp))
+
+                                                Row {
+                                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                        Text(
+                                                            text = "19",
+                                                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
+                                                            style = MaterialTheme.typography.h1
+                                                        )
+                                                        Text(
+                                                            modifier = Modifier.offset(y = (-20).dp),
+                                                            text = "Rainy",
+                                                            color = MaterialTheme.colors.onSurface,
+                                                            style = MaterialTheme.typography.h3
+                                                        )
+                                                    }
+                                                    Text(
+                                                        modifier = Modifier.offset(y = 10.dp),
+                                                        text = "°C",
+                                                        color = MaterialTheme.colors.onSurface,
+                                                        style = MaterialTheme.typography.h5
+                                                    )
+                                                }
+                                            }
                                         }
-                                        Box(modifier = Modifier
-                                            .fillMaxWidth()
-                                            //.background(Color.Green)
-                                            .weight(5f),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            secondPart(this)
-                                        }
-                                    }
-                                }
-                                else {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(end = 104.dp)
-                                    ){
-                                        Box(modifier = Modifier
-                                            .fillMaxHeight()
-                                            //.background(Color.Red)
-                                            .weight(1f),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            firstPart(this)
-                                        }
-                                        Box(modifier = Modifier
-                                            .fillMaxHeight()
-                                            //.background(Color.Green)
-                                            .weight(1f),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            secondPart(this)
-                                        }
-                                    }
-                                }
+                                    },
+                                    secondPart = {
+                                        Text("second")
+                                    },
+                                    ratio = 4/5f,
+                                    horizontalRatio = 1f
+                                )
                             }
                             1 -> {
                                 Box(modifier = Modifier
