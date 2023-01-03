@@ -50,7 +50,6 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val view = LocalView.current
-    val localDensity = LocalDensity.current
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
@@ -253,8 +252,6 @@ fun HomeScreen(
                                                     }
                                                 }
                                             }
-
-
                                         }
                                     },
                                     secondPart = {
