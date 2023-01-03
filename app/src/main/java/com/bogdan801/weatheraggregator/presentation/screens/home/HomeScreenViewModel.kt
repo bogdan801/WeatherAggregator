@@ -8,6 +8,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bogdan801.weatheraggregator.data.datastore.saveIntToDataStore
+import com.bogdan801.weatheraggregator.data.util.getCurrentDate
+import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,4 +43,86 @@ constructor(
             _isLoadingState.value = false
         }
     }
+
+    val data = DayWeatherCondition(
+        date = getCurrentDate(),
+        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(
+            SnowLevel.Three)),
+        dayTemperature = -20,
+        nightTemperature = -30,
+        weatherByHours = listOf(
+            WeatherSlice(
+                time = "00:00",
+                temperature = -5,
+                skyCondition = SkyCondition("3_s_1_n"),
+                precipitationProbability = 74,
+                pressure = 756,
+                humidity = 78,
+                wind = Wind.create(0, 5)
+            ),
+            WeatherSlice(
+                time = "03:00",
+                temperature = -7,
+                skyCondition = SkyCondition("2_s_3_n"),
+                precipitationProbability = 80,
+                pressure = 758,
+                humidity = 80,
+                wind = Wind.create(1, 4)
+            ),
+            WeatherSlice(
+                time = "06:00",
+                temperature = -8,
+                skyCondition = SkyCondition("2_s_5_n"),
+                precipitationProbability = 99,
+                pressure = 760,
+                humidity = 85,
+                wind = Wind.create(7, 3)
+            ),
+            WeatherSlice(
+                time = "09:00",
+                temperature = -6,
+                skyCondition = SkyCondition("2_s_3_d"),
+                precipitationProbability = 88,
+                pressure = 762,
+                humidity = 90,
+                wind = Wind.create(7, 4)
+            ),
+            WeatherSlice(
+                time = "12:00",
+                temperature = -5,
+                skyCondition = SkyCondition("2_s_2_d"),
+                precipitationProbability = 32,
+                pressure = 763,
+                humidity = 94,
+                wind = Wind.create(7, 2)
+            ),
+            WeatherSlice(
+                time = "15:00",
+                temperature = -4,
+                skyCondition = SkyCondition("2_c_0_d"),
+                precipitationProbability = 0,
+                pressure = 764,
+                humidity = 95,
+                wind = Wind.create(7, 2)
+            ),
+            WeatherSlice(
+                time = "18:00",
+                temperature = -5,
+                skyCondition = SkyCondition("2_s_1_n"),
+                precipitationProbability = 13,
+                pressure = 762,
+                humidity = 95,
+                wind = Wind.create(7, 3)
+            ),
+            WeatherSlice(
+                time = "21:00",
+                temperature = -7,
+                skyCondition = SkyCondition("2_s_2_n"),
+                precipitationProbability = 33,
+                pressure = 761,
+                humidity = 97,
+                wind = Wind.create(6, 2)
+            )
+        )
+    )
 }

@@ -31,6 +31,7 @@ import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.presentation.composables.AdaptiveDoubleLayout
 import com.bogdan801.weatheraggregator.presentation.composables.AdaptivePager
 import com.bogdan801.weatheraggregator.presentation.composables.BottomBar
+import com.bogdan801.weatheraggregator.presentation.composables.DayWeatherPanel
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -255,7 +256,10 @@ fun HomeScreen(
                                         }
                                     },
                                     secondPart = {
-                                        Text("second")
+                                        DayWeatherPanel(
+                                            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().height(200.dp),
+                                            data = viewModel.data
+                                        )
                                     },
                                     ratio = 4/5f,
                                     horizontalRatio = 1f
