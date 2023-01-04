@@ -3,6 +3,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,6 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -189,6 +189,7 @@ fun HomeScreen(
                     ) { index ->
                         when(index){
                             0 -> {
+                                //first page
                                 AdaptiveDoubleLayout(
                                     modifier = Modifier.fillMaxSize(),
                                     firstPart = {
@@ -256,22 +257,65 @@ fun HomeScreen(
                                         }
                                     },
                                     secondPart = {
-                                        DayWeatherPanel(
-                                            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().height(200.dp),
-                                            data = viewModel.data
-                                        )
+                                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                            val panelUnexpandedHeight = maxHeight * 0.6f
+                                            val panelExpandedHeight = if(!isPortrait) maxHeight else maxHeight * 0.85f
+                                            val dayCardsHeight = maxHeight * 0.25f
+                                            val sourceSelectorHeight = maxHeight * 0.15f
+
+                                            Column(modifier = Modifier
+                                                .fillMaxWidth()
+                                                .align(Alignment.BottomCenter)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(dayCardsHeight)
+                                                        //.background(Color.Black)
+                                                )
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(sourceSelectorHeight)
+                                                        //.background(Color.Gray)
+                                                )
+                                            }
+
+
+                                            var isExpanded by remember { mutableStateOf(false) }
+                                            val heightOfPanel by animateDpAsState(
+                                                targetValue = if(isExpanded) panelExpandedHeight
+                                                else panelUnexpandedHeight,
+                                                animationSpec = tween(
+                                                    durationMillis = 400
+                                                )
+                                            )
+
+                                            DayWeatherPanel(
+                                                modifier = Modifier
+                                                    .align(Alignment.TopCenter)
+                                                    .fillMaxWidth()
+                                                    .height(heightOfPanel),
+                                                data = viewModel.data,
+                                                isExpanded = isExpanded,
+                                                onExpandClick = {
+                                                    isExpanded = !isExpanded
+                                                }
+                                            )
+                                        }
                                     },
                                     ratio = 4/5f,
                                     horizontalRatio = 1f
                                 )
                             }
                             1 -> {
+                                //second page
                                 Box(modifier = Modifier
                                     .fillMaxSize()
                                     .padding(bottom = if (isPortrait) 211.dp else 118.dp),
                                     contentAlignment = Alignment.Center
                                 ){
-                                    Text(text = "third")
+                                    Text(text = "third", color = MaterialTheme.colors.onSurface)
                                 }
                             }
                         }

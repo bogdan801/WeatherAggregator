@@ -13,6 +13,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
@@ -130,8 +131,6 @@ class MainActivity : ComponentActivity() {
 
                 //screens and navigation
                 Navigation(navController = rememberNavController())
-
-
 
                 /*DayWeatherPanel(
                     modifier = Modifier.fillMaxWidth().height(200.dp),

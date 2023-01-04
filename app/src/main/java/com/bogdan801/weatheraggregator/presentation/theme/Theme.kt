@@ -23,7 +23,8 @@ private val LightColorPalette = lightColors(
     onPrimary = seventhLight,
     onSecondary = eighthLight,
     error = ninth,
-    background = Color.White
+    background = Color.White,
+    onBackground = Color(0xFFDDE6F1)
 )
 
 private val DarkColorPalette = darkColors(
@@ -36,7 +37,8 @@ private val DarkColorPalette = darkColors(
     onPrimary = seventhDark,
     onSecondary = eighthDark,
     error = ninth,
-    background = Color.Black
+    background = Color.Black,
+    onBackground = Color(0xFF252525)
 )
 
 @Composable

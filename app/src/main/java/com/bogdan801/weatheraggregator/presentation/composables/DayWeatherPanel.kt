@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -31,7 +32,9 @@ import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
 @Composable
 fun DayWeatherPanel(
     modifier: Modifier = Modifier,
-    data: DayWeatherCondition
+    data: DayWeatherCondition,
+    isExpanded: Boolean = false,
+    onExpandClick: () -> Unit = {}
 ) {
     val localDensity = LocalDensity.current
     var columnWidth by remember { mutableStateOf(0.dp) }
@@ -40,53 +43,53 @@ fun DayWeatherPanel(
             columnWidth = with(localDensity) { coordinates.size.width.toDp() }
         }
     ) {
-        var isExpanded by remember { mutableStateOf(false) }
-        LazyRow(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(6.5f)
-        ){
-            item {
-                ExpandableWeatherSlice(
-                    modifier = modifier
-                        .fillMaxHeight()
-                        .width(100.dp)
-                        .background(MaterialTheme.colors.secondary),
-                    isExpanded = isExpanded,
-                    displayTitles = true
-                )
-            }
-            itemsIndexed(data.weatherByHours){ index, slice ->
-                val sliceWidth =
-                    if((60.dp * data.weatherByHours.size) < (columnWidth-100.dp))
-                        (columnWidth-100.dp) / data.weatherByHours.size
-                    else 60.dp
-                ExpandableWeatherSlice(
-                    modifier = modifier
-                        .fillMaxHeight()
-                        .width(sliceWidth)
-                        .background(
-                            if (index % 2 == 0) MaterialTheme.colors.secondary.copy(alpha = 0.5f)
-                            else MaterialTheme.colors.secondary
-                        ),
-                    isExpanded = isExpanded,
-                    data = slice
-                )
+                .weight(1f)
+        ) {
+            ExpandableWeatherSlice(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.secondary)
+                    .fillMaxHeight()
+                    .width(100.dp),
+                isExpanded = isExpanded,
+                displayTitles = true
+            )
+            LazyRow(modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f)
+            ){
+                itemsIndexed(data.weatherByHours){ index, slice ->
+                    val sliceWidth =
+                        if((60.dp * data.weatherByHours.size) < (columnWidth-100.dp))
+                            (columnWidth-100.dp) / data.weatherByHours.size
+                        else 60.dp
+                    ExpandableWeatherSlice(
+                        modifier = modifier
+                            .fillMaxHeight()
+                            .width(sliceWidth)
+                            .background(
+                                if (index % 2 == 0) MaterialTheme.colors.onBackground
+                                else MaterialTheme.colors.secondary
+                            ),
+                        isExpanded = isExpanded,
+                        data = slice
+                    )
+                }
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1.5f)
-                .background(MaterialTheme.colors.secondary.copy(alpha = 0.5f))
+                .height(40.dp)
+                .background(MaterialTheme.colors.onBackground)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    isExpanded = !isExpanded
-
-                },
+                    indication = null,
+                    onClick = onExpandClick
+                ),
             contentAlignment = Alignment.Center
         ){
             Row(verticalAlignment = Alignment.CenterVertically) {
