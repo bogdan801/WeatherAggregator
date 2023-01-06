@@ -7,6 +7,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -28,10 +30,9 @@ import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
-import com.bogdan801.weatheraggregator.presentation.composables.AdaptiveDoubleLayout
-import com.bogdan801.weatheraggregator.presentation.composables.AdaptivePager
-import com.bogdan801.weatheraggregator.presentation.composables.BottomBar
-import com.bogdan801.weatheraggregator.presentation.composables.DayWeatherPanel
+import com.bogdan801.weatheraggregator.data.util.toFormattedDate
+import com.bogdan801.weatheraggregator.domain.model.*
+import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -203,7 +204,7 @@ fun HomeScreen(
                                                     color = MaterialTheme.colors.onSurface
                                                 )
                                                 Text(
-                                                    text = "Tue, Oct 28",
+                                                    text = viewModel.data.weatherByDates[viewModel.selectedDayState.value].date.toFormattedDate(context),
                                                     style = MaterialTheme.typography.h5,
                                                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
                                                 )
@@ -223,7 +224,7 @@ fun HomeScreen(
                                                     Spacer(modifier = Modifier.width(24.dp))
                                                     Image(
                                                         modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
-                                                        painter = painterResource(id = R.drawable.ic_1_r_2_d),
+                                                        painter = viewModel.data.weatherByDates[viewModel.selectedDayState.value].skyCondition.getPainterResource(),
                                                         contentDescription = "Current condition"
                                                     )
                                                     Box(
@@ -258,21 +259,47 @@ fun HomeScreen(
                                     },
                                     secondPart = {
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                            val panelUnexpandedHeight = maxHeight * 0.6f
+                                            val panelUnexpandedHeight = maxHeight * 0.55f
                                             val panelExpandedHeight = if(!isPortrait) maxHeight else maxHeight * 0.85f
-                                            val dayCardsHeight = maxHeight * 0.25f
+                                            val dayCardsHeight = maxHeight * 0.30f
                                             val sourceSelectorHeight = maxHeight * 0.15f
+                                            val width = maxWidth
 
                                             Column(modifier = Modifier
                                                 .fillMaxWidth()
                                                 .align(Alignment.BottomCenter)
                                             ) {
-                                                Box(
+                                                LazyRow(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .height(dayCardsHeight)
-                                                        //.background(Color.Black)
-                                                )
+                                                        .padding(
+                                                            start = 4.dp,
+                                                            end = 4.dp,
+                                                            top = 4.dp
+                                                        )
+                                                ) {
+                                                    itemsIndexed(viewModel.data.weatherByDates){ index, dayCondition ->
+                                                        DayCard(
+                                                            modifier = Modifier
+                                                                .padding(
+                                                                    start = 4.dp,
+                                                                    end = 4.dp,
+                                                                    top = 4.dp
+                                                                )
+                                                                .fillMaxHeight()
+                                                                .width((width - 40.dp) / 4f),
+                                                            isSelected = viewModel.selectedDayState.value == index,
+                                                            onCardClick = {
+                                                                viewModel.setSelectedDay(index)
+                                                            },
+                                                            date = dayCondition.date,
+                                                            skyCondition = dayCondition.skyCondition,
+                                                            nightTemperature = dayCondition.nightTemperature,
+                                                            dayTemperature = dayCondition.dayTemperature
+                                                        )
+                                                    }
+                                                }
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -290,13 +317,12 @@ fun HomeScreen(
                                                     durationMillis = 400
                                                 )
                                             )
-
                                             DayWeatherPanel(
                                                 modifier = Modifier
                                                     .align(Alignment.TopCenter)
                                                     .fillMaxWidth()
                                                     .height(heightOfPanel),
-                                                data = viewModel.data,
+                                                data = viewModel.data.weatherByDates[viewModel.selectedDayState.value],
                                                 isExpanded = isExpanded,
                                                 onExpandClick = {
                                                     isExpanded = !isExpanded

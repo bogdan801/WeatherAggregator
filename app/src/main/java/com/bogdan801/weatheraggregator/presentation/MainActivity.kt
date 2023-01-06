@@ -131,11 +131,6 @@ class MainActivity : ComponentActivity() {
 
                 //screens and navigation
                 Navigation(navController = rememberNavController())
-
-                /*DayWeatherPanel(
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    data = day
-                )*/
             }
         }
     }
