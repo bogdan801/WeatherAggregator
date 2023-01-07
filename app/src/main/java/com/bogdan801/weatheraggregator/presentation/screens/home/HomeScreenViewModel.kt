@@ -312,5 +312,6 @@ constructor(
         )
     )
 
+    val selectedDay get() = data.weatherByDates[_selectedDayState.value]
 
 }

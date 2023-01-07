@@ -39,17 +39,22 @@ fun DayCard(
 ) {
     val context = LocalContext.current
     val elevation by animateDpAsState(
-        targetValue = if(isSelected) 5.dp else 0.dp,
+        targetValue = if(isSelected) 3.dp else 0.dp,
         tween(200)
     )
     val backgroundColor by animateColorAsState(
         targetValue = if(isSelected) MaterialTheme.colors.surface
-                      else MaterialTheme.colors.secondary.copy(alpha = 0.5f),
+                      else MaterialTheme.colors.onBackground,
         tween(200)
     )
     val contentColor by animateColorAsState(
         targetValue = if(isSelected) MaterialTheme.colors.onSurface
                       else MaterialTheme.colors.onSurface.copy(alpha = 0.65f),
+        tween(200)
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if(isSelected) Color.Transparent
+        else Color.White.copy(alpha = 0.5f),
         tween(200)
     )
     Card(
@@ -60,14 +65,15 @@ fun DayCard(
         ),
         shape = MaterialTheme.shapes.medium,
         elevation = elevation,
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, borderColor),
         backgroundColor = backgroundColor,
         contentColor = contentColor
     ){
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.25f),
+                .weight(0.3f)
+                .padding(bottom = 3.dp),
                 contentAlignment = Alignment.BottomCenter
             ){
                 Text(
@@ -77,7 +83,7 @@ fun DayCard(
             }
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.5f),
+                .weight(0.4f),
                 contentAlignment = Alignment.Center
             ){
                 Image(
@@ -89,7 +95,8 @@ fun DayCard(
             }
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.25f),
+                .weight(0.3f)
+                .padding(top = 3.dp),
                 contentAlignment = Alignment.TopCenter
             ){
                 Row(

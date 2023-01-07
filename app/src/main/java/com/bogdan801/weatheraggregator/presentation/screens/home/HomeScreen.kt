@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -31,7 +32,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.data.util.toFormattedDate
-import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
@@ -204,7 +204,7 @@ fun HomeScreen(
                                                     color = MaterialTheme.colors.onSurface
                                                 )
                                                 Text(
-                                                    text = viewModel.data.weatherByDates[viewModel.selectedDayState.value].date.toFormattedDate(context),
+                                                    text = viewModel.selectedDay.date.toFormattedDate(context),
                                                     style = MaterialTheme.typography.h5,
                                                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
                                                 )
@@ -224,7 +224,7 @@ fun HomeScreen(
                                                     Spacer(modifier = Modifier.width(24.dp))
                                                     Image(
                                                         modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
-                                                        painter = viewModel.data.weatherByDates[viewModel.selectedDayState.value].skyCondition.getPainterResource(),
+                                                        painter = viewModel.selectedDay.skyCondition.getPainterResource(),
                                                         contentDescription = "Current condition"
                                                     )
                                                     Box(
@@ -234,7 +234,7 @@ fun HomeScreen(
                                                         Row {
                                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                                 Text(
-                                                                    text = "19",
+                                                                    text = viewModel.selectedDay.dayTemperature.toString(),
                                                                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
                                                                     style = MaterialTheme.typography.h1
                                                                 )
@@ -259,10 +259,10 @@ fun HomeScreen(
                                     },
                                     secondPart = {
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                            val panelUnexpandedHeight = maxHeight * 0.55f
-                                            val panelExpandedHeight = if(!isPortrait) maxHeight else maxHeight * 0.85f
-                                            val dayCardsHeight = maxHeight * 0.30f
-                                            val sourceSelectorHeight = maxHeight * 0.15f
+                                            val panelUnexpandedHeight = if(!isPortrait) maxHeight * 0.63f else maxHeight * 0.55f
+                                            val panelExpandedHeight = if(!isPortrait) maxHeight else maxHeight * 0.9f
+                                            val dayCardsHeight = if(!isPortrait) maxHeight * 0.28f else maxHeight * 0.35f
+                                            val sourceSelectorHeight = maxHeight * 0.1f
                                             val width = maxWidth
 
                                             Column(modifier = Modifier
@@ -273,20 +273,12 @@ fun HomeScreen(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .height(dayCardsHeight)
-                                                        .padding(
-                                                            start = 4.dp,
-                                                            end = 4.dp,
-                                                            top = 4.dp
-                                                        )
+                                                        .padding(4.dp)
                                                 ) {
                                                     itemsIndexed(viewModel.data.weatherByDates){ index, dayCondition ->
                                                         DayCard(
                                                             modifier = Modifier
-                                                                .padding(
-                                                                    start = 4.dp,
-                                                                    end = 4.dp,
-                                                                    top = 4.dp
-                                                                )
+                                                                .padding(4.dp)
                                                                 .fillMaxHeight()
                                                                 .width((width - 40.dp) / 4f),
                                                             isSelected = viewModel.selectedDayState.value == index,
@@ -338,7 +330,7 @@ fun HomeScreen(
                                 //second page
                                 Box(modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(bottom = if (isPortrait) 211.dp else 118.dp),
+                                    .padding(bottom = 118.dp),
                                     contentAlignment = Alignment.Center
                                 ){
                                     Text(text = "third", color = MaterialTheme.colors.onSurface)
