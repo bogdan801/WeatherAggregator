@@ -11,21 +11,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.bogdan801.weatheraggregator.data.util.getShortDayOfWeekName
-import com.bogdan801.weatheraggregator.data.util.getShortMonthName
 import com.bogdan801.weatheraggregator.data.util.toDegree
 import com.bogdan801.weatheraggregator.data.util.toFormattedDate
 import com.bogdan801.weatheraggregator.domain.model.SkyCondition
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.number
 
 @Composable
 fun DayCard(
@@ -58,11 +57,13 @@ fun DayCard(
         tween(200)
     )
     Card(
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onCardClick
-        ),
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(color = Color.White.copy(alpha = 0.3f)),
+                onClick = onCardClick
+            ),
         shape = MaterialTheme.shapes.medium,
         elevation = elevation,
         border = BorderStroke(1.dp, borderColor),
@@ -72,32 +73,29 @@ fun DayCard(
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.3f)
-                .padding(bottom = 3.dp),
-                contentAlignment = Alignment.BottomCenter
+                .weight(0.3f),
+                contentAlignment = Alignment.Center
             ){
                 Text(
                     text = date.toFormattedDate(context),
                     style = MaterialTheme.typography.caption
                 )
             }
-            Box(modifier = Modifier
+            BoxWithConstraints(modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.4f),
                 contentAlignment = Alignment.Center
             ){
                 Image(
-                    modifier = modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.size(maxHeight),
                     painter = skyCondition.getPainterResource(),
                     contentDescription = "Day Weather Icon"
                 )
             }
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.3f)
-                .padding(top = 3.dp),
-                contentAlignment = Alignment.TopCenter
+                .weight(0.3f),
+                contentAlignment = Alignment.Center
             ){
                 Row(
                     modifier = Modifier.fillMaxWidth(),

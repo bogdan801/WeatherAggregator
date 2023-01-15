@@ -83,7 +83,7 @@ fun DayWeatherPanel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(35.dp)
+                .height(40.dp)
                 .background(MaterialTheme.colors.onBackground)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },

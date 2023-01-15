@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +52,7 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val view = LocalView.current
+    val localDensity = LocalDensity.current
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
@@ -195,20 +196,18 @@ fun HomeScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     firstPart = {
                                         Column(modifier = Modifier.fillMaxSize()) {
-                                            Column(modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 24.dp)) {
-                                                Text(
-                                                    text = "Desnianske,\nUkraine",
-                                                    style = MaterialTheme.typography.h2,
-                                                    color = MaterialTheme.colors.onSurface
-                                                )
-                                                Text(
-                                                    text = viewModel.selectedDay.date.toFormattedDate(context),
-                                                    style = MaterialTheme.typography.h5,
-                                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
-                                                )
-                                            }
+                                            Text(
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                text = "Desnianske,\nUkraine",
+                                                style = MaterialTheme.typography.h2,
+                                                color = MaterialTheme.colors.onSurface
+                                            )
+                                            Text(
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                text = viewModel.selectedDay.date.toFormattedDate(context),
+                                                style = MaterialTheme.typography.h5,
+                                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
+                                            )
 
                                             BoxWithConstraints(modifier = Modifier.fillMaxSize()){
                                                 val width = maxWidth
@@ -218,7 +217,7 @@ fun HomeScreen(
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ){
                                                     val imagePadding = 8.dp
-                                                    val maxSize = 300.dp
+                                                    val maxSize = 150.dp
                                                     val sizeByWidth = min(width / 2 - (imagePadding * 2), maxSize)
                                                     val sizeByHeight = min(height - (imagePadding * 2), maxSize)
                                                     Spacer(modifier = Modifier.width(24.dp))
@@ -259,12 +258,11 @@ fun HomeScreen(
                                     },
                                     secondPart = {
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                            val panelUnexpandedHeight = if(!isPortrait) maxHeight * 0.63f else maxHeight * 0.55f
-                                            val panelExpandedHeight = if(!isPortrait) maxHeight else maxHeight * 0.9f
-                                            val dayCardsHeight = if(!isPortrait) maxHeight * 0.28f else maxHeight * 0.35f
-                                            val sourceSelectorHeight = maxHeight * 0.1f
-                                            val width = maxWidth
-
+                                            val columnWidth = maxWidth
+                                            val dataSelectorHeight = 40.dp
+                                            val heightRelation = 1.05f
+                                            val dayCardsHeight = ((maxWidth - 40.dp) / 4f) * heightRelation
+                                            val columnHeight = dayCardsHeight + dataSelectorHeight + 16.dp
                                             Column(modifier = Modifier
                                                 .fillMaxWidth()
                                                 .align(Alignment.BottomCenter)
@@ -272,15 +270,14 @@ fun HomeScreen(
                                                 LazyRow(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .height(dayCardsHeight)
                                                         .padding(4.dp)
                                                 ) {
                                                     itemsIndexed(viewModel.data.weatherByDates){ index, dayCondition ->
                                                         DayCard(
                                                             modifier = Modifier
                                                                 .padding(4.dp)
-                                                                .fillMaxHeight()
-                                                                .width((width - 40.dp) / 4f),
+                                                                .width((columnWidth - 40.dp) / 4f)
+                                                                .height(dayCardsHeight),
                                                             isSelected = viewModel.selectedDayState.value == index,
                                                             onCardClick = {
                                                                 viewModel.setSelectedDay(index)
@@ -295,16 +292,18 @@ fun HomeScreen(
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .height(sourceSelectorHeight)
-                                                        //.background(Color.Gray)
+                                                        .height(dataSelectorHeight)
                                                 )
                                             }
 
-
                                             var isExpanded by remember { mutableStateOf(false) }
                                             val heightOfPanel by animateDpAsState(
-                                                targetValue = if(isExpanded) panelExpandedHeight
-                                                else panelUnexpandedHeight,
+                                                targetValue =
+                                                    if(isExpanded) {
+                                                        if(isPortrait) maxHeight - dataSelectorHeight
+                                                        else maxHeight
+                                                    }
+                                                    else maxHeight - columnHeight,
                                                 animationSpec = tween(
                                                     durationMillis = 400
                                                 )
@@ -314,7 +313,7 @@ fun HomeScreen(
                                                     .align(Alignment.TopCenter)
                                                     .fillMaxWidth()
                                                     .height(heightOfPanel),
-                                                data = viewModel.data.weatherByDates[viewModel.selectedDayState.value],
+                                                data = viewModel.selectedDay,
                                                 isExpanded = isExpanded,
                                                 onExpandClick = {
                                                     isExpanded = !isExpanded
@@ -322,7 +321,7 @@ fun HomeScreen(
                                             )
                                         }
                                     },
-                                    ratio = 4/5f,
+                                    ratio = 4/5.5f,
                                     horizontalRatio = 1f
                                 )
                             }
