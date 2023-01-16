@@ -183,7 +183,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                bottom = if (isPortrait) 104.dp else 0.dp,
+                                bottom = if (isPortrait) 100.dp else 0.dp,
                                 end = if (!isPortrait) 104.dp else 0.dp
                             ),
                         state = pageState,
@@ -260,7 +260,7 @@ fun HomeScreen(
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                                             val columnWidth = maxWidth
                                             val dataSelectorHeight = 40.dp
-                                            val heightRelation = 1.05f
+                                            val heightRelation = if(isPortrait) 1.05f else 0.95f
                                             val dayCardsHeight = ((maxWidth - 40.dp) / 4f) * heightRelation
                                             val columnHeight = dayCardsHeight + dataSelectorHeight + 16.dp
                                             Column(modifier = Modifier
@@ -272,7 +272,7 @@ fun HomeScreen(
                                                         .fillMaxWidth()
                                                         .padding(4.dp)
                                                 ) {
-                                                    itemsIndexed(viewModel.data.weatherByDates){ index, dayCondition ->
+                                                    itemsIndexed(viewModel.currentData.weatherByDates){ index, dayCondition ->
                                                         DayCard(
                                                             modifier = Modifier
                                                                 .padding(4.dp)
@@ -289,20 +289,30 @@ fun HomeScreen(
                                                         )
                                                     }
                                                 }
-                                                Box(
+                                                DataSelector(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .height(dataSelectorHeight)
+                                                        .padding(horizontal = 8.dp)
+                                                        .height(dataSelectorHeight),
+                                                    dataStateList = viewModel.dataListState.value,
+                                                    selectedIndex = viewModel.selectedDataIndexState.value,
+                                                    onDataSelected = { index, isError ->
+                                                        if(isError){
+                                                            coroutineScope.launch {
+                                                                pageState.animateScrollToPage(1)
+                                                            }
+                                                        }
+                                                        else {
+                                                            viewModel.setSelectedData(index)
+                                                        }
+                                                    }
                                                 )
                                             }
 
                                             var isExpanded by remember { mutableStateOf(false) }
                                             val heightOfPanel by animateDpAsState(
                                                 targetValue =
-                                                    if(isExpanded) {
-                                                        if(isPortrait) maxHeight - dataSelectorHeight
-                                                        else maxHeight
-                                                    }
+                                                    if(isExpanded) maxHeight
                                                     else maxHeight - columnHeight,
                                                 animationSpec = tween(
                                                     durationMillis = 400
