@@ -52,25 +52,27 @@ fun DayCard(
         tween(200)
     )
     val borderColor by animateColorAsState(
-        targetValue = if(isSelected) Color.Transparent
+        targetValue = if(isSelected) Color.White.copy(alpha = 0f)
         else Color.White.copy(alpha = 0.5f),
         tween(200)
     )
     Card(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(color = Color.White.copy(alpha = 0.3f)),
-                onClick = onCardClick
-            ),
+        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = elevation,
         border = BorderStroke(1.dp, borderColor),
         backgroundColor = backgroundColor,
         contentColor = contentColor
     ){
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(color = Color.White.copy(alpha = 0.3f)),
+                    onClick = onCardClick
+                )
+        ) {
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.3f),

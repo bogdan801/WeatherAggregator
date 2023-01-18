@@ -259,7 +259,7 @@ fun HomeScreen(
                                     secondPart = {
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                                             val columnWidth = maxWidth
-                                            val dataSelectorHeight = 40.dp
+                                            val dataSelectorHeight = 50.dp
                                             val heightRelation = if(isPortrait) 1.05f else 0.95f
                                             val dayCardsHeight = ((maxWidth - 40.dp) / 4f) * heightRelation
                                             val columnHeight = dayCardsHeight + dataSelectorHeight + 16.dp
@@ -292,8 +292,8 @@ fun HomeScreen(
                                                 DataSelector(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(horizontal = 8.dp)
-                                                        .height(dataSelectorHeight),
+                                                        .height(dataSelectorHeight)
+                                                        .padding(horizontal = 8.dp, vertical = 4.dp),
                                                     dataStateList = viewModel.dataListState.value,
                                                     selectedIndex = viewModel.selectedDataIndexState.value,
                                                     onDataSelected = { index, isError ->
