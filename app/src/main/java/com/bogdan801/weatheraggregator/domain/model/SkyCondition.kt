@@ -19,6 +19,22 @@ data class SkyCondition(
     val timeOfDay get() = _timeOfDay
     val descriptor get() = imageName.substring(3)
 
+    val textDescription: String
+        get() = when(_precipitation){
+            Precipitation.None -> {
+                when(_cloudiness){
+                    Clear -> "Clear"
+                    LittleCloudy -> "Cloudy"
+                    CloudyWithClearing -> "Cloudy"
+                    Cloudy -> "Cloudy"
+                    Gloomy -> "Gloomy"
+                }
+            }
+            is Precipitation.Rain -> "Rainy"
+            is Precipitation.RainWithSnow -> "Rain With Snow"
+            is Precipitation.Snow -> "Snowy"
+        }
+
     constructor(descriptor: String):this() {
         val parts = descriptor.split('_')
         if(parts.size != 4) return

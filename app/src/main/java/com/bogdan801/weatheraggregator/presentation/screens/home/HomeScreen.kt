@@ -17,24 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.bogdan801.weatheraggregator.R
-import com.bogdan801.weatheraggregator.data.util.toFormattedDate
 import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
-import com.bogdan801.weatheraggregator.presentation.theme.WeatherAggregatorTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -52,7 +43,6 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val view = LocalView.current
-    val localDensity = LocalDensity.current
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
@@ -103,79 +93,44 @@ fun HomeScreen(
                     .height(maxHeight)
                 ) {
                     //top bar
-                    Row(
+                    var count by remember { mutableStateOf(viewModel.themeState.value.ordinal) }
+                    var isEnabled by remember { mutableStateOf(true) }
+                    val isSystemInDarkTheme = isSystemInDarkTheme()
+                    TopAppBar(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = {},
-                            shape = MaterialTheme.shapes.large,
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = MaterialTheme.colors.secondary,
-                                contentColor = MaterialTheme.colors.onSurface
-                            ),
-                            elevation = null,
-                            border = BorderStroke(width = 1.dp, color = Color.White.copy(alpha = 0.5f))
-                        ) {
-                            Row {
-                                Icon(painter = painterResource(id = R.drawable.ic_location), contentDescription = "location")
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "Change location", style = MaterialTheme.typography.h4)
-                            }
-                        }
+                        themeState = viewModel.themeState,
+                        onChangeLocationClick = {},
+                        getIconCoordinates = { coordinates ->
+                            iconCoordinates.value = coordinates
+                        },
+                        onChangeThemeClick = {
+                            count++
+                            val currentOrdinal = count % 3
+                            viewModel.setTheme(currentOrdinal, context)
 
-                        var count by remember { mutableStateOf(viewModel.themeState.value.ordinal) }
-                        var isEnabled by remember { mutableStateOf(true) }
-                        val isSystemInDarkTheme = isSystemInDarkTheme()
-                        IconButton(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .onGloballyPositioned { coordinates ->
-                                    iconCoordinates.value = coordinates.boundsInRoot().center
-                                },
-                            enabled = isEnabled,
-                            onClick = {
-                                count++
-                                val currentOrdinal = count % 3
-                                viewModel.setTheme(currentOrdinal, context)
+                            //animated transition between themes
+                            if((currentOrdinal == 2) || (currentOrdinal == 1 && isSystemInDarkTheme) || (currentOrdinal == 0 && !isSystemInDarkTheme)){
+                                coroutineScope.launch {
+                                    isEnabled = false
 
-                                //animated transition between themes
-                                if((currentOrdinal == 2) || (currentOrdinal == 1 && isSystemInDarkTheme) || (currentOrdinal == 0 && !isSystemInDarkTheme)){
-                                    coroutineScope.launch {
-                                        isEnabled = false
+                                    //save screenshot
+                                    imageState.value = view.drawToBitmap().asImageBitmap()
 
-                                        //save screenshot
-                                        imageState.value = view.drawToBitmap().asImageBitmap()
+                                    val diagonal = sqrt((view.width * view.width + view.height * view.height).toFloat())
+                                    isAnimating.value = true
+                                    animatable.animateTo(
+                                        diagonal,
+                                        tween(350)
+                                    )
+                                    isAnimating.value = false
 
-                                        val diagonal = sqrt((view.width * view.width + view.height * view.height).toFloat())
-                                        isAnimating.value = true
-                                        animatable.animateTo(
-                                            diagonal,
-                                            tween(350)
-                                        )
-                                        isAnimating.value = false
-
-                                        animatable.snapTo(50f)
-                                        isEnabled = true
-                                    }
+                                    animatable.snapTo(50f)
+                                    isEnabled = true
                                 }
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    id = when(viewModel.themeState.value){
-                                        Theme.Auto  -> R.drawable.ic_auto
-                                        Theme.Light -> R.drawable.ic_light_mode
-                                        Theme.Dark  -> R.drawable.ic_dark_mode
-                                    }
-                                ),
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.onSurface
-                            )
-                        }
-                    }
+                            }
+                        },
+                        isEnabled = isEnabled
+                    )
 
                     //pager
                     AdaptivePager(
@@ -195,66 +150,10 @@ fun HomeScreen(
                                 AdaptiveDoubleLayout(
                                     modifier = Modifier.fillMaxSize(),
                                     firstPart = {
-                                        Column(modifier = Modifier.fillMaxSize()) {
-                                            Text(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                text = "Desnianske,\nUkraine",
-                                                style = MaterialTheme.typography.h2,
-                                                color = MaterialTheme.colors.onSurface
-                                            )
-                                            Text(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                text = viewModel.selectedDay.date.toFormattedDate(context),
-                                                style = MaterialTheme.typography.h5,
-                                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
-                                            )
-
-                                            BoxWithConstraints(modifier = Modifier.fillMaxSize()){
-                                                val width = maxWidth
-                                                val height = maxHeight
-                                                Row(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ){
-                                                    val imagePadding = 8.dp
-                                                    val maxSize = 150.dp
-                                                    val sizeByWidth = min(width / 2 - (imagePadding * 2), maxSize)
-                                                    val sizeByHeight = min(height - (imagePadding * 2), maxSize)
-                                                    Spacer(modifier = Modifier.width(24.dp))
-                                                    Image(
-                                                        modifier = Modifier.size(min(sizeByWidth, sizeByHeight)),
-                                                        painter = viewModel.selectedDay.skyCondition.getPainterResource(),
-                                                        contentDescription = "Current condition"
-                                                    )
-                                                    Box(
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        contentAlignment = Alignment.Center
-                                                    ){
-                                                        Row {
-                                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                                Text(
-                                                                    text = viewModel.selectedDay.dayTemperature.toString(),
-                                                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f),
-                                                                    style = MaterialTheme.typography.h1
-                                                                )
-                                                                Text(
-                                                                    modifier = Modifier.offset(y = (-20).dp),
-                                                                    text = "Rainy",
-                                                                    color = MaterialTheme.colors.onSurface,
-                                                                    style = MaterialTheme.typography.h3
-                                                                )
-                                                            }
-                                                            Text(
-                                                                modifier = Modifier.offset(y = 10.dp),
-                                                                text = "°C",
-                                                                color = MaterialTheme.colors.onSurface,
-                                                                style = MaterialTheme.typography.h5
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        WeatherOverview(
+                                            modifier = Modifier.fillMaxSize(),
+                                            selectedDay = viewModel.selectedDay
+                                        )
                                     },
                                     secondPart = {
                                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -397,13 +296,5 @@ fun HomeScreen(
                 }
             )
         }
-    }
-}
-
-@Composable
-@Preview
-fun PreviewMain() {
-    WeatherAggregatorTheme(Theme.Light) {
-
     }
 }
