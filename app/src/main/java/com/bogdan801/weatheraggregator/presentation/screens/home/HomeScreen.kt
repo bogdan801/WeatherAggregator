@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -35,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController? = null,
@@ -162,6 +163,7 @@ fun HomeScreen(
                                             val heightRelation = if(isPortrait) 1.05f else 0.95f
                                             val dayCardsHeight = ((maxWidth - 40.dp) / 4f) * heightRelation
                                             val columnHeight = dayCardsHeight + dataSelectorHeight + 16.dp
+                                            var slideRight by remember { mutableStateOf(true) }
                                             Column(modifier = Modifier
                                                 .fillMaxWidth()
                                                 .align(Alignment.BottomCenter)
@@ -179,7 +181,9 @@ fun HomeScreen(
                                                                 .height(dayCardsHeight),
                                                             isSelected = viewModel.selectedDayState.value == index,
                                                             onCardClick = {
-                                                                viewModel.setSelectedDay(index)
+                                                                viewModel.setSelectedDay(index) { shouldSlideRight ->
+                                                                    slideRight = shouldSlideRight
+                                                                }
                                                             },
                                                             date = dayCondition.date,
                                                             skyCondition = dayCondition.skyCondition,
@@ -226,7 +230,8 @@ fun HomeScreen(
                                                 isExpanded = isExpanded,
                                                 onExpandClick = {
                                                     isExpanded = !isExpanded
-                                                }
+                                                },
+                                                slideRight = slideRight
                                             )
                                         }
                                     },

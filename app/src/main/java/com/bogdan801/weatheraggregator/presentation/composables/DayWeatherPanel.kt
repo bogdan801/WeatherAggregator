@@ -34,7 +34,8 @@ fun DayWeatherPanel(
     modifier: Modifier = Modifier,
     data: DayWeatherCondition,
     isExpanded: Boolean = false,
-    onExpandClick: () -> Unit = {}
+    onExpandClick: () -> Unit = {},
+    slideRight: Boolean = true
 ) {
     val localDensity = LocalDensity.current
     var columnWidth by remember { mutableStateOf(0.dp) }
@@ -43,39 +44,60 @@ fun DayWeatherPanel(
             columnWidth = with(localDensity) { coordinates.size.width.toDp() }
         }
     ) {
-        Row(
+
+        AnimatedContent(
+            targetState = data,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-        ) {
-            ExpandableWeatherSlice(
+                .weight(1f),
+            transitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = {
+                        if(slideRight) -it
+                        else it
+                    }
+                ) with slideOutHorizontally(
+                    targetOffsetX = {
+                        if(slideRight) it
+                        else -it
+                    }
+                )
+            }
+        ) { newData ->
+            Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.secondary)
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                ExpandableWeatherSlice(
+                    modifier = Modifier
+                        .background(MaterialTheme.colors.secondary)
+                        .fillMaxHeight()
+                        .width(100.dp),
+                    isExpanded = isExpanded,
+                    displayTitles = true
+                )
+                LazyRow(modifier = Modifier
                     .fillMaxHeight()
-                    .width(100.dp),
-                isExpanded = isExpanded,
-                displayTitles = true
-            )
-            LazyRow(modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f)
-            ){
-                itemsIndexed(data.weatherByHours){ index, slice ->
-                    val sliceWidth =
-                        if((60.dp * data.weatherByHours.size) < (columnWidth-100.dp))
-                            (columnWidth-100.dp) / data.weatherByHours.size
-                        else 60.dp
-                    ExpandableWeatherSlice(
-                        modifier = modifier
-                            .fillMaxHeight()
-                            .width(sliceWidth)
-                            .background(
-                                if (index % 2 == 0) MaterialTheme.colors.onBackground
-                                else MaterialTheme.colors.secondary
-                            ),
-                        isExpanded = isExpanded,
-                        data = slice
-                    )
+                    .weight(1f)
+                ){
+                    itemsIndexed(newData.weatherByHours){ index, slice ->
+                        val sliceWidth =
+                            if((60.dp * newData.weatherByHours.size) < (columnWidth-100.dp))
+                                (columnWidth-100.dp) / newData.weatherByHours.size
+                            else 60.dp
+                        ExpandableWeatherSlice(
+                            modifier = modifier
+                                .fillMaxHeight()
+                                .width(sliceWidth)
+                                .background(
+                                    if (index % 2 == 0) MaterialTheme.colors.onBackground
+                                    else MaterialTheme.colors.secondary
+                                ),
+                            isExpanded = isExpanded,
+                            data = slice
+                        )
+                    }
                 }
             }
         }

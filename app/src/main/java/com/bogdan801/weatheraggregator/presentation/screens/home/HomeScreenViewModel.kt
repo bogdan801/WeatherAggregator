@@ -51,8 +51,15 @@ constructor(
     private val _selectedDayState = mutableStateOf(0)
     val selectedDayState: State<Int> = _selectedDayState
     val selectedDay get() = currentData.weatherByDates[_selectedDayState.value]
-    fun setSelectedDay(index: Int){
-        _selectedDayState.value = index
+    fun setSelectedDay(index: Int, slideRight: (Boolean) -> Unit = {}){
+        if(selectedDayState.value > index){
+            slideRight(true)
+            _selectedDayState.value = index
+        }
+        else if(selectedDayState.value < index){
+            slideRight(false)
+            _selectedDayState.value = index
+        }
     }
 
 
