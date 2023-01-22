@@ -26,6 +26,9 @@ import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.presentation.composables.*
+import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptiveDoubleLayout
+import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptivePager
+import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DayCard
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
@@ -273,7 +276,32 @@ fun HomeScreen(
                     width = 1.dp,
                     color = Color.White.copy(alpha = 0.2f)
                 )
-            ){}
+            ){
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                top = 8.dp,
+                                bottom = 4.dp
+                            ),
+                        text = "Trust levels",
+                        style = MaterialTheme.typography.overline,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    TrustLevelsSelector(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(70.dp)
+                            .padding(vertical = 0.dp, horizontal = 8.dp),
+                        dataStateList = viewModel.dataListState.value,
+                        levels = viewModel.trustLevels.value,
+                        onLevelChanged = { newLevels ->
+                            viewModel.setTrustLevels(newLevels)
+                        }
+                    )
+                }
+            }
 
             //bottom bar
             BottomBar(

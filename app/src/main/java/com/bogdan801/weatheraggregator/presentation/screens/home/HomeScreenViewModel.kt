@@ -860,4 +860,10 @@ constructor(
         setSelectedDay(0)
         _selectedDataIndexState.value = index
     }
+
+    private val _trustLevels = mutableStateOf(listOf(1.0/3, 1.0/3, 1.0/3))
+    val trustLevels: State<List<Double>> = _trustLevels
+    fun setTrustLevels(newTrustLevels: List<Double>){
+        _trustLevels.value = newTrustLevels
+    }
 }

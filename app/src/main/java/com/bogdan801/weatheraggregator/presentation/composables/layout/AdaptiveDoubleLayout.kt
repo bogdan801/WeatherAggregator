@@ -1,4 +1,4 @@
-package com.bogdan801.weatheraggregator.presentation.composables
+package com.bogdan801.weatheraggregator.presentation.composables.layout
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
