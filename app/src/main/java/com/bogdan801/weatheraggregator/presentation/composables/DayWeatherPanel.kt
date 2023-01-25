@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
+import com.bogdan801.weatheraggregator.presentation.composables.repeatable.ExpandableWeatherSlice
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

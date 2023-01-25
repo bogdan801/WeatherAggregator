@@ -249,7 +249,11 @@ fun HomeScreen(
                                     .padding(bottom = 118.dp),
                                     contentAlignment = Alignment.Center
                                 ){
-                                    Text(text = "third", color = MaterialTheme.colors.onSurface)
+                                    Text(
+                                        text = viewModel.trustLevels.value.toString(),
+                                        color = MaterialTheme.colors.onSurface,
+                                        style = MaterialTheme.typography.caption
+                                    )
                                 }
                             }
                         }

@@ -1,4 +1,4 @@
-package com.bogdan801.weatheraggregator.presentation.composables
+package com.bogdan801.weatheraggregator.presentation.composables.repeatable
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
