@@ -7,12 +7,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.bogdan801.weatheraggregator"
         minSdk 26
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -51,6 +51,7 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    namespace 'com.bogdan801.weatheraggregator'
 }
 
 dependencies {
@@ -70,7 +71,7 @@ dependencies {
     //datetime
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.2'
 
-    def accompanist_version = "0.24.9-beta"
+    def accompanist_version = "0.25.1"
     //pager
     implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
     //system UI controller
