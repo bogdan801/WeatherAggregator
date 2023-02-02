@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptiveDoubleLayout
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptivePager
+import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DataSourceCard
 import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DayCard
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -257,8 +258,20 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 16.dp),
-                                            action = HeaderAction.Delete,
+                                            action = HeaderAction.Add,
                                             onActionClick = {}
+                                        )
+                                    }
+                                    item { 
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                    item {
+                                        DataSourceCard(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(200.dp)
+                                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                            dataState = viewModel.dataListState.value[1]
                                         )
                                     }
                                 }
