@@ -7,10 +7,14 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -243,16 +247,20 @@ fun HomeScreen(
                             }
                             1 -> {
                                 //second page
-                                Box(modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(bottom = 118.dp),
-                                    contentAlignment = Alignment.Center
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(bottom = if (viewModel.dataListState.value.size > 1) 118.dp else 0.dp),
                                 ){
-                                    Text(
-                                        text = viewModel.trustLevels.value.toString(),
-                                        color = MaterialTheme.colors.onSurface,
-                                        style = MaterialTheme.typography.caption
-                                    )
+                                    item {
+                                        DataSourceHeader(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp),
+                                            action = HeaderAction.Delete,
+                                            onActionClick = {}
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -261,48 +269,51 @@ fun HomeScreen(
             }
 
             //trust levels panel
-            val height = if(isPortrait) 211 else 118
-            val yOffset = ((height+2) - (height * (pageState.currentPage+pageState.currentPageOffset))).dp
-            Card (
-                modifier = Modifier
-                    .requiredWidth(maxWidth + 4.dp)
-                    .height(height.dp)
-                    .align(Alignment.BottomCenter)
-                    .offset(y = yOffset)
-                    .padding(end = if (!isPortrait) 104.dp else 0.dp),
-                shape = RoundedCornerShape(
-                    topStart = if(isPortrait) 20.dp else 0.dp,
-                    topEnd = 20.dp
-                ),
-                backgroundColor = MaterialTheme.colors.secondary,
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.2f)
-                )
-            ){
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        modifier = Modifier
-                            .padding(
-                                start = 16.dp,
-                                top = 8.dp,
-                                bottom = 4.dp
-                            ),
-                        text = "Trust levels",
-                        style = MaterialTheme.typography.overline,
-                        color = MaterialTheme.colors.onSurface
+            if((pageState.currentPage + pageState.currentPageOffset != 0f) && (viewModel.dataListState.value.size > 1)){
+                val height = if(isPortrait) 211 else 118
+                val yOffset = ((height+2) - (height * (pageState.currentPage+pageState.currentPageOffset))).dp
+                Card (
+                    modifier = Modifier
+                        .requiredWidth(maxWidth + 4.dp)
+                        .height(height.dp)
+                        .align(Alignment.BottomCenter)
+                        .offset(y = yOffset)
+                        .padding(end = if (!isPortrait) 104.dp else 0.dp),
+                    shape = RoundedCornerShape(
+                        topStart = if(isPortrait) 20.dp else 0.dp,
+                        topEnd = 20.dp
+                    ),
+                    elevation = 7.dp,
+                    backgroundColor = MaterialTheme.colors.secondary,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.2f)
                     )
-                    TrustLevelsSelector(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(70.dp)
-                            .padding(vertical = 0.dp, horizontal = 8.dp),
-                        dataStateList = viewModel.dataListState.value,
-                        levels = viewModel.trustLevels.value,
-                        onLevelChanged = { newLevels ->
-                            viewModel.setTrustLevels(newLevels)
-                        }
-                    )
+                ){
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            modifier = Modifier
+                                .padding(
+                                    start = 16.dp,
+                                    top = 8.dp,
+                                    bottom = 4.dp
+                                ),
+                            text = "Trust levels",
+                            style = MaterialTheme.typography.overline,
+                            color = MaterialTheme.colors.onSurface
+                        )
+                        TrustLevelsSelector(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(70.dp)
+                                .padding(vertical = 0.dp, horizontal = 8.dp),
+                            dataStateList = viewModel.dataListState.value,
+                            levels = viewModel.trustLevels.value,
+                            onLevelChanged = { newLevels ->
+                                viewModel.setTrustLevels(newLevels)
+                            }
+                        )
+                    }
                 }
             }
 

@@ -2,9 +2,12 @@ package com.bogdan801.weatheraggregator.presentation.composables
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -40,13 +43,11 @@ fun TrustLevelsSelector(
 
         val handlesOffsets = remember {
             mutableStateListOf(
-                *(levels
-                    .subList(0, levels.lastIndex)
-                    .mapIndexed { index, _ ->
+                *(
+                    List(levels.subList(0, levels.lastIndex).size) { index ->
                         maxWidth * levels.subList(0, index + 1).sum().toFloat()
-                    }
-                    .toTypedArray())
-
+                    }.toTypedArray()
+                )
             )
         }
 
@@ -91,18 +92,22 @@ fun TrustLevelsSelector(
         }
 
         handlesOffsets.forEachIndexed { index, offset ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
             var isDragged by remember {
                 mutableStateOf(false)
             }
             val handleWidth by animateDpAsState(
-                targetValue = if(isDragged) 11.dp else 1.dp
+                targetValue = if(isDragged || isPressed) 11.dp else 1.dp
             )
+
             Box(
                 modifier = Modifier
                     .width(handleWidth)
                     .offset(offset - (handleWidth / 2))
                     .fillMaxHeight()
                     .background(MaterialTheme.colors.surface)
+                    .clickable(interactionSource = interactionSource, indication = null, onClick = {})
                     .draggable(
                         orientation = Orientation.Horizontal,
                         state = rememberDraggableState { delta ->
