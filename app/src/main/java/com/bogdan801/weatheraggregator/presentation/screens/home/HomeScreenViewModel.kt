@@ -330,7 +330,7 @@ constructor(
                 data = WeatherData(
                     currentDate = getCurrentDate(),
                     domain = WeatherSourceDomain.Meta,
-                    url = "",
+                    url = "https://pogoda.meta.ua/ua/Chernihivska/Koropskyi/Sverdlovka/",
                     currentSkyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Five)),
                     currentTemperature = -25,
                     weatherByDates = listOf(

@@ -33,7 +33,7 @@ fun DataSourceHeader(
         )
         CompositionLocalProvider(LocalRippleTheme provides  RippleCustomTheme) {
             Button(
-                modifier = Modifier.size(65.dp, 37.dp),
+                modifier = Modifier.size(65.dp, 42.dp).padding(4.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
                     contentColor = MaterialTheme.colors.onSecondary
@@ -41,7 +41,11 @@ fun DataSourceHeader(
                 shape = MaterialTheme.shapes.medium,
                 onClick = {
                     onActionClick(action)
-                }
+                },
+                elevation = ButtonDefaults.elevation(
+                    defaultElevation = 3.dp,
+                    pressedElevation = 5.dp
+                )
             ) {
                 Icon(
                     imageVector = when(action){

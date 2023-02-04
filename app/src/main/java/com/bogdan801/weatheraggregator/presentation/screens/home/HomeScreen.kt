@@ -12,9 +12,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -269,7 +266,6 @@ fun HomeScreen(
                                         DataSourceCard(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(200.dp)
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                                             dataState = viewModel.dataListState.value[1]
                                         )

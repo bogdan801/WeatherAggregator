@@ -1,6 +1,10 @@
 package com.bogdan801.weatheraggregator.domain.model
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import kotlinx.datetime.LocalDate
+import com.bogdan801.weatheraggregator.R
 
 data class WeatherData(
     val dataID: Int = 0,
@@ -13,6 +17,13 @@ data class WeatherData(
     var weatherByDates: List<DayWeatherCondition> = listOf()
 ){
     val isEmpty: Boolean get() = weatherByDates.isEmpty()
+    @Composable
+    fun getDomainPainter(): Painter = when(domain){
+        WeatherSourceDomain.Meta -> painterResource(id = R.drawable.ic_meta)
+        WeatherSourceDomain.Sinoptik -> painterResource(id = R.drawable.ic_sinoptik)
+        WeatherSourceDomain.OpenWeather -> painterResource(id = R.drawable.ic_open_weather)
+        WeatherSourceDomain.Average -> painterResource(id = R.drawable.ic_average)
+    }
 }
 
 

@@ -1,13 +1,26 @@
 package com.bogdan801.weatheraggregator.presentation.composables.repeatable
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import com.bogdan801.weatheraggregator.R
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
 
@@ -16,18 +29,88 @@ fun DataSourceCard(
     modifier: Modifier = Modifier,
     dataState: WeatherDataState,
     isSelected: Boolean = false,
-    onLongPress: () -> Unit = {},
+    onLongPress: (Boolean) -> Unit = {},
     onTap: (Boolean) -> Unit ={}
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
     Box(modifier = modifier){
+        val cardHeight by animateDpAsState(
+            targetValue =
+            if(isExpanded) 300.dp
+            else 72.dp,
+            animationSpec = tween(200)
+        )
         Card(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cardHeight),
             backgroundColor = MaterialTheme.colors.secondary,
             shape = MaterialTheme.shapes.medium,
             border = BorderStroke(1.dp, Color.White.copy(0.2f))
         ) {
-
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .background(MaterialTheme.colors.onPrimary),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = dataState.data.domain.name,
+                                color = MaterialTheme.colors.onSurface,
+                                style = MaterialTheme.typography.overline,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Image(
+                                modifier = Modifier.size(16.dp),
+                                painter = dataState.data.getDomainPainter(),
+                                contentDescription = ""
+                            )
+                        }
+                        Text(
+                            text = dataState.data.url,
+                            color = MaterialTheme.colors.onSurface.copy(0.65f),
+                            style = MaterialTheme.typography.caption,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(64.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    isExpanded = !isExpanded
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ){
+                        val xRotation by animateFloatAsState(
+                            targetValue = if(!isExpanded) 0f else 180f,
+                            animationSpec = tween(200)
+                        )
+                        Icon(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .graphicsLayer {
+                                    rotationX = xRotation
+                                },
+                            painter = painterResource(id = R.drawable.ic_expand),
+                            contentDescription = "Icon",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         }
     }
-
 }
