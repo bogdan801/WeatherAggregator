@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.data.util.toDegree
@@ -24,7 +25,9 @@ fun ExpandableWeatherSlice(
     modifier: Modifier,
     isExpanded: Boolean = false,
     data: WeatherSlice? = null,
-    displayTitles: Boolean = data == null
+    displayTitles: Boolean = data == null,
+    displayDayTitle: Boolean = false,
+    calculatedItemHeight: (Dp) -> Unit = {}
 ) {
     BoxWithConstraints(modifier = modifier.clipToBounds()) {
         val columnHeight by animateDpAsState(
@@ -32,6 +35,7 @@ fun ExpandableWeatherSlice(
             animationSpec = tween(200)
         )
         val height = maxHeight / 7
+        calculatedItemHeight(height)
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -43,6 +47,19 @@ fun ExpandableWeatherSlice(
             verticalArrangement = Arrangement.SpaceAround
         ) {
             if(displayTitles) {
+                if (displayDayTitle){
+                    Box(
+                        modifier = Modifier.height(height),
+                        contentAlignment = Alignment.CenterStart
+                    ){
+                        Text(
+                            text = "Day",
+                            style = MaterialTheme.typography.h6,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+
                 Box(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
