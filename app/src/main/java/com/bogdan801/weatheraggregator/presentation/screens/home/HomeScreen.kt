@@ -201,7 +201,7 @@ fun HomeScreen(
                                                         .fillMaxWidth()
                                                         .height(dataSelectorHeight)
                                                         .padding(horizontal = 8.dp, vertical = 4.dp),
-                                                    dataStateList = viewModel.dataListState.value,
+                                                    dataStateList = viewModel.dataListState,
                                                     selectedIndex = viewModel.selectedDataIndexState.value,
                                                     onDataSelected = { index, isError ->
                                                         if(isError){
@@ -248,7 +248,7 @@ fun HomeScreen(
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(bottom = if (viewModel.dataListState.value.size > 1) 118.dp else 0.dp),
+                                        .padding(bottom = if (viewModel.dataListState.size > 1) 118.dp else 0.dp),
                                 ){
                                     item {
                                         DataSourceHeader(
@@ -267,7 +267,7 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
-                                            dataState = viewModel.dataListState.value[1]
+                                            dataState = viewModel.dataListState[1]
                                         )
                                     }
                                 }
@@ -278,7 +278,7 @@ fun HomeScreen(
             }
 
             //trust levels panel
-            if((pageState.currentPage + pageState.currentPageOffset != 0f) && (viewModel.dataListState.value.size > 1)){
+            if((pageState.currentPage + pageState.currentPageOffset != 0f) && (viewModel.dataListState.size > 1)){
                 val height = if(isPortrait) 211 else 118
                 val yOffset = ((height+2) - (height * (pageState.currentPage+pageState.currentPageOffset))).dp
                 Card (
@@ -316,7 +316,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .height(70.dp)
                                 .padding(vertical = 0.dp, horizontal = 8.dp),
-                            dataStateList = viewModel.dataListState.value,
+                            dataStateList = viewModel.dataListState,
                             levels = viewModel.trustLevels.value,
                             onLevelChanged = { newLevels ->
                                 viewModel.setTrustLevels(newLevels)
