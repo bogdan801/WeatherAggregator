@@ -591,7 +591,7 @@ constructor(
             d = WeatherData(domain = WeatherSourceDomain.Sinoptik, url = "https://ua.sinoptik.ua/%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%B5%D1%81%D0%BD%D1%8F%D0%BD%D1%81%D1%8C%D0%BA%D0%B5"),
             message = "Can’t connect to the server, please try later."
         ),
-        WeatherDataState.IsLoading(
+        WeatherDataState.Data(
             WeatherData(
                 currentDate = getCurrentDate(),
                 domain = WeatherSourceDomain.OpenWeather,

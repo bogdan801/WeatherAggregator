@@ -1,15 +1,15 @@
 package com.bogdan801.weatheraggregator.presentation.composables.repeatable
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import com.bogdan801.weatheraggregator.R
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,12 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.data.util.toFormattedString
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
+import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
 
 @Composable
@@ -39,6 +42,9 @@ fun DataSourceCard(
     onTap: (Boolean) -> Unit ={}
 ) {
     val density = LocalDensity.current
+    var cardHeightState by remember {
+        mutableStateOf(0.dp)
+    }
 
     Box(modifier = modifier){
         when(dataState){
@@ -50,6 +56,7 @@ fun DataSourceCard(
                     else 72.dp,
                     animationSpec = tween(200)
                 )
+                cardHeightState = cardHeight
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -69,7 +76,8 @@ fun DataSourceCard(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(horizontal = 16.dp),
-                                data = dataState.data
+                                data = dataState.data,
+                                isLinkBrowsable = (dataState.d.domain != WeatherSourceDomain.OpenWeather) && (!isSelected)
                             )
                             Box(
                                 modifier = Modifier
@@ -79,7 +87,7 @@ fun DataSourceCard(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
                                         onClick = {
-                                            isExpanded = !isExpanded
+                                            if (!isSelected) isExpanded = !isExpanded
                                         }
                                     ),
                                 contentAlignment = Alignment.Center
@@ -211,9 +219,10 @@ fun DataSourceCard(
                                                                             sliceIndex,
                                                                             dataState.data
                                                                         )
-                                                                    ) MaterialTheme.colors.surface.copy(
-                                                                        0.42f
                                                                     )
+                                                                        MaterialTheme.colors.surface.copy(
+                                                                            0.42f
+                                                                        )
                                                                     else MaterialTheme.colors.onPrimary
                                                                 )
                                                                 .padding(bottom = 4.dp),
@@ -232,6 +241,7 @@ fun DataSourceCard(
                 }
             }
             is WeatherDataState.IsLoading -> {
+                cardHeightState = 72.dp
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -251,7 +261,8 @@ fun DataSourceCard(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(horizontal = 16.dp),
-                                data = dataState.data
+                                data = dataState.data,
+                                isLinkBrowsable = (dataState.d.domain != WeatherSourceDomain.OpenWeather) && (!isSelected)
                             )
                             Box(
                                 modifier = Modifier
@@ -269,6 +280,7 @@ fun DataSourceCard(
                 }
             }
             is WeatherDataState.Error -> {
+                cardHeightState = 106.dp
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -288,7 +300,8 @@ fun DataSourceCard(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(horizontal = 16.dp),
-                                data = dataState.data
+                                data = dataState.data,
+                                isLinkBrowsable = (dataState.d.domain != WeatherSourceDomain.OpenWeather) && (!isSelected)
                             )
                             Box(
                                 modifier = Modifier
@@ -328,14 +341,44 @@ fun DataSourceCard(
                 }
             }
         }
+
+        AnimatedVisibility(
+            visible = isSelected,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(cardHeightState),
+                backgroundColor = MaterialTheme.colors.secondary.copy(0.5f),
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(width = 3.dp, color = MaterialTheme.colors.primary),
+                elevation = 0.dp
+            ){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        modifier = Modifier.size(46.dp),
+                        painter = painterResource(id = R.drawable.ic_check_mark),
+                        contentDescription = "Check mark",
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
 fun DataSourceCardHeader(
     modifier: Modifier = Modifier,
-    data: WeatherData
+    data: WeatherData,
+    isLinkBrowsable: Boolean = true
 ){
+    val context = LocalContext.current
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -353,6 +396,12 @@ fun DataSourceCardHeader(
             )
         }
         Text(
+            modifier = Modifier.clickable {
+                if(isLinkBrowsable){
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(data.url))
+                    context.startActivity(browserIntent)
+                }
+            },
             text = data.url,
             color = MaterialTheme.colors.onSurface.copy(0.65f),
             style = MaterialTheme.typography.caption,

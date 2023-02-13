@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -248,7 +249,6 @@ fun HomeScreen(
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(bottom = if (viewModel.dataListState.size > 1) 118.dp else 0.dp),
                                 ){
                                     item {
                                         DataSourceHeader(
@@ -258,17 +258,21 @@ fun HomeScreen(
                                             action = HeaderAction.Add,
                                             onActionClick = {}
                                         )
-                                    }
-                                    item { 
                                         Spacer(modifier = Modifier.height(8.dp))
                                     }
+                                    (1..viewModel.dataListState.lastIndex).forEach { index ->
+                                        item {
+                                            DataSourceCard(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                                dataState = viewModel.dataListState[index],
+                                                //isSelected = true
+                                            )
+                                        }
+                                    }
                                     item {
-                                        DataSourceCard(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                                            dataState = viewModel.dataListState[1]
-                                        )
+                                        Spacer(modifier = Modifier.height(if(isPortrait) 112.dp else 120.dp))
                                     }
                                 }
                             }
@@ -279,12 +283,12 @@ fun HomeScreen(
 
             //trust levels panel
             if((pageState.currentPage + pageState.currentPageOffset != 0f) && (viewModel.dataListState.size > 1)){
-                val height = if(isPortrait) 211 else 118
-                val yOffset = ((height+2) - (height * (pageState.currentPage+pageState.currentPageOffset))).dp
+                val trustLevelPanelHeight = if(isPortrait) 211 else 118
+                val yOffset = ((trustLevelPanelHeight+2) - (trustLevelPanelHeight * (pageState.currentPage+pageState.currentPageOffset))).dp
                 Card (
                     modifier = Modifier
                         .requiredWidth(maxWidth + 4.dp)
-                        .height(height.dp)
+                        .height(trustLevelPanelHeight.dp)
                         .align(Alignment.BottomCenter)
                         .offset(y = yOffset)
                         .padding(end = if (!isPortrait) 104.dp else 0.dp),
@@ -315,7 +319,7 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(70.dp)
-                                .padding(vertical = 0.dp, horizontal = 8.dp),
+                                .padding(horizontal = 8.dp),
                             dataStateList = viewModel.dataListState,
                             levels = viewModel.trustLevels.value,
                             onLevelChanged = { newLevels ->
