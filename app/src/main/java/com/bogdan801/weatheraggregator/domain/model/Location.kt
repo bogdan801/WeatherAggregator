@@ -21,7 +21,11 @@ data class Region(
 data class Location(
     val metaLink: String,
     val sinoptikLink: String,
-    val name: String
+    val name: String,
+    val regionName: String,
+    val oblastName: String,
+    val lat: Double,
+    val lon: Double
 )
 
 fun turnJSONtoOblastList(jsonString: String): List<Oblast>{

@@ -33,6 +33,7 @@ import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DataSourceCard(
     modifier: Modifier = Modifier,
@@ -46,7 +47,12 @@ fun DataSourceCard(
         mutableStateOf(0.dp)
     }
 
-    Box(modifier = modifier){
+    Box(modifier = modifier
+        .combinedClickable(
+            onClick = { onTap(isSelected) },
+            onLongClick = { onLongPress(isSelected) },
+        )
+    ){
         when(dataState){
             is WeatherDataState.Data -> {
                 var isExpanded by remember { mutableStateOf(false) }
@@ -347,27 +353,15 @@ fun DataSourceCard(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Card(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(cardHeightState),
-                backgroundColor = MaterialTheme.colors.secondary.copy(0.5f),
+                color = Color.Transparent,
                 shape = MaterialTheme.shapes.medium,
                 border = BorderStroke(width = 3.dp, color = MaterialTheme.colors.primary),
                 elevation = 0.dp
-            ){
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ){
-                    Icon(
-                        modifier = Modifier.size(46.dp),
-                        painter = painterResource(id = R.drawable.ic_check_mark),
-                        contentDescription = "Check mark",
-                        tint = MaterialTheme.colors.primary
-                    )
-                }
-            }
+            ){}
         }
     }
 }

@@ -43,7 +43,7 @@ fun TopAppBar(
             Row {
                 Icon(painter = painterResource(id = R.drawable.ic_location), contentDescription = "location")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Change location", style = MaterialTheme.typography.h4)
+                Text(text = "Select location", style = MaterialTheme.typography.h4)
             }
         }
 

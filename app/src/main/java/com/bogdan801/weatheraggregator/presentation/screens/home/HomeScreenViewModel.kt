@@ -1,23 +1,17 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bogdan801.weatheraggregator.data.datastore.saveIntToDataStore
-import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.plus
 import okhttp3.internal.toImmutableList
 import javax.inject.Inject
 
@@ -38,21 +32,40 @@ constructor(
         }
     }
 
-    //loading
-    private val _isLoadingState = mutableStateOf(false)
-    val isLoadingState: State<Boolean> = _isLoadingState
-    fun updateWeatherData(){
-        viewModelScope.launch {
-            _isLoadingState.value = true
-            delay(3000)
-            _isLoadingState.value = false
-        }
+    //location
+    private val allLocations: List<Oblast> = listOf()
+
+    private val _selectedLocationState = mutableStateOf(Location("", "", ""))
+    val selectedLocationState: State<Location>  = _selectedLocationState
+
+    fun selectNewLocation(newLocation: Location){
+        _selectedLocationState.value = newLocation
+    }
+
+    //data selection
+    private val _dataListState = mutableStateListOf<WeatherDataState>()
+    val dataListState: List<WeatherDataState>  = _dataListState
+
+    val averageData = WeatherDataState.Data(WeatherData())
+
+    private val _selectedDataIndexState = mutableStateOf(0)
+    val selectedDataIndexState: State<Int> = _selectedDataIndexState
+
+    val currentData by derivedStateOf {
+        if(_selectedDataIndexState.value == 0) averageData.data
+        else _dataListState[_selectedDataIndexState.value - 1].data
+    }
+
+    fun setSelectedData(index: Int){
+        setSelectedDay(0)
+        _selectedDataIndexState.value = index
     }
 
     //day selection
     private val _selectedDayState = mutableStateOf(0)
     val selectedDayState: State<Int> = _selectedDayState
     val selectedDay get() = currentData.weatherByDates[_selectedDayState.value]
+
     fun setSelectedDay(index: Int, slideRight: (Boolean) -> Unit = {}){
         if(selectedDayState.value > index){
             slideRight(true)
@@ -64,806 +77,55 @@ constructor(
         }
     }
 
-
-    //data selection
-    private val _dataListState = mutableStateListOf(
-        WeatherDataState.Data(
-            WeatherData(
-                currentDate = getCurrentDate(),
-                domain = WeatherSourceDomain.Average,
-                url = "",
-                currentSkyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Five)),
-                currentTemperature = -25,
-                weatherByDates = listOf(
-                    DayWeatherCondition(
-                        date = getCurrentDate(),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(
-                            SnowLevel.One)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "00:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("3_s_1_n"),
-                                precipitationProbability = 74,
-                                pressure = 756,
-                                humidity = 78,
-                                wind = Wind.create(0, 5)
-                            ),
-                            WeatherSlice(
-                                time = "03:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_3_n"),
-                                precipitationProbability = 80,
-                                pressure = 758,
-                                humidity = 80,
-                                wind = Wind.create(1, 4)
-                            ),
-                            WeatherSlice(
-                                time = "06:00",
-                                temperature = -8,
-                                skyCondition = SkyCondition("2_s_5_n"),
-                                precipitationProbability = 99,
-                                pressure = 760,
-                                humidity = 85,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                temperature = -6,
-                                skyCondition = SkyCondition("2_s_3_d"),
-                                precipitationProbability = 88,
-                                pressure = 762,
-                                humidity = 90,
-                                wind = Wind.create(7, 4)
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_2_d"),
-                                precipitationProbability = 32,
-                                pressure = 763,
-                                humidity = 94,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                temperature = -4,
-                                skyCondition = SkyCondition("2_c_0_d"),
-                                precipitationProbability = 0,
-                                pressure = 764,
-                                humidity = 95,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "18:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_1_n"),
-                                precipitationProbability = 13,
-                                pressure = 762,
-                                humidity = 95,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "21:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_2_n"),
-                                precipitationProbability = 33,
-                                pressure = 761,
-                                humidity = 97,
-                                wind = Wind.create(6, 2)
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 1),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -25,
-                        nightTemperature = -32,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 2),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -12,
-                        nightTemperature = -15,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 3),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -20,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 4),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -23,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 5),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 6),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        WeatherDataState.Data(
-            WeatherData(
-                currentDate = getCurrentDate(),
-                domain = WeatherSourceDomain.Meta,
-                url = "https://pogoda.meta.ua/ua/Chernihivska/Koropskyi/Sverdlovka/",
-                currentSkyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Five)),
-                currentTemperature = -25,
-                weatherByDates = listOf(
-                    DayWeatherCondition(
-                        date = getCurrentDate(),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(
-                            SnowLevel.One)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "00:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("3_s_1_n"),
-                                precipitationProbability = 74,
-                                pressure = 756,
-                                humidity = 78,
-                                wind = Wind.create(0, 5)
-                            ),
-                            WeatherSlice(
-                                time = "03:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_3_n"),
-                                precipitationProbability = 80,
-                                pressure = 758,
-                                humidity = 80,
-                                wind = Wind.create(1, 4)
-                            ),
-                            WeatherSlice(
-                                time = "06:00",
-                                temperature = -8,
-                                skyCondition = SkyCondition("2_s_5_n"),
-                                precipitationProbability = 99,
-                                pressure = 760,
-                                humidity = 85,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                temperature = -6,
-                                skyCondition = SkyCondition("2_s_3_d"),
-                                precipitationProbability = 88,
-                                pressure = 762,
-                                humidity = 90,
-                                wind = Wind.create(7, 4)
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_2_d"),
-                                precipitationProbability = 32,
-                                pressure = 763,
-                                humidity = 94,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                temperature = -4,
-                                skyCondition = SkyCondition("2_c_0_d"),
-                                precipitationProbability = 0,
-                                pressure = 764,
-                                humidity = 95,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "18:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_1_n"),
-                                precipitationProbability = 13,
-                                pressure = 762,
-                                humidity = 95,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "21:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_2_n"),
-                                precipitationProbability = 33,
-                                pressure = 761,
-                                humidity = 97,
-                                wind = Wind.create(6, 2)
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 1),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -25,
-                        nightTemperature = -32,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 2),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -12,
-                        nightTemperature = -15,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 3),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -20,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 4),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -23,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 5),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 6),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        WeatherDataState.Error(
-            d = WeatherData(domain = WeatherSourceDomain.Sinoptik, url = "https://ua.sinoptik.ua/%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%B5%D1%81%D0%BD%D1%8F%D0%BD%D1%81%D1%8C%D0%BA%D0%B5"),
-            message = "Can’t connect to the server, please try later."
-        ),
-        WeatherDataState.Data(
-            WeatherData(
-                currentDate = getCurrentDate(),
-                domain = WeatherSourceDomain.OpenWeather,
-                url = "https://api.openweathermap.org/data/2.5/forecast?",
-                currentSkyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Five)),
-                currentTemperature = -25,
-                weatherByDates = listOf(
-                    DayWeatherCondition(
-                        date = getCurrentDate(),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(
-                            SnowLevel.One)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "00:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("3_s_1_n"),
-                                precipitationProbability = 74,
-                                pressure = 756,
-                                humidity = 78,
-                                wind = Wind.create(0, 5)
-                            ),
-                            WeatherSlice(
-                                time = "03:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_3_n"),
-                                precipitationProbability = 80,
-                                pressure = 758,
-                                humidity = 80,
-                                wind = Wind.create(1, 4)
-                            ),
-                            WeatherSlice(
-                                time = "06:00",
-                                temperature = -8,
-                                skyCondition = SkyCondition("2_s_5_n"),
-                                precipitationProbability = 99,
-                                pressure = 760,
-                                humidity = 85,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                temperature = -6,
-                                skyCondition = SkyCondition("2_s_3_d"),
-                                precipitationProbability = 88,
-                                pressure = 762,
-                                humidity = 90,
-                                wind = Wind.create(7, 4)
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_2_d"),
-                                precipitationProbability = 32,
-                                pressure = 763,
-                                humidity = 94,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                temperature = -4,
-                                skyCondition = SkyCondition("2_c_0_d"),
-                                precipitationProbability = 0,
-                                pressure = 764,
-                                humidity = 95,
-                                wind = Wind.create(7, 2)
-                            ),
-                            WeatherSlice(
-                                time = "18:00",
-                                temperature = -5,
-                                skyCondition = SkyCondition("2_s_1_n"),
-                                precipitationProbability = 13,
-                                pressure = 762,
-                                humidity = 95,
-                                wind = Wind.create(7, 3)
-                            ),
-                            WeatherSlice(
-                                time = "21:00",
-                                temperature = -7,
-                                skyCondition = SkyCondition("2_s_2_n"),
-                                precipitationProbability = 33,
-                                pressure = 761,
-                                humidity = 97,
-                                wind = Wind.create(6, 2)
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 1),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -25,
-                        nightTemperature = -32,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 2),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -12,
-                        nightTemperature = -15,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_4_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 3),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -20,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 4),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -14,
-                        nightTemperature = -23,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_1_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 5),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    ),
-                    DayWeatherCondition(
-                        date = getCurrentDate() + DatePeriod(days = 6),
-                        skyCondition = SkyCondition(_cloudiness = Cloudiness.Gloomy, _precipitation = Precipitation.Snow(SnowLevel.Three)),
-                        dayTemperature = -20,
-                        nightTemperature = -30,
-                        weatherByHours = listOf(
-                            WeatherSlice(
-                                time = "06:00",
-                                skyCondition = SkyCondition("4_s_5_d"),
-                                precipitationProbability = 99
-                            ),
-                            WeatherSlice(
-                                time = "09:00",
-                                skyCondition = SkyCondition("4_s_3_d"),
-                                precipitationProbability = 88
-                            ),
-                            WeatherSlice(
-                                time = "12:00",
-                                skyCondition = SkyCondition("4_s_2_d"),
-                                precipitationProbability = 32
-                            ),
-                            WeatherSlice(
-                                time = "15:00",
-                                skyCondition = SkyCondition("4_c_0_d"),
-                                precipitationProbability = 0
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    )
-    val dataListState = _dataListState.toImmutableList()
-    private val _selectedDataIndexState = mutableStateOf(0)
-    val selectedDataIndexState: State<Int> = _selectedDataIndexState
-    val currentData get() = _dataListState[_selectedDataIndexState.value].data
-    fun setSelectedData(index: Int){
-        setSelectedDay(0)
-        _selectedDataIndexState.value = index
+    //loading
+    private val _isLoadingState = mutableStateOf(false)
+    val isLoadingState: State<Boolean> = _isLoadingState
+    fun updateWeatherData(){
+        viewModelScope.launch {
+            _isLoadingState.value = true
+            delay(3000)
+            _isLoadingState.value = false
+        }
     }
 
+
+    //trust levels
     private val _trustLevels = mutableStateOf(listOf(1.0/3, 1.0/3, 1.0/3))
     val trustLevels: State<List<Double>> = _trustLevels
     fun setTrustLevels(newTrustLevels: List<Double>){
         _trustLevels.value = newTrustLevels
+    }
+
+    //selected data cards
+    private val _selectedCards = mutableStateListOf<Int>()
+    val selectedCards by derivedStateOf {
+        _selectedCards.toImmutableList()
+    }
+
+    val cardsSelected by derivedStateOf {
+        _selectedCards.isNotEmpty()
+    }
+
+    fun setDataCardSelection(index: Int, value: Boolean){
+        if(_selectedCards.contains(index)){
+            if(!value) _selectedCards.remove(index)
+        }
+        else {
+            if(value) _selectedCards.add(index)
+        }
+    }
+
+    fun clearSelection(){
+        _selectedCards.clear()
+    }
+
+    fun deleteSelectedData(){
+
+    }
+
+
+    init {
+
+
     }
 }

@@ -49,7 +49,7 @@ object AppModule {
     }
 
     @Provides
-    fun provideDao(db :Database) = db.dbDao
+    fun provideDao(db: Database) = db.dbDao
 
     @Provides
     @Singleton
