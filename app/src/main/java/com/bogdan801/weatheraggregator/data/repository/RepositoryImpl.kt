@@ -4,7 +4,6 @@ import com.bogdan801.weatheraggregator.BuildConfig
 import com.bogdan801.weatheraggregator.data.localdb.Dao
 import com.bogdan801.weatheraggregator.data.mapper.*
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
-import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFromMeta
 import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
@@ -12,11 +11,8 @@ import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.net.UnknownHostException
-import kotlin.coroutines.coroutineContext
 
 class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeatherApi) : Repository {
     //INSERT
@@ -44,6 +40,10 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
     override suspend fun insertWeatherSlice(weatherSlice: WeatherSlice) {
         dao.deleteWeatherSliceEntityByDayIDAndTime(weatherSlice.dayID, weatherSlice.time)
         dao.insertWeatherSliceEntity(weatherSlice.toWeatherSliceEntity())
+    }
+
+    override suspend fun insertLocation(location: Location) {
+        dao.insertLocationEntity(location.toLocationEntity())
     }
 
     //DELETE
@@ -86,6 +86,18 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         } ?: WeatherData()
     }
 
+    override suspend fun getOblastList() = dao.getOblastList()
+
+    override suspend fun getOblastRegionList(oblastName: String) = dao.getOblastRegionList(oblastName)
+
+    override suspend fun getLocationsList(oblastName: String, regionName: String) = dao.getLocationsList(oblastName, regionName)
+
+    override suspend fun getLocation(
+        oblastName: String,
+        regionName: String,
+        townName: String
+    ) = dao.getLocationEntity(oblastName, regionName, townName).map { it.toLocation() }
+
     //NETWORK
     override suspend fun getWeatherDataFromNetwork(
         domain: WeatherSourceDomain,
@@ -100,11 +112,7 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         WeatherSourceDomain.OpenWeather -> {
             try {
                 val apiKey = BuildConfig.API_KEY
-                val locInfo = openWeatherApi.getLocationInfo(location.name + ",ua", apiKey).let {
-                    if(it.isEmpty()) throw WrongUrlException("Wrong URL. Location: ${location.name} doesn't exist")
-                    it[0]
-                }
-                openWeatherApi.getWeatherData(locInfo.lat.toString(), locInfo.lon.toString(), "metric", apiKey).toWeatherData(location)
+                openWeatherApi.getWeatherData(location.lat.toString(), location.lon.toString(), "metric", apiKey).toWeatherData(location)
             }
             catch (e: UnknownHostException){
                 throw NoConnectionException("No internet connection")

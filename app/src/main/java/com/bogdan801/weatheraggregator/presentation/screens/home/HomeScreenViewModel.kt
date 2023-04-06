@@ -35,7 +35,7 @@ constructor(
     //location
     private val allLocations: List<Oblast> = listOf()
 
-    private val _selectedLocationState = mutableStateOf(Location("", "", ""))
+    private val _selectedLocationState = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
     val selectedLocationState: State<Location>  = _selectedLocationState
 
     fun selectNewLocation(newLocation: Location){

@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.data.mapper
 
 import com.bogdan801.weatheraggregator.data.localdb.entities.DayWeatherEntity
+import com.bogdan801.weatheraggregator.data.localdb.entities.LocationEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherDataEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherSliceEntity
 import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
@@ -121,3 +122,21 @@ fun DataWithDaysJunction.toWeatherData(): WeatherData = WeatherData(
     weatherByDates = days.map { it.toDayWeatherCondition() }
 )
 
+fun Location.toLocationEntity(): LocationEntity = LocationEntity(
+    0,
+    metaLink,
+    sinoptikLink,
+    name,
+    regionName,
+    oblastName,
+    lat, lon
+)
+
+fun LocationEntity.toLocation(): Location = Location(
+    metaLink,
+    sinoptikLink,
+    name,
+    regionName,
+    oblastName,
+    lat, lon
+)

@@ -10,6 +10,7 @@ interface Repository {
     suspend fun insertWeatherData(weatherData: WeatherData)
     suspend fun insertDayWeather(dayWeatherCondition: DayWeatherCondition)
     suspend fun insertWeatherSlice(weatherSlice: WeatherSlice)
+    suspend fun insertLocation(location: Location)
 
     //delete
     suspend fun deleteWeatherSlice(sliceID: Int)
@@ -21,6 +22,11 @@ interface Repository {
     //select
     fun getAllWeatherDataFromCache(): Flow<List<WeatherData>>
     fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData>
+
+    suspend fun getOblastList(): List<String>
+    suspend fun getOblastRegionList(oblastName: String): List<String>
+    suspend fun getLocationsList(oblastName: String, regionName: String): List<String>
+    suspend fun getLocation(oblastName: String, regionName: String, townName: String): List<Location>
 
     //network
     suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: Location): WeatherData

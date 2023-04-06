@@ -3,6 +3,7 @@ package com.bogdan801.weatheraggregator.data.localdb
 import androidx.room.*
 import androidx.room.Dao
 import com.bogdan801.weatheraggregator.data.localdb.entities.DayWeatherEntity
+import com.bogdan801.weatheraggregator.data.localdb.entities.LocationEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherDataEntity
 import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherSliceEntity
 import com.bogdan801.weatheraggregator.data.localdb.relations.DataWithDaysJunction
@@ -20,6 +21,9 @@ interface Dao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWeatherSliceEntity(weatherSliceEntity: WeatherSliceEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLocationEntity(locationEntity: LocationEntity)
 
     //delete
     @Query("DELETE FROM weathersliceentity")
@@ -71,4 +75,16 @@ interface Dao {
     @Transaction
     @Query("SELECT * FROM weatherdataentity WHERE domain == :domain")
     fun getWeatherDataEntityByDomain(domain: Int): Flow<DataWithDaysJunction?>
+
+    @Query("SELECT DISTINCT oblastName FROM locationentity")
+    suspend fun getOblastList(): List<String>
+
+    @Query("SELECT DISTINCT regionName FROM locationentity WHERE oblastName == :oblastName ORDER BY regionName ASC")
+    suspend fun getOblastRegionList(oblastName: String): List<String>
+
+    @Query("SELECT DISTINCT name FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName ORDER BY regionName ASC")
+    suspend fun getLocationsList(oblastName: String, regionName: String): List<String>
+
+    @Query("SELECT * FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName AND name == :townName")
+    suspend fun getLocationEntity(oblastName: String, regionName: String, townName: String): List<LocationEntity>
 }

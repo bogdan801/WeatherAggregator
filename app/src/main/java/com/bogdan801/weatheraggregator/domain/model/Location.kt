@@ -38,10 +38,3 @@ fun getOblastListFromFile(context: Context): List<Oblast>{
     val jsonString = context.readTextFromAsset("locations.json")
     return turnJSONtoOblastList(jsonString)
 }
-
-data class LocationInfo(
-    val lat: Double,
-    val lon: Double,
-    val name: String,
-    val state: String?
-)
