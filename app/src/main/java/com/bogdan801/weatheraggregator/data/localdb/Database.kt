@@ -9,7 +9,8 @@ import com.bogdan801.weatheraggregator.data.localdb.entities.WeatherSliceEntity
 
 @Database(
     entities = [WeatherSliceEntity::class, DayWeatherEntity::class, WeatherDataEntity::class, LocationEntity::class],
-    version = 2
+    exportSchema = true,
+    version = 3
 )
 abstract class Database: RoomDatabase() {
     abstract val dbDao: Dao

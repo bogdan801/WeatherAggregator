@@ -79,10 +79,10 @@ interface Dao {
     @Query("SELECT DISTINCT oblastName FROM locationentity")
     suspend fun getOblastList(): List<String>
 
-    @Query("SELECT DISTINCT regionName FROM locationentity WHERE oblastName == :oblastName ORDER BY regionName ASC")
+    @Query("SELECT DISTINCT regionName FROM locationentity WHERE oblastName == :oblastName")
     suspend fun getOblastRegionList(oblastName: String): List<String>
 
-    @Query("SELECT DISTINCT name FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName ORDER BY regionName ASC")
+    @Query("SELECT DISTINCT name FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName")
     suspend fun getLocationsList(oblastName: String, regionName: String): List<String>
 
     @Query("SELECT * FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName AND name == :townName")
