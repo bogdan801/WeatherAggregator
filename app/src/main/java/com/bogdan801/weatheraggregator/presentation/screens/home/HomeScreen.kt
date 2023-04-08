@@ -57,12 +57,13 @@ fun HomeScreen(
 
     BottomSheetLayout(
         modifier = Modifier.fillMaxSize(),
-        sheetContent = { _, _ ->
-            Box(
+        sheetContent = { sheetState, _ ->
+            SelectLocationSheet(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
-                    .background(MaterialTheme.colors.onPrimary)
+                    .height(500.dp)
+                    .background(MaterialTheme.colors.onPrimary),
+                sheetState = sheetState
             )
         }
     ) { sheetState, _, _ ->
