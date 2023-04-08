@@ -14,14 +14,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun BottomSheetLayout(
     modifier: Modifier = Modifier,
@@ -29,15 +33,19 @@ fun BottomSheetLayout(
     backgroundColor: Color = MaterialTheme.colors.background,
     sheetPeekHeight: Dp = 0.dp,
     sheetElevation: Dp = 20.dp,
-    sheetShape: Shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
+    roundCorners: Boolean = true,
+    sheetShape: Shape = if(roundCorners) MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)) else RectangleShape,
     scrimAlpha: Float = 0.2f,
     scrimColor: Color = MaterialTheme.colors.onSurface,
     content: @Composable (sheetState: BottomSheetState, expansionFraction: Float, scaffoldState: BottomSheetScaffoldState) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
     val sheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState, drawerState = drawerState)
+    val focusManager = LocalFocusManager.current
+
 
     val expansionFraction = when{
         sheetState.progress.from == BottomSheetValue.Collapsed && sheetState.progress.to == BottomSheetValue.Expanded -> sheetState.progress.fraction
@@ -50,7 +58,16 @@ fun BottomSheetLayout(
         BackHandler(enabled = true) {
             scope.launch {
                 sheetState.collapse()
+                keyboardController?.hide()
+                focusManager.clearFocus()
             }
+        }
+    }
+
+    LaunchedEffect(key1 = sheetState.isExpanded){
+        if(!sheetState.isExpanded){
+            keyboardController?.hide()
+            focusManager.clearFocus()
         }
     }
 

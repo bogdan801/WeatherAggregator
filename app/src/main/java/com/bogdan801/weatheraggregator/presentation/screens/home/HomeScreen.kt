@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
@@ -63,9 +64,13 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .height(500.dp)
                     .background(MaterialTheme.colors.onPrimary),
-                sheetState = sheetState
+                sheetState = sheetState,
+                onLocationSelected = {
+                    Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+                }
             )
-        }
+        },
+        roundCorners = isPortrait
     ) { sheetState, _, _ ->
         //states for animated theme transition
         val imageState = remember { mutableStateOf<ImageBitmap?>(null) }
