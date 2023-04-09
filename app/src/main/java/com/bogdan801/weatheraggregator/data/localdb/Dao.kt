@@ -87,4 +87,19 @@ interface Dao {
 
     @Query("SELECT * FROM locationentity WHERE oblastName == :oblastName AND regionName == :regionName AND name == :townName")
     suspend fun getLocationEntity(oblastName: String, regionName: String, townName: String): List<LocationEntity>
+
+    @Query("SELECT DISTINCT oblastName FROM LocationEntity WHERE oblastName LIKE '%' || :prompt || '%'")
+    suspend fun searchOblasts(prompt: String): List<String>
+
+    @Query("SELECT * FROM LocationEntity le " +
+            "INNER JOIN (" +
+            "  SELECT DISTINCT regionName, oblastName, MIN(locationID) AS locationID " +
+            "  FROM LocationEntity " +
+            "  WHERE regionName LIKE '%' || :prompt || '%' " +
+            "  GROUP BY regionName, oblastName " +
+            ") subquery ON le.locationID = subquery.locationID")
+    suspend fun searchRegions(prompt: String): List<LocationEntity>
+
+    @Query("SELECT * FROM LocationEntity WHERE name LIKE '%' || :prompt || '%' ORDER BY LENGTH(name) ASC")
+    suspend fun searchLocations(prompt: String): List<LocationEntity>
 }

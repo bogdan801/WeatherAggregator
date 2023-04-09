@@ -1,10 +1,10 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
-import android.location.Location
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bogdan801.weatheraggregator.domain.model.Location
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,13 +17,52 @@ class SelectLocationViewModel
 constructor(
     val repository: Repository
 ): ViewModel() {
+    //SEARCH
     private val _searchBarText = mutableStateOf("")
     val searchBarText: State<String> = _searchBarText
 
-    fun searchBarTextChanged(newText: String){
-        _searchBarText.value = newText
+    private val _foundOblasts = mutableStateOf(listOf<Location>())
+    val foundOblasts: State<List<Location>> = _foundOblasts
+
+    private val _foundRegions = mutableStateOf(listOf<Location>())
+    val foundRegions: State<List<Location>> = _foundRegions
+
+    private val _foundLocations = mutableStateOf(listOf<Location>())
+    val foundLocations: State<List<Location>> = _foundLocations
+
+    private fun searchOblasts(prompt: String){
+        viewModelScope.launch {
+            _foundOblasts.value = repository.searchOblasts(prompt)
+        }
     }
 
+    private fun searchRegions(prompt: String){
+        viewModelScope.launch {
+            _foundRegions.value = repository.searchRegions(prompt)
+        }
+    }
+
+    private fun searchLocations(prompt: String){
+        viewModelScope.launch {
+            _foundLocations.value = repository.searchLocations(prompt)
+        }
+    }
+
+    fun searchBarTextChanged(newText: String){
+        _searchBarText.value = newText
+
+        _foundOblasts.value = listOf()
+        _foundRegions.value = listOf()
+        _foundLocations.value = listOf()
+
+        if(newText.isNotBlank()){
+            searchOblasts(newText)
+            if(newText.length > 1) searchRegions(newText)
+            if(newText.length > 2) searchLocations(newText)
+        }
+    }
+
+    //SELECTION
     private val _path = mutableStateOf(listOf("Україна"))
     val path: State<List<String>> = _path
 
@@ -32,12 +71,14 @@ constructor(
 
     fun displayOblastList(){
         _path.value = listOf(_path.value[0])
+        _searchBarText.value = ""
         viewModelScope.launch {
             _selectionDisplayList.value = repository.getOblastList()
         }
     }
 
     fun selectOblast(oblastName: String){
+        _searchBarText.value = ""
         _path.value = listOf(_path.value[0], oblastName)
         viewModelScope.launch {
             _selectionDisplayList.value = repository.getOblastRegionList(oblastName)
@@ -45,13 +86,19 @@ constructor(
     }
 
     fun selectRegion(oblastName: String, regionName:String){
+        _searchBarText.value = ""
         _path.value = listOf(_path.value[0], oblastName, regionName)
         viewModelScope.launch {
             _selectionDisplayList.value = repository.getLocationsList(oblastName, regionName)
         }
     }
 
-    fun selectLocation(name: String) = runBlocking { return@runBlocking repository.getLocation(path.value[1], path.value[2], name)[0] }
+    fun selectLocation(oblastName: String, regionName:String, name: String) = runBlocking {
+        displayOblastList()
+        return@runBlocking repository.getLocation(oblastName, regionName, name)[0]
+    }
+
+
 
     init {
         viewModelScope.launch {

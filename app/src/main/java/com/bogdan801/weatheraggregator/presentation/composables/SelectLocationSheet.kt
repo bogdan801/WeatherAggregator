@@ -9,8 +9,11 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -21,7 +24,7 @@ import com.bogdan801.weatheraggregator.presentation.screens.home.SelectLocationV
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SelectLocationSheet(
     modifier: Modifier = Modifier,
@@ -30,6 +33,14 @@ fun SelectLocationSheet(
     onLocationSelected: (Location) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(key1 = sheetState.isExpanded){
+        if(!sheetState.isExpanded){
+            viewModel.displayOblastList()
+        }
+    }
 
     Column(modifier = modifier){
         Row(
@@ -82,6 +93,9 @@ fun SelectLocationSheet(
             }
         }
 
+
+        val lazyColumnState = rememberLazyListState()
+        val lazyRowState = rememberLazyListState()
         AnimatedContent(
             targetState = viewModel.searchBarText.value.isBlank(),
             transitionSpec = {
@@ -90,8 +104,6 @@ fun SelectLocationSheet(
         ) { showSelection ->
             Column(modifier = Modifier.fillMaxSize()) {
                 if(showSelection){
-                    val lazyColumnState = rememberLazyListState()
-                    val lazyRowState = rememberLazyListState()
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,7 +176,10 @@ fun SelectLocationSheet(
                                                 }
                                             }
                                             2 -> {
-                                                viewModel.selectRegion(viewModel.path.value[1], settlement)
+                                                viewModel.selectRegion(
+                                                    viewModel.path.value[1],
+                                                    settlement
+                                                )
                                                 scope.launch {
                                                     lazyColumnState.scrollToItem(0)
                                                     delay(100)
@@ -172,7 +187,18 @@ fun SelectLocationSheet(
                                                 }
                                             }
                                             3 -> {
-                                                onLocationSelected(viewModel.selectLocation(settlement))
+                                                onLocationSelected(
+                                                    viewModel.selectLocation(
+                                                        viewModel.path.value[1],
+                                                        viewModel.path.value[2],
+                                                        settlement
+                                                    )
+                                                )
+                                                scope.launch {
+                                                    delay(100)
+                                                    lazyColumnState.scrollToItem(0)
+                                                    lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                                }
                                             }
                                         }
                                     },
@@ -187,7 +213,140 @@ fun SelectLocationSheet(
                         }
                     }
                 }
+                else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()){
+                        items(viewModel.foundLocations.value){ location ->
+                            FoundItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp),
+                                data = location,
+                                onItemSelected = {
+                                    onLocationSelected(
+                                        viewModel.selectLocation(
+                                            location.oblastName,
+                                            location.regionName,
+                                            location.name
+                                        )
+                                    )
+                                    scope.launch {
+                                        delay(100)
+                                        lazyColumnState.scrollToItem(0)
+                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                    }
+                                }
+                            )
+                        }
+                        items(viewModel.foundRegions.value){ region ->
+                            FoundItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp),
+                                data = region,
+                                onItemSelected = {
+                                    viewModel.selectRegion(region.oblastName, region.regionName)
+                                    scope.launch {
+                                        delay(100)
+                                        lazyColumnState.scrollToItem(0)
+                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                    }
+                                }
+                            )
+                        }
+                        items(viewModel.foundOblasts.value){ oblast ->
+                            FoundItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp),
+                                data = oblast,
+                                onItemSelected = {
+                                    viewModel.selectOblast(oblast.oblastName)
+                                    scope.launch {
+                                        delay(100)
+                                        lazyColumnState.scrollToItem(0)
+                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+fun FoundItem(
+    modifier: Modifier = Modifier,
+    data: Location,
+    onItemSelected: () -> Unit = {}
+) {
+    Column(modifier = modifier.clickable { onItemSelected() }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(MaterialTheme.colors.primary.copy(0.3f))
+        )
+        LazyRow(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            if(data.name.isNotBlank()){
+                item {
+                    Text(
+                        text = data.name,
+                        color = MaterialTheme.colors.onSurface,
+                        style = MaterialTheme.typography.h5
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        modifier = Modifier
+                            .size(13.dp)
+                            .rotate(90f),
+                        painter = painterResource(id = R.drawable.ic_expand),
+                        contentDescription = "",
+                        tint = MaterialTheme.colors.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+            }
+            if(data.regionName.isNotBlank()){
+                item {
+                    Text(
+                        text = data.regionName + " район",
+                        color = MaterialTheme.colors.onSurface,
+                        style = MaterialTheme.typography.h5
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        modifier = Modifier
+                            .size(13.dp)
+                            .rotate(90f),
+                        painter = painterResource(id = R.drawable.ic_expand),
+                        contentDescription = "",
+                        tint = MaterialTheme.colors.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+            }
+            item {
+                Text(
+                    text = data.oblastName + if(data.oblastName != "Автономна Республіка Крим") " область" else "",
+                    color = MaterialTheme.colors.onSurface,
+                    style = MaterialTheme.typography.h5
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(MaterialTheme.colors.primary.copy(0.3f))
+        )
     }
 }

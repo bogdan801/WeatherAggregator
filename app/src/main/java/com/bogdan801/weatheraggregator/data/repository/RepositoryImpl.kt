@@ -98,6 +98,19 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         townName: String
     ) = dao.getLocationEntity(oblastName, regionName, townName).map { it.toLocation() }
 
+    override suspend fun searchOblasts(prompt: String): List<Location> =
+        dao.searchOblasts(prompt).map {
+            Location("", "", "", "", it, -1.0, -1.0)
+        }
+
+    override suspend fun searchRegions(prompt: String): List<Location> =
+        dao.searchRegions(prompt).map { locationEntity ->
+            Location("", "", "", locationEntity.regionName, locationEntity.oblastName, -1.0, -1.0)
+        }
+
+    override suspend fun searchLocations(prompt: String): List<Location> =
+        dao.searchLocations(prompt).map { it.toLocation() }
+
     //NETWORK
     override suspend fun getWeatherDataFromNetwork(
         domain: WeatherSourceDomain,
