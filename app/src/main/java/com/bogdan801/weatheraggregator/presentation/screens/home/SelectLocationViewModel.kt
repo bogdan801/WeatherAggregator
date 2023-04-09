@@ -98,8 +98,6 @@ constructor(
         return@runBlocking repository.getLocation(oblastName, regionName, name)[0]
     }
 
-
-
     init {
         viewModelScope.launch {
             _selectionDisplayList.value = repository.getOblastList()
