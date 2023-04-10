@@ -94,8 +94,6 @@ fun SelectLocationSheet(
         }
 
 
-        val lazyColumnState = rememberLazyListState()
-        val lazyRowState = rememberLazyListState()
         AnimatedContent(
             targetState = viewModel.searchBarText.value.isBlank(),
             transitionSpec = {
@@ -108,7 +106,7 @@ fun SelectLocationSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(32.dp),
-                        state = lazyRowState,
+                        state = viewModel.lazyRowState,
                         contentPadding = PaddingValues(horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ){
@@ -121,7 +119,10 @@ fun SelectLocationSheet(
                                             1 -> viewModel.selectOblast(name)
                                             2 -> viewModel.selectRegion(viewModel.path.value[1], name)
                                         }
-                                        scope.launch { lazyColumnState.scrollToItem(0) }
+                                        scope.launch {
+                                            delay(200)
+                                            viewModel.lazyColumnState.scrollToItem(0)
+                                        }
                                     },
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
@@ -158,7 +159,7 @@ fun SelectLocationSheet(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        state = lazyColumnState
+                        state = viewModel.lazyColumnState
                     ){
                         items(viewModel.selectionDisplayList.value){ settlement ->
                             Box(
@@ -169,22 +170,12 @@ fun SelectLocationSheet(
                                         when (viewModel.path.value.size) {
                                             1 -> {
                                                 viewModel.selectOblast(settlement)
-                                                scope.launch {
-                                                    lazyColumnState.scrollToItem(0)
-                                                    delay(100)
-                                                    lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
-                                                }
                                             }
                                             2 -> {
                                                 viewModel.selectRegion(
                                                     viewModel.path.value[1],
                                                     settlement
                                                 )
-                                                scope.launch {
-                                                    lazyColumnState.scrollToItem(0)
-                                                    delay(100)
-                                                    lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
-                                                }
                                             }
                                             3 -> {
                                                 onLocationSelected(
@@ -194,11 +185,6 @@ fun SelectLocationSheet(
                                                         settlement
                                                     )
                                                 )
-                                                scope.launch {
-                                                    delay(100)
-                                                    lazyColumnState.scrollToItem(0)
-                                                    lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
-                                                }
                                             }
                                         }
                                     },
@@ -231,8 +217,8 @@ fun SelectLocationSheet(
                                     )
                                     scope.launch {
                                         delay(100)
-                                        lazyColumnState.scrollToItem(0)
-                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                        viewModel.lazyColumnState.scrollToItem(0)
+                                        viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
                                         keyboardController?.hide()
                                         focusManager.clearFocus()
                                     }
@@ -249,8 +235,8 @@ fun SelectLocationSheet(
                                     viewModel.selectRegion(region.oblastName, region.regionName)
                                     scope.launch {
                                         delay(100)
-                                        lazyColumnState.scrollToItem(0)
-                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                        viewModel.lazyColumnState.scrollToItem(0)
+                                        viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
                                     }
                                 }
                             )
@@ -265,8 +251,8 @@ fun SelectLocationSheet(
                                     viewModel.selectOblast(oblast.oblastName)
                                     scope.launch {
                                         delay(100)
-                                        lazyColumnState.scrollToItem(0)
-                                        lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                        viewModel.lazyColumnState.scrollToItem(0)
+                                        viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
                                     }
                                 }
                             )

@@ -2,7 +2,6 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
@@ -59,16 +58,32 @@ fun HomeScreen(
     BottomSheetLayout(
         modifier = Modifier.fillMaxSize(),
         sheetContent = { sheetState, _ ->
-            SelectLocationSheet(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(500.dp)
-                    .background(MaterialTheme.colors.onPrimary),
-                sheetState = sheetState,
-                onLocationSelected = {
-                    Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+            if(viewModel.showSelectLocationSheet.value) {
+                SelectLocationSheet(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(500.dp)
+                        .background(MaterialTheme.colors.onPrimary),
+                    sheetState = sheetState,
+                    onLocationSelected = { selectedLocation ->
+                        viewModel.setTemporaryLocation(selectedLocation)
+                        viewModel.openSelectLocationSheet(false)
+                    }
+                )
+            }
+            else {
+                BackHandler(enabled = true) {
+                    viewModel.openSelectLocationSheet(true)
                 }
-            )
+                SelectDataSourcesSheet(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(500.dp)
+                        .background(MaterialTheme.colors.onPrimary),
+                    location = viewModel.tempLocation.value,
+                    onSourcesSelected = {}
+                )
+            }
         },
         roundCorners = isPortrait
     ) { sheetState, _, _ ->
@@ -125,8 +140,9 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         themeState = viewModel.themeState,
                         onChangeLocationClick = {
+                            viewModel.openSelectLocationSheet(true)
                             scope.launch {
-                                sheetState.expand()
+                                if(!sheetState.isExpanded) sheetState.expand()
                             }
                         },
                         getIconCoordinates = { coordinates ->

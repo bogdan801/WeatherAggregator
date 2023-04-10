@@ -32,6 +32,22 @@ constructor(
         }
     }
 
+    //bottom sheet control
+    private val _tempLocation = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
+    val tempLocation: State<Location>  = _tempLocation
+
+    fun setTemporaryLocation(location: Location){
+        _tempLocation.value = location
+    }
+
+    private val _showSelectLocationSheet = mutableStateOf(true)
+    val showSelectLocationSheet: State<Boolean>  = _showSelectLocationSheet
+
+    fun openSelectLocationSheet(value: Boolean){
+        _showSelectLocationSheet.value = value
+    }
+
+
     //location
     private val allLocations: List<Oblast> = listOf()
 
