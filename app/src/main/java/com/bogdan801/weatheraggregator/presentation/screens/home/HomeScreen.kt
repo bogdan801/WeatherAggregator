@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
@@ -81,7 +82,9 @@ fun HomeScreen(
                         .height(500.dp)
                         .background(MaterialTheme.colors.onPrimary),
                     location = viewModel.tempLocation.value,
-                    onSourcesSelected = {}
+                    onSourcesSelected = {
+                        Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+                    }
                 )
             }
         },
