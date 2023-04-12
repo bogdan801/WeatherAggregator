@@ -8,6 +8,6 @@ sealed class WeatherDataState(
     val error: String? = null
 ){
     data class Data(val d: WeatherData): WeatherDataState(d, false, null)
-    data class IsLoading(val d: WeatherData): WeatherDataState(d, true, null)
+    data class IsLoading(val d: WeatherData = WeatherData()): WeatherDataState(d, true, null)
     data class Error(val d: WeatherData, val message: String): WeatherDataState(d, false, message)
 }

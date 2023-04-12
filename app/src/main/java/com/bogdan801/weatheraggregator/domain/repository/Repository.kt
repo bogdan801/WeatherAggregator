@@ -20,7 +20,7 @@ interface Repository {
 
     //select
     fun getAllWeatherDataFromCache(): Flow<List<WeatherData>>
-    fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData>
+    suspend fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData>
     suspend fun getOblastList(): List<String>
     suspend fun getOblastRegionList(oblastName: String): List<String>
     suspend fun getLocationsList(oblastName: String, regionName: String): List<String>

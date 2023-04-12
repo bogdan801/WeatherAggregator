@@ -28,7 +28,6 @@ fun TrustLevelsSelector(
     onLevelChanged: (List<Double>) -> Unit
 ) {
     val density = LocalDensity.current
-    val listWithoutAverage = dataStateList.subList(1, dataStateList.lastIndex+1)
     BoxWithConstraints(modifier = modifier) {
         val wholeWidth = maxWidth
 
@@ -61,7 +60,7 @@ fun TrustLevelsSelector(
             .fillMaxSize()
             .clip(MaterialTheme.shapes.small)
         ) {
-            listWithoutAverage.forEachIndexed { index, weatherDataState ->
+            dataStateList.forEachIndexed { index, weatherDataState ->
                 Column(
                     modifier = Modifier
                         .background(

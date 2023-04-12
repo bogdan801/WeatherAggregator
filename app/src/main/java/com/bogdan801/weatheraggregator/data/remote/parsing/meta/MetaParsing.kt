@@ -4,6 +4,8 @@ import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.jsoup.HttpStatusException
@@ -11,7 +13,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 import java.net.UnknownHostException
 
-fun getWeatherDataFromMeta(location: Location): WeatherData {
+suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContext(Dispatchers.IO)  {
     val baseUrl = "https://pogoda.meta.ua"
     val url = baseUrl + location.metaLink
 
@@ -81,7 +83,7 @@ fun getWeatherDataFromMeta(location: Location): WeatherData {
             )
         }
 
-        return WeatherData(
+        return@withContext WeatherData(
             currentDate = currentDate,
             currentLocation = currentLocation,
             domain = domain,
@@ -99,7 +101,7 @@ fun getWeatherDataFromMeta(location: Location): WeatherData {
     }
 }
 
-private fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
+private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
     val parts = metaDescriptor.split("-")
     if(parts.size != 3) throw Exception("Invalid Meta sky descriptor: $metaDescriptor")
 

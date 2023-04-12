@@ -8,9 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.bogdan801.weatheraggregator.data.datastore.saveIntToDataStore
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import com.bogdan801.weatheraggregator.domain.usecase.GetAverageWeatherDataUseCase
+import com.bogdan801.weatheraggregator.domain.usecase.GetWeatherDataUseCase
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableList
 import javax.inject.Inject
@@ -21,6 +27,8 @@ class HomeScreenViewModel
 constructor(
     private val repository: Repository,
     private val theme: MutableState<Theme>,
+    val getDataUseCase: GetWeatherDataUseCase,
+    val getAverageUseCase: GetAverageWeatherDataUseCase,
     handle: SavedStateHandle
 ): ViewModel() {
     //theme handling
@@ -32,7 +40,7 @@ constructor(
         }
     }
 
-    //bottom sheet control
+    //bottom sheet control and location
     private val _tempLocation = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
     val tempLocation: State<Location>  = _tempLocation
 
@@ -47,10 +55,6 @@ constructor(
         _showSelectLocationSheet.value = value
     }
 
-
-    //location
-    private val allLocations: List<Oblast> = listOf()
-
     private val _selectedLocationState = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
     val selectedLocationState: State<Location>  = _selectedLocationState
 
@@ -59,10 +63,34 @@ constructor(
     }
 
     //data selection
+    private val jobs = mutableListOf<Job>()
+
     private val _dataListState = mutableStateListOf<WeatherDataState>()
     val dataListState: List<WeatherDataState>  = _dataListState
 
-    val averageData = WeatherDataState.Data(WeatherData())
+    fun setNewDataList(location: Location, domains: List<WeatherSourceDomain>) {
+        selectNewLocation(location)
+        jobs.forEach{ job ->
+            job.cancel()
+        }
+
+        jobs.clear()
+        _dataListState.clear()
+
+        domains.forEachIndexed{ id, domain ->
+            _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain)))
+
+            jobs.add(
+                viewModelScope.launch {
+                    getDataUseCase(location, domain).collect { newDataState ->
+                        _dataListState[id] = newDataState
+                    }
+                }
+            )
+        }
+    }
+
+    val averageData = WeatherDataState.Data(WeatherData(domain = WeatherSourceDomain.Average))
 
     private val _selectedDataIndexState = mutableStateOf(0)
     val selectedDataIndexState: State<Int> = _selectedDataIndexState
@@ -80,7 +108,7 @@ constructor(
     //day selection
     private val _selectedDayState = mutableStateOf(0)
     val selectedDayState: State<Int> = _selectedDayState
-    val selectedDay get() = currentData.weatherByDates[_selectedDayState.value]
+    val selectedDay get() = if(currentData.weatherByDates.isNotEmpty()) currentData.weatherByDates[_selectedDayState.value] else DayWeatherCondition()
 
     fun setSelectedDay(index: Int, slideRight: (Boolean) -> Unit = {}){
         if(selectedDayState.value > index){
@@ -96,11 +124,15 @@ constructor(
     //loading
     private val _isLoadingState = mutableStateOf(false)
     val isLoadingState: State<Boolean> = _isLoadingState
-    fun updateWeatherData(){
+
+    private val _isRefreshingState = mutableStateOf(false)
+    val isRefreshingState: State<Boolean> = _isRefreshingState
+
+    fun refreshAllWeatherData(){
         viewModelScope.launch {
-            _isLoadingState.value = true
+            _isRefreshingState.value = true
             delay(3000)
-            _isLoadingState.value = false
+            _isRefreshingState.value = false
         }
     }
 
@@ -138,6 +170,8 @@ constructor(
     fun deleteSelectedData(){
 
     }
+
+
 
 
     init {

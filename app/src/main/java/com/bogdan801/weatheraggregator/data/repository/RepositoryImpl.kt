@@ -78,7 +78,7 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         }
     }
 
-    override fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData> = dao.getWeatherDataEntityByDomain(domain.ordinal).map { junction ->
+    override suspend fun getWeatherDataByDomain(domain: WeatherSourceDomain): Flow<WeatherData> = dao.getWeatherDataEntityByDomain(domain.ordinal).map { junction ->
         junction?.toWeatherData()?.apply {
             this.weatherByDates.forEach { day ->
                 day.weatherByHours = dao.getAllSliceEntitiesForAGivenDayID(day.dayID).map { entity -> entity.toWeatherSlice() }

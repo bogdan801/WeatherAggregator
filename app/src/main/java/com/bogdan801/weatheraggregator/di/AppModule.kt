@@ -11,6 +11,8 @@ import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.data.repository.RepositoryImpl
 import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import com.bogdan801.weatheraggregator.domain.usecase.GetAverageWeatherDataUseCase
+import com.bogdan801.weatheraggregator.domain.usecase.GetWeatherDataUseCase
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.Module
 import dagger.Provides
@@ -77,4 +79,12 @@ object AppModule {
 
         return mutableStateOf(theme)
     }
+
+    @Provides
+    @Singleton
+    fun provideGetWeatherDataUseCase(repository: Repository): GetWeatherDataUseCase = GetWeatherDataUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetAverageWeatherDataUseCase(): GetAverageWeatherDataUseCase = GetAverageWeatherDataUseCase()
 }

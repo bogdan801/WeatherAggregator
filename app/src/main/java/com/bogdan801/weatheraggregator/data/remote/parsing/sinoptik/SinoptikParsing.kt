@@ -2,9 +2,10 @@ package com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik
 
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
-
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.jsoup.HttpStatusException
@@ -13,8 +14,8 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import java.net.UnknownHostException
 
-fun getWeatherDataFromSinoptik(location: Location): WeatherData {
-    val url = "https:" + location.sinoptikLink
+suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withContext(Dispatchers.IO) {
+    val url = "https://ua.sinoptik.ua/" + location.sinoptikLink
 
     try {
         val baseDocument = Jsoup
@@ -98,7 +99,7 @@ fun getWeatherDataFromSinoptik(location: Location): WeatherData {
             )
         }
 
-        return WeatherData(
+        return@withContext WeatherData(
             currentDate = currentDate,
             currentLocation = currentLocation,
             domain = domain,
@@ -117,7 +118,7 @@ fun getWeatherDataFromSinoptik(location: Location): WeatherData {
 
 }
 
-private fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): SkyCondition {
+private suspend fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): SkyCondition {
     if(sinoptikDescriptor.length != 4) throw Exception("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
     if(sinoptikDescriptor[0] != 'd' && sinoptikDescriptor[0] != 'n') throw Exception("Invalid Sinoptik sky descriptor: '${sinoptikDescriptor[0]}'")
     if(sinoptikDescriptor.filter { it.isDigit() }.length != 3) throw Exception("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")

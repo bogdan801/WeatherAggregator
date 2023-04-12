@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -56,6 +57,15 @@ fun HomeScreen(
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
 
+
+    LaunchedEffect(key1 = viewModel.dataListState){
+        viewModel.dataListState.forEach { state ->
+            Log.d("puk", state.toString())
+        }
+        Log.d("puk", "----------------------------")
+    }
+
+
     BottomSheetLayout(
         modifier = Modifier.fillMaxSize(),
         sheetContent = { sheetState, _ ->
@@ -82,8 +92,11 @@ fun HomeScreen(
                         .height(500.dp)
                         .background(MaterialTheme.colors.onPrimary),
                     location = viewModel.tempLocation.value,
-                    onSourcesSelected = {
-                        Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+                    onSourcesSelected = { selectedDomains ->
+                        scope.launch { sheetState.collapse() }
+                        viewModel.openSelectLocationSheet(true)
+                        viewModel.setNewDataList(viewModel.tempLocation.value, selectedDomains)
+                        Toast.makeText(context, selectedDomains.toString(), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -117,10 +130,10 @@ fun HomeScreen(
                 }
             }
 
-            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoadingState.value)
+            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isRefreshingState.value)
             SwipeRefresh(
                 state = swipeRefreshState,
-                onRefresh = viewModel::updateWeatherData,
+                onRefresh = viewModel::refreshAllWeatherData,
                 indicator = { state, refreshTrigger ->
                     SwipeRefreshIndicator(
                         state = state,
@@ -329,7 +342,7 @@ fun HomeScreen(
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
                                         }
-                                        (1..viewModel.dataListState.lastIndex).forEach { index ->
+                                        viewModel.dataListState.indices.forEach { index ->
                                             item {
                                                 DataSourceCard(
                                                     modifier = Modifier
