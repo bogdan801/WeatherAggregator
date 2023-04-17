@@ -1,11 +1,13 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.*
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.bogdan801.weatheraggregator.data.datastore.readStringFromDataStore
 import com.bogdan801.weatheraggregator.data.datastore.saveIntToDataStore
+import com.bogdan801.weatheraggregator.data.datastore.saveStringToDataStore
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.domain.usecase.GetAverageWeatherDataUseCase
@@ -14,12 +16,10 @@ import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableList
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class HomeScreenViewModel
@@ -29,8 +29,12 @@ constructor(
     private val theme: MutableState<Theme>,
     val getDataUseCase: GetWeatherDataUseCase,
     val getAverageUseCase: GetAverageWeatherDataUseCase,
-    handle: SavedStateHandle
-): ViewModel() {
+    application: Application
+): AndroidViewModel(application) {
+    //context
+    private val context
+        get() = getApplication<Application>()
+
     //theme handling
     val themeState: State<Theme> = theme
     fun setTheme(ordinal: Int, context: Context){
@@ -44,6 +48,13 @@ constructor(
     private val _tempLocation = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
     val tempLocation: State<Location>  = _tempLocation
 
+    private val _blockBackPressOnLocationsSelection = mutableStateOf(true)
+    val blockBackPressOnLocationsSelection: State<Boolean>  = _blockBackPressOnLocationsSelection
+
+    fun setBlockBackPressOnLocationsSelection(value: Boolean){
+        _blockBackPressOnLocationsSelection.value = value
+    }
+
     fun setTemporaryLocation(location: Location){
         _tempLocation.value = location
     }
@@ -56,11 +67,8 @@ constructor(
     }
 
     private val _selectedLocationState = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
-    val selectedLocationState: State<Location>  = _selectedLocationState
+    val selectedLocation: State<Location>  = _selectedLocationState
 
-    fun selectNewLocation(newLocation: Location){
-        _selectedLocationState.value = newLocation
-    }
 
     //data selection
     private val jobs = mutableListOf<Job>()
@@ -68,14 +76,18 @@ constructor(
     private val _dataListState = mutableStateListOf<WeatherDataState>()
     val dataListState: List<WeatherDataState>  = _dataListState
 
-    fun setNewDataList(location: Location, domains: List<WeatherSourceDomain>) {
-        selectNewLocation(location)
+    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, ) {
+        _selectedLocationState.value = location
+        viewModelScope.launch { context.saveStringToDataStore("location", location.toString()) }
+
         jobs.forEach{ job ->
             job.cancel()
         }
 
         jobs.clear()
         _dataListState.clear()
+
+        setTrustLevels(List(domains.size) { 1 / domains.size.toDouble() })
 
         domains.forEachIndexed{ id, domain ->
             _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain)))
@@ -90,7 +102,17 @@ constructor(
         }
     }
 
-    val averageData = WeatherDataState.Data(WeatherData(domain = WeatherSourceDomain.Average))
+    //trust levels
+    private val _trustLevels = mutableStateOf(listOf(1.0/3, 1.0/3, 1.0/3))
+    val trustLevels: State<List<Double>> = _trustLevels
+    fun setTrustLevels(newTrustLevels: List<Double>){
+        _trustLevels.value = newTrustLevels
+    }
+
+    //average
+    val averageData by derivedStateOf {
+        WeatherDataState.Data(getAverageUseCase(dataList = _dataListState.map { it.data }, trustLevels = _trustLevels.value))
+    }
 
     private val _selectedDataIndexState = mutableStateOf(0)
     val selectedDataIndexState: State<Int> = _selectedDataIndexState
@@ -131,17 +153,10 @@ constructor(
     fun refreshAllWeatherData(){
         viewModelScope.launch {
             _isRefreshingState.value = true
-            delay(3000)
+            delay(1.seconds)
+            setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain })
             _isRefreshingState.value = false
         }
-    }
-
-
-    //trust levels
-    private val _trustLevels = mutableStateOf(listOf(1.0/3, 1.0/3, 1.0/3))
-    val trustLevels: State<List<Double>> = _trustLevels
-    fun setTrustLevels(newTrustLevels: List<Double>){
-        _trustLevels.value = newTrustLevels
     }
 
     //selected data cards
@@ -172,10 +187,12 @@ constructor(
     }
 
 
-
-
     init {
-
-
+        viewModelScope.launch {
+            val cachedLocation = Location.fromString(context.readStringFromDataStore("location"))
+            if(cachedLocation != null){
+                setupDataFlows(location = cachedLocation, domains = repository.getCachedDomains())
+            }
+        }
     }
 }

@@ -2,7 +2,6 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -57,18 +56,13 @@ fun HomeScreen(
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
 
-
-    LaunchedEffect(key1 = viewModel.dataListState){
-        viewModel.dataListState.forEach { state ->
-            Log.d("puk", state.toString())
-        }
-        Log.d("puk", "----------------------------")
-    }
-
-
     BottomSheetLayout(
         modifier = Modifier.fillMaxSize(),
         sheetContent = { sheetState, _ ->
+            LaunchedEffect(key1 = sheetState.isExpanded) {
+                if(!sheetState.isExpanded) viewModel.openSelectLocationSheet(true)
+            }
+
             if(viewModel.showSelectLocationSheet.value) {
                 SelectLocationSheet(
                     modifier = Modifier
@@ -78,13 +72,16 @@ fun HomeScreen(
                     sheetState = sheetState,
                     onLocationSelected = { selectedLocation ->
                         viewModel.setTemporaryLocation(selectedLocation)
+                        viewModel.setBlockBackPressOnLocationsSelection(false)
                         viewModel.openSelectLocationSheet(false)
                     }
                 )
             }
             else {
-                BackHandler(enabled = true) {
-                    viewModel.openSelectLocationSheet(true)
+                if(!viewModel.blockBackPressOnLocationsSelection.value){
+                    BackHandler(enabled = true) {
+                        viewModel.openSelectLocationSheet(true)
+                    }
                 }
                 SelectDataSourcesSheet(
                     modifier = Modifier
@@ -95,8 +92,8 @@ fun HomeScreen(
                     onSourcesSelected = { selectedDomains ->
                         scope.launch { sheetState.collapse() }
                         viewModel.openSelectLocationSheet(true)
-                        viewModel.setNewDataList(viewModel.tempLocation.value, selectedDomains)
-                        Toast.makeText(context, selectedDomains.toString(), Toast.LENGTH_SHORT).show()
+                        viewModel.setupDataFlows(viewModel.tempLocation.value, selectedDomains)
+                        viewModel.setBlockBackPressOnLocationsSelection(true)
                     }
                 )
             }
@@ -214,7 +211,8 @@ fun HomeScreen(
                                         firstPart = {
                                             WeatherOverview(
                                                 modifier = Modifier.fillMaxSize(),
-                                                selectedDay = viewModel.selectedDay
+                                                selectedDay = viewModel.selectedDay,
+                                                locationName = viewModel.selectedLocation.value.name + ",\nUkraine"
                                             )
                                         },
                                         secondPart = {
@@ -338,7 +336,13 @@ fun HomeScreen(
                                                     .fillMaxWidth()
                                                     .padding(horizontal = 16.dp),
                                                 action = if(viewModel.cardsSelected) HeaderAction.Delete else HeaderAction.Add,
-                                                onActionClick = {}
+                                                onActionClick = {
+                                                    viewModel.setTemporaryLocation(viewModel.selectedLocation.value)
+                                                    viewModel.openSelectLocationSheet(false)
+                                                    scope.launch {
+                                                        if(!sheetState.isExpanded) sheetState.expand()
+                                                    }
+                                                }
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
                                         }

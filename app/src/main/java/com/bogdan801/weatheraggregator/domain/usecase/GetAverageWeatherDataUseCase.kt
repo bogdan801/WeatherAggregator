@@ -6,8 +6,8 @@ import kotlin.math.roundToInt
 
 class GetAverageWeatherDataUseCase {
     operator fun invoke(dataList: List<WeatherData>, trustLevels: List<Double>): WeatherData{
-        if(dataList.isEmpty()) return WeatherData()
-        if(dataList.size != trustLevels.size) return WeatherData()
+        if(dataList.isEmpty()) return WeatherData(domain = WeatherSourceDomain.Average)
+        if(dataList.size != trustLevels.size) return WeatherData(domain = WeatherSourceDomain.Average)
 
         val sum = trustLevels.sum()
         val normalizedTrustLevels = trustLevels.map { it/sum }

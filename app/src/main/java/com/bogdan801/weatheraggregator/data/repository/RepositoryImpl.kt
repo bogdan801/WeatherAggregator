@@ -11,6 +11,7 @@ import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.net.UnknownHostException
 
@@ -85,6 +86,8 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
             }
         } ?: WeatherData()
     }
+
+    override suspend fun getCachedDomains() = dao.getAllWeatherDataEntities().first().map { WeatherSourceDomain.values()[it.domain] }
 
     override suspend fun getOblastList() = dao.getOblastList()
 

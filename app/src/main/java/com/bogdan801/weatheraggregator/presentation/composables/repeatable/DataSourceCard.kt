@@ -49,6 +49,8 @@ fun DataSourceCard(
 
     Box(modifier = modifier
         .combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
             onClick = { onTap(isSelected) },
             onLongClick = { onLongPress(isSelected) },
         )
