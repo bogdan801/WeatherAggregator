@@ -30,31 +30,45 @@ fun TrustLevelsSelector(
     val density = LocalDensity.current
     BoxWithConstraints(modifier = modifier) {
         val wholeWidth = maxWidth
+        var isDragged by remember {
+            mutableStateOf(false)
+        }
 
-        val sectionsWidth = remember {
-            mutableStateListOf(
-                *(levels.map { level ->
+
+        val tempSectionsWidth = remember {
+            mutableStateOf(
+                levels.map { level ->
                     maxWidth * level.toFloat()
                 }
-                .toTypedArray())
             )
         }
 
-        val handlesOffsets = remember {
-            mutableStateListOf(
-                *(
-                    List(levels.subList(0, levels.lastIndex).size) { index ->
-                        maxWidth * levels.subList(0, index + 1).sum().toFloat()
-                    }.toTypedArray()
-                )
+        val tempHandlesOffsets = remember {
+            mutableStateOf(
+                List(levels.subList(0, levels.lastIndex).size) { index ->
+                    maxWidth * levels.subList(0, index + 1).sum().toFloat()
+                }
             )
         }
 
-        val percentages = remember {
-            mutableStateListOf(
-                *(levels.map { level -> "%,.0f".format((level * 100)) }.toTypedArray())
+        val tempPercentages = remember {
+            mutableStateOf(
+                levels.map { level -> "%,.0f".format((level * 100)) }
             )
         }
+
+        /*LaunchedEffect(key1 = levels){
+            tempSectionsWidth.value = levels.map { level ->
+                maxWidth * level.toFloat()
+            }
+
+            tempHandlesOffsets.value = List(levels.subList(0, levels.lastIndex).size) { index ->
+                maxWidth * levels.subList(0, index + 1).sum().toFloat()
+            }
+
+            tempPercentages.value = levels.map { level -> "%,.0f".format((level * 100)) }
+        }*/
+
 
         Row(modifier = Modifier
             .fillMaxSize()
@@ -68,7 +82,7 @@ fun TrustLevelsSelector(
                             else MaterialTheme.colors.onPrimary.copy(0.6f)
                         )
                         .fillMaxHeight()
-                        .width(sectionsWidth[index]),
+                        .width(if(isDragged) tempSectionsWidth.value[index] else (wholeWidth * levels[index].toFloat())),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
@@ -80,7 +94,7 @@ fun TrustLevelsSelector(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = percentages[index] + "%",
+                        text = if(isDragged) tempPercentages.value[index] + "%" else "%,.0f".format(levels[index] * 100) + "%",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(0.65f),
                         maxLines = 1,
@@ -90,12 +104,9 @@ fun TrustLevelsSelector(
             }
         }
 
-        handlesOffsets.forEachIndexed { index, offset ->
+        levels.subList(0, levels.lastIndex).forEachIndexed { index, level ->
             val interactionSource = remember { MutableInteractionSource() }
             val isPressed by interactionSource.collectIsPressedAsState()
-            var isDragged by remember {
-                mutableStateOf(false)
-            }
             val handleWidth by animateDpAsState(
                 targetValue = if(isDragged || isPressed) 11.dp else 1.dp
             )
@@ -103,7 +114,11 @@ fun TrustLevelsSelector(
             Box(
                 modifier = Modifier
                     .width(handleWidth)
-                    .offset(offset - (handleWidth / 2))
+                    .offset(
+                        (if(isDragged) tempHandlesOffsets.value[index]
+                            else maxWidth * levels.subList(0, index + 1).sum().toFloat())
+                            - (handleWidth / 2)
+                    )
                     .fillMaxHeight()
                     .background(MaterialTheme.colors.surface)
                     .clickable(interactionSource = interactionSource, indication = null, onClick = {})
@@ -112,27 +127,44 @@ fun TrustLevelsSelector(
                         state = rememberDraggableState { delta ->
                             val d = with(density) { delta.toDp() }
 
-                            val levelLeft = (sectionsWidth[index] + d).value.toDouble() / wholeWidth.value
-                            val levelRight = (sectionsWidth[index + 1] - d).value.toDouble() / wholeWidth.value
+                            val levelLeft = (tempSectionsWidth.value[index] + d).value.toDouble() / wholeWidth.value
+                            val levelRight = (tempSectionsWidth.value[index + 1] - d).value.toDouble() / wholeWidth.value
 
-                            if(levelLeft > 0.1 && levelRight > 0.1){
-                                percentages[index] = "%,.0f".format(levelLeft * 100)
-                                percentages[index + 1] = "%,.0f".format(levelRight * 100)
+                            if (levelLeft > 0.1 && levelRight > 0.1) {
+                                tempPercentages.value = tempPercentages.value.toMutableList().apply {
+                                    this[index] = "%,.0f".format(levelLeft * 100)
+                                    this[index + 1] = "%,.0f".format(levelRight * 100)
+                                }
 
-                                handlesOffsets[index] += d
-                                sectionsWidth[index] += d
-                                sectionsWidth[index + 1] -= d
+                                tempHandlesOffsets.value = tempHandlesOffsets.value.toMutableList().apply {
+                                    this[index] += d
+                                }
+
+                                tempSectionsWidth.value = tempSectionsWidth.value.toMutableList().apply {
+                                    this[index] += d
+                                    this[index + 1] -= d
+                                }
                             }
                         },
                         onDragStarted = {
                             isDragged = true
+
+                            tempSectionsWidth.value = levels.map { level ->
+                                maxWidth * level.toFloat()
+                            }
+
+                            tempHandlesOffsets.value = List(levels.subList(0, levels.lastIndex).size) { index ->
+                                maxWidth * levels.subList(0, index + 1).sum().toFloat()
+                            }
+
+                            tempPercentages.value = levels.map { level -> "%,.0f".format((level * 100)) }
                         },
                         onDragStopped = {
-                            isDragged = false
-                            val newLevels = sectionsWidth.map { sectionWidth ->
+                            val newLevels = tempSectionsWidth.value.map { sectionWidth ->
                                 sectionWidth.value.toDouble() / wholeWidth.value
                             }
                             onLevelChanged(newLevels)
+                            isDragged = false
                         }
                     ),
                 contentAlignment = Alignment.Center

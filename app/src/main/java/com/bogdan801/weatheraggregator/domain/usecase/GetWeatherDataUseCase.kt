@@ -17,12 +17,26 @@ class GetWeatherDataUseCase @Inject constructor(
     private val repository: Repository
 ) {
     operator fun invoke(location: Location, domain: WeatherSourceDomain): Flow<WeatherDataState> = flow {
-        emit(WeatherDataState.IsLoading())
+        val url = domain.domain + when(domain){
+            WeatherSourceDomain.Meta -> location.metaLink
+            WeatherSourceDomain.Sinoptik -> location.sinoptikLink
+            WeatherSourceDomain.OpenWeather -> "/data/2.5/forecast?lat=${location.lat}&lon=${location.lon}"
+            WeatherSourceDomain.Average -> ""
+        }
+
+        emit(
+            WeatherDataState.IsLoading(
+                d = WeatherData(
+                    domain = domain,
+                    url = url
+                )
+            )
+        )
 
         val dataFromDB = repository.getWeatherDataByDomain(domain).first()
         val cachedData = if(dataFromDB.isEmpty) null else dataFromDB
 
-        emit(WeatherDataState.IsLoading(d = cachedData ?: WeatherData()))
+        emit(WeatherDataState.IsLoading(d = cachedData ?: WeatherData(domain = domain, url = url)))
 
         try {
             val networkData = repository.getWeatherDataFromNetwork(domain, location)
@@ -37,7 +51,7 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Даний населений пункт не знайдено",
-                    d = cachedData ?: WeatherData()
+                    d = cachedData ?: WeatherData(domain = domain, url = url)
                 )
             )
         }
@@ -45,7 +59,7 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Відсутнє з'єднання з інтернетом",
-                    d = cachedData ?: WeatherData()
+                    d = cachedData ?: WeatherData(domain = domain, url = url)
                 )
             )
         }

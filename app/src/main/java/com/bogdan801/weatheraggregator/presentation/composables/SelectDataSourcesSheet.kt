@@ -28,7 +28,8 @@ import okhttp3.internal.toImmutableList
 fun SelectDataSourcesSheet(
     modifier: Modifier = Modifier,
     location: Location,
-    onSourcesSelected: (List<WeatherSourceDomain>) -> Unit = {}
+    onSourcesSelected: (List<WeatherSourceDomain>) -> Unit = {},
+    selectedDomains: List<WeatherSourceDomain> = listOf()
 ) {
     val dataSourcesList by remember {
         val list = WeatherSourceDomain.values().filter { source ->
@@ -43,7 +44,7 @@ fun SelectDataSourcesSheet(
     }
 
     var selectionList by rememberSaveable{
-        mutableStateOf(List(dataSourcesList.size){ false })
+        mutableStateOf(dataSourcesList.map{ selectedDomains.contains(it) })
     }
 
     val isButtonEnabled by remember {

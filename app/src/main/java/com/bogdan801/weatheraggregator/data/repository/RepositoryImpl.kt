@@ -87,7 +87,7 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
         } ?: WeatherData()
     }
 
-    override suspend fun getCachedDomains() = dao.getAllWeatherDataEntities().first().map { WeatherSourceDomain.values()[it.domain] }
+    override suspend fun getCachedDomains() = dao.getAllWeatherDataEntities().first().map { WeatherSourceDomain.values()[it.domain] }.sortedBy { it.ordinal }
 
     override suspend fun getOblastList() = dao.getOblastList()
 
@@ -135,24 +135,6 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
             }
         }
         else -> WeatherData()
-    }
-
-    override suspend fun getWeatherDataFromNetwork(domains: List<WeatherSourceDomain>, location: Location): List<WeatherData>{
-        var output = listOf<WeatherData>()
-
-        coroutineScope {
-            val list = mutableListOf<Deferred<WeatherData>>()
-            domains.forEach { domain ->
-                val data = async {
-                    getWeatherDataFromNetwork(domain, location)
-                }
-                list.add(data)
-            }
-
-            output = list.map { it.await() }
-        }
-
-        return output
     }
 
     override fun getApi():OpenWeatherApi = openWeatherApi

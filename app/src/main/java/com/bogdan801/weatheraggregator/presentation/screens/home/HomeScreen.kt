@@ -2,7 +2,6 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
@@ -92,9 +91,12 @@ fun HomeScreen(
                     onSourcesSelected = { selectedDomains ->
                         scope.launch { sheetState.collapse() }
                         viewModel.openSelectLocationSheet(true)
-                        viewModel.setupDataFlows(viewModel.tempLocation.value, selectedDomains)
+                        viewModel.setSelectedData(0)
+                        viewModel.setSelectedDay(0)
+                        viewModel.setupDataFlows(viewModel.tempLocation.value, selectedDomains, true)
                         viewModel.setBlockBackPressOnLocationsSelection(true)
-                    }
+                    },
+                    selectedDomains = viewModel.dataListState.map { it.data.domain }
                 )
             }
         },
@@ -221,18 +223,12 @@ fun HomeScreen(
                                                 val dataSelectorHeight = 50.dp
                                                 val heightRelation = if(isPortrait) 1.05f else 0.95f
                                                 val dayCardsHeight = ((maxWidth - 40.dp) / 4f) * heightRelation
-                                                val columnHeight = dayCardsHeight + dataSelectorHeight + 16.dp
+                                                val columnHeight = (if(viewModel.dataListState.size != 1) dataSelectorHeight else 0.dp) + dayCardsHeight + 16.dp
                                                 var slideRight by remember { mutableStateOf(true) }
                                                 Column(modifier = Modifier
                                                     .fillMaxWidth()
                                                     .align(Alignment.BottomCenter)
                                                 ) {
-                                                    LaunchedEffect(key1 = viewModel.dataListState.size){
-                                                        if(viewModel.dataListState.size == 1){
-                                                            viewModel.setSelectedData(1)
-                                                        }
-                                                    }
-
                                                     LazyRow(
                                                         modifier = Modifier
                                                             .fillMaxWidth()

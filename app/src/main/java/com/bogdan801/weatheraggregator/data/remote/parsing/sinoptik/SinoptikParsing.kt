@@ -15,7 +15,7 @@ import org.jsoup.nodes.TextNode
 import java.net.UnknownHostException
 
 suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withContext(Dispatchers.IO) {
-    val url = "https://ua.sinoptik.ua/" + location.sinoptikLink
+    val url = "https://ua.sinoptik.ua" + location.sinoptikLink
 
     try {
         val baseDocument = Jsoup

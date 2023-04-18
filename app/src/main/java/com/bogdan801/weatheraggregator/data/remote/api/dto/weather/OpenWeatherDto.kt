@@ -69,7 +69,7 @@ data class OpenWeatherDto(
             currentDate = days[0].date,
             currentLocation = location.name,
             domain = WeatherSourceDomain.OpenWeather,
-            url = "https://api.openweathermap.org/data/2.5/forecast",
+            url = "https://api.openweathermap.org/data/2.5/forecast?lat=${location.lat}&lon=${location.lon}",
             currentSkyCondition = days[0].skyCondition,
             currentTemperature = days[0].dayTemperature,
             weatherByDates = days.toList()

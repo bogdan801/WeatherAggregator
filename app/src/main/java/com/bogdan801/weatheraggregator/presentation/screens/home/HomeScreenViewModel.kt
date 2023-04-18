@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -76,21 +77,22 @@ constructor(
     private val _dataListState = mutableStateListOf<WeatherDataState>()
     val dataListState: List<WeatherDataState>  = _dataListState
 
-    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, ) {
+    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false) {
+        if(clearCache) runBlocking { repository.deleteAllWeatherData() }
+
         _selectedLocationState.value = location
         viewModelScope.launch { context.saveStringToDataStore("location", location.toString()) }
 
         jobs.forEach{ job ->
             job.cancel()
         }
-
         jobs.clear()
         _dataListState.clear()
 
         setTrustLevels(List(domains.size) { 1 / domains.size.toDouble() })
 
         domains.forEachIndexed{ id, domain ->
-            _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain)))
+            _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain, url = domain.domain)))
 
             jobs.add(
                 viewModelScope.launch {
@@ -153,8 +155,8 @@ constructor(
     fun refreshAllWeatherData(){
         viewModelScope.launch {
             _isRefreshingState.value = true
-            delay(1.seconds)
             setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain })
+            //delay(1.seconds)
             _isRefreshingState.value = false
         }
     }

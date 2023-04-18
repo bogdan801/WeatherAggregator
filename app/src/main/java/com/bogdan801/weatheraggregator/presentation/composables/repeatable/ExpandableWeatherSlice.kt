@@ -166,7 +166,7 @@ fun ExpandableWeatherSlice(
                     contentAlignment = Alignment.Center
                 ){
                     Text(
-                        text = data!!.precipitationProbability.toString(),
+                        text = if(data!!.precipitationProbability == -1) "-" else data.precipitationProbability.toString(),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
