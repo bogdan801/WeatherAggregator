@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
 import com.bogdan801.weatheraggregator.R
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -29,7 +30,7 @@ fun DataSelector(
     modifier: Modifier = Modifier,
     dataStateList: List<WeatherDataState>,
     selectedIndex: Int,
-    onDataSelected: (index: Int, isError: Boolean) -> Unit
+    onDataSelected: (index: Int, selectedState: WeatherDataState) -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -48,7 +49,7 @@ fun DataSelector(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                             onClick = {
-                                onDataSelected(index, weatherDataState.error != null)
+                                onDataSelected(index, weatherDataState)
                             }
                         ),
                     contentAlignment = Alignment.Center
@@ -73,12 +74,19 @@ fun DataSelector(
                                 else MaterialTheme.typography.body2
                         )
                         if(weatherDataState.error != null){
-                            Spacer(modifier = Modifier.width(2.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 modifier = Modifier.size(12.dp),
                                 painter = painterResource(id = R.drawable.ic_error),
                                 contentDescription = "Error icon",
                                 tint = MaterialTheme.colors.error.copy(0.5f)
+                            )
+                        }
+                        if(weatherDataState.isLoading){
+                            Spacer(modifier = Modifier.width(4.dp))
+                            CircularProgressIndicator(
+                                modifier = Modifier.requiredSize(10.dp),
+                                strokeWidth = 1.5.dp
                             )
                         }
                     }

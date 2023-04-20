@@ -29,15 +29,15 @@ import kotlinx.coroutines.launch
 fun SelectLocationSheet(
     modifier: Modifier = Modifier,
     viewModel: SelectLocationViewModel = hiltViewModel(),
-    sheetState: BottomSheetState,
+    sheetState: ModalBottomSheetState,
     onLocationSelected: (Location) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(key1 = sheetState.isExpanded){
-        if(!sheetState.isExpanded){
+    LaunchedEffect(key1 = sheetState.isVisible){
+        if(!sheetState.isVisible){
             viewModel.displayOblastList()
         }
     }
@@ -80,7 +80,7 @@ fun SelectLocationSheet(
                     modifier = Modifier.offset(x = (-2).dp),
                     onClick = {
                         if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
-                        else scope.launch { sheetState.collapse() }
+                        else scope.launch { sheetState.hide() }
                     }
                 ) {
                     Icon(

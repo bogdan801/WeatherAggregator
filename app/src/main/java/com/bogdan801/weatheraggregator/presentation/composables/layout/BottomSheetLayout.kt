@@ -31,13 +31,13 @@ fun BottomSheetLayout(
     modifier: Modifier = Modifier,
     sheetContent: @Composable (sheetState: BottomSheetState, expansionFraction: Float) -> Unit = { _: BottomSheetState, _: Float -> },
     backgroundColor: Color = MaterialTheme.colors.background,
-    sheetPeekHeight: Dp = 0.dp,
+    sheetPeekHeight: Dp = 30.dp,
     sheetElevation: Dp = 20.dp,
     roundCorners: Boolean = true,
     sheetShape: Shape = if(roundCorners) MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)) else RectangleShape,
     scrimAlpha: Float = 0.2f,
     scrimColor: Color = MaterialTheme.colors.onSurface,
-    content: @Composable (sheetState: BottomSheetState, expansionFraction: Float, scaffoldState: BottomSheetScaffoldState) -> Unit
+    content: @Composable (sheetState: BottomSheetState, expansionFraction: String, scaffoldState: BottomSheetScaffoldState) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -47,12 +47,14 @@ fun BottomSheetLayout(
     val focusManager = LocalFocusManager.current
 
 
-    val expansionFraction = when{
+    /*val expansionFraction = when{
         sheetState.progress.from == BottomSheetValue.Collapsed && sheetState.progress.to == BottomSheetValue.Expanded -> sheetState.progress.fraction
         sheetState.progress.from == BottomSheetValue.Expanded && sheetState.progress.to == BottomSheetValue.Expanded -> sheetState.progress.fraction
         sheetState.progress.from == BottomSheetValue.Expanded && sheetState.progress.to == BottomSheetValue.Collapsed -> 1f - sheetState.progress.fraction
         else -> 0f
-    }
+    }*/
+
+    val expansionFraction = 0f
 
     if(sheetState.isExpanded) {
         BackHandler(enabled = true) {
@@ -95,7 +97,7 @@ fun BottomSheetLayout(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ){
-            content(sheetState, expansionFraction, bottomSheetScaffoldState)
+            content(sheetState, "${sheetState.progress} current: ${sheetState.currentValue} \nisCol ${sheetState.isCollapsed} isExp ${sheetState.isExpanded}", bottomSheetScaffoldState)
             if(expansionFraction != 0f){
                 Box(
                     modifier = Modifier

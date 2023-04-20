@@ -29,7 +29,6 @@ import androidx.navigation.NavHostController
 import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptiveDoubleLayout
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptivePager
-import com.bogdan801.weatheraggregator.presentation.composables.layout.BottomSheetLayout
 import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DataSourceCard
 import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DayCard
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
@@ -54,12 +53,18 @@ fun HomeScreen(
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     val isDarkTheme = (viewModel.themeState.value == Theme.Dark) || (viewModel.themeState.value == Theme.Auto && isSystemInDarkTheme())
     val coroutineScope = rememberCoroutineScope()
+    val pageState = rememberPagerState()
 
-    BottomSheetLayout(
+
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    ModalBottomSheetLayout(
         modifier = Modifier.fillMaxSize(),
-        sheetContent = { sheetState, _ ->
-            LaunchedEffect(key1 = sheetState.isExpanded) {
-                if(!sheetState.isExpanded) viewModel.openSelectLocationSheet(true)
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        scrimColor = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
+        sheetContent = {
+            LaunchedEffect(key1 = sheetState.isVisible) {
+                if(!sheetState.isVisible) viewModel.openSelectLocationSheet(true)
             }
 
             if(viewModel.showSelectLocationSheet.value) {
@@ -89,7 +94,10 @@ fun HomeScreen(
                         .background(MaterialTheme.colors.onPrimary),
                     location = viewModel.tempLocation.value,
                     onSourcesSelected = { selectedDomains ->
-                        scope.launch { sheetState.collapse() }
+                        scope.launch {
+                            sheetState.hide()
+                            pageState.animateScrollToPage(0)
+                        }
                         viewModel.openSelectLocationSheet(true)
                         viewModel.setSelectedData(0)
                         viewModel.setSelectedDay(0)
@@ -99,9 +107,8 @@ fun HomeScreen(
                     selectedDomains = viewModel.dataListState.map { it.data.domain }
                 )
             }
-        },
-        roundCorners = isPortrait
-    ) { sheetState, _, _ ->
+        }
+    ) {
         //states for animated theme transition
         val imageState = remember { mutableStateOf<ImageBitmap?>(null) }
         val iconCoordinates = remember { mutableStateOf(Offset.Zero) }
@@ -122,7 +129,6 @@ fun HomeScreen(
             )
         ) {
             //current tab state
-            val pageState = rememberPagerState()
             val pageFraction by remember {
                 derivedStateOf {
                     pageState.currentPageOffset + pageState.currentPage.toFloat()
@@ -157,7 +163,7 @@ fun HomeScreen(
                         onChangeLocationClick = {
                             viewModel.openSelectLocationSheet(true)
                             scope.launch {
-                                if(!sheetState.isExpanded) sheetState.expand()
+                                if(!sheetState.isVisible) sheetState.show()
                             }
                         },
                         getIconCoordinates = { coordinates ->
@@ -264,15 +270,8 @@ fun HomeScreen(
                                                                 ),
                                                             dataStateList = listOf(viewModel.averageData) + viewModel.dataListState,
                                                             selectedIndex = viewModel.selectedDataIndexState.value,
-                                                            onDataSelected = { index, isError ->
-                                                                if(isError){
-                                                                    coroutineScope.launch {
-                                                                        pageState.animateScrollToPage(1)
-                                                                    }
-                                                                }
-                                                                else {
-                                                                    viewModel.setSelectedData(index)
-                                                                }
+                                                            onDataSelected = { index, _ ->
+                                                                viewModel.setSelectedData(index)
                                                             }
                                                         )
                                                     }
@@ -336,7 +335,7 @@ fun HomeScreen(
                                                     viewModel.setTemporaryLocation(viewModel.selectedLocation.value)
                                                     viewModel.openSelectLocationSheet(false)
                                                     scope.launch {
-                                                        if(!sheetState.isExpanded) sheetState.expand()
+                                                        if(!sheetState.isVisible) sheetState.show()
                                                     }
                                                 }
                                             )

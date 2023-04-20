@@ -147,7 +147,7 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.Center
                 ){
-                    Image(painter = data!!.skyCondition.getPainterResource(), contentDescription = "Weather icon")
+                    Image(modifier = Modifier.requiredSize(30.dp), painter = data!!.skyCondition.getPainterResource(), contentDescription = "Weather icon")
                 }
 
                 Box(

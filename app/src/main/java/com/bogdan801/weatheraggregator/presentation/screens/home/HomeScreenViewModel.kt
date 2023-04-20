@@ -113,7 +113,30 @@ constructor(
 
     //average
     val averageData by derivedStateOf {
-        WeatherDataState.Data(getAverageUseCase(dataList = _dataListState.map { it.data }, trustLevels = _trustLevels.value))
+        val dataList = _dataListState.map { it.data }
+        val someAreLoading = _dataListState.map { it.isLoading }.contains(true)
+        val isErrorPresent = _dataListState.map { it.error != null }.contains(true)
+
+        if(isErrorPresent) {
+            return@derivedStateOf WeatherDataState.Error(
+                d = getAverageUseCase(
+                    dataList = dataList,
+                    trustLevels = _trustLevels.value
+                ),
+                message = "Average error"
+            )
+        }
+
+        if(someAreLoading){
+            return@derivedStateOf WeatherDataState.IsLoading(
+                d = getAverageUseCase(
+                    dataList = dataList,
+                    trustLevels = _trustLevels.value
+                )
+            )
+        }
+
+        return@derivedStateOf WeatherDataState.Data(getAverageUseCase(dataList = dataList, trustLevels = _trustLevels.value))
     }
 
     private val _selectedDataIndexState = mutableStateOf(0)
