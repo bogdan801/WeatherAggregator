@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -34,6 +35,9 @@ import com.bogdan801.weatheraggregator.presentation.composables.repeatable.DayCa
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.shimmer
+import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -186,7 +190,7 @@ fun HomeScreen(
                                     isAnimating.value = true
                                     animatable.animateTo(
                                         diagonal,
-                                        tween(350)
+                                        tween(durationMillis =  700, easing = FastOutSlowInEasing)
                                     )
                                     isAnimating.value = false
 
@@ -221,7 +225,8 @@ fun HomeScreen(
                                             WeatherOverview(
                                                 modifier = Modifier.fillMaxSize(),
                                                 selectedDay = viewModel.selectedDay,
-                                                locationName = viewModel.selectedLocation.value.name + ",\nUkraine"
+                                                locationName = viewModel.selectedLocation.value.name + ",\nUkraine",
+                                                isLoading = viewModel.currentDataState.isLoading
                                             )
                                         },
                                         secondPart = {
@@ -241,16 +246,19 @@ fun HomeScreen(
                                                             .fillMaxWidth()
                                                             .padding(4.dp)
                                                     ) {
-                                                        itemsIndexed(viewModel.currentData.weatherByDates){ index, dayCondition ->
+                                                        itemsIndexed(viewModel.currentDataState.data.weatherByDates){ index, dayCondition ->
                                                             DayCard(
                                                                 modifier = Modifier
                                                                     .padding(4.dp)
                                                                     .width((columnWidth - 40.dp) / 4f)
                                                                     .height(dayCardsHeight),
                                                                 isSelected = viewModel.selectedDayState.value == index,
+                                                                isLoading = viewModel.currentDataState.isLoading,
                                                                 onCardClick = {
-                                                                    viewModel.setSelectedDay(index) { shouldSlideRight ->
-                                                                        slideRight = shouldSlideRight
+                                                                    if(!viewModel.currentDataState.isLoading){
+                                                                        viewModel.setSelectedDay(index) { shouldSlideRight ->
+                                                                            slideRight = shouldSlideRight
+                                                                        }
                                                                     }
                                                                 },
                                                                 date = dayCondition.date,
@@ -273,15 +281,16 @@ fun HomeScreen(
                                                             selectedIndex = viewModel.selectedDataIndexState.value,
                                                             onDataSelected = { index, _ ->
                                                                 viewModel.setSelectedData(index)
+                                                                viewModel.setSelectedDay(0) { shouldSlideRight ->
+                                                                    slideRight = shouldSlideRight
+                                                                }
                                                             }
                                                         )
                                                     }
                                                 }
-
-                                                var isExpanded by remember { mutableStateOf(false) }
                                                 val heightOfPanel by animateDpAsState(
                                                     targetValue =
-                                                    if(isExpanded) maxHeight
+                                                    if(viewModel.isDayPanelExpanded.value) maxHeight
                                                     else maxHeight - columnHeight,
                                                     animationSpec = tween(
                                                         durationMillis = 400
@@ -291,11 +300,21 @@ fun HomeScreen(
                                                     modifier = Modifier
                                                         .align(Alignment.TopCenter)
                                                         .fillMaxWidth()
-                                                        .height(heightOfPanel),
+                                                        .height(heightOfPanel)
+                                                        .placeholder(
+                                                            visible = viewModel.currentDataState.isLoading,
+                                                            color = MaterialTheme.colors.surface.copy(
+                                                                alpha = 0.5f
+                                                            ),
+                                                            shape = RectangleShape,
+                                                            highlight = PlaceholderHighlight.shimmer()
+                                                        ),
                                                     data = viewModel.selectedDay,
-                                                    isExpanded = isExpanded,
+                                                    isExpanded = viewModel.isDayPanelExpanded.value,
                                                     onExpandClick = {
-                                                        isExpanded = !isExpanded
+                                                        if(!viewModel.currentDataState.isLoading) {
+                                                            viewModel.setDayPanelExpansion(!viewModel.isDayPanelExpanded.value)
+                                                        }
                                                     },
                                                     slideRight = slideRight
                                                 )
@@ -328,7 +347,8 @@ fun HomeScreen(
                                         LazyColumn(
                                             modifier = Modifier
                                                 .fillMaxSize(),
-                                            contentPadding = PaddingValues(bottom = if(isPortrait) 112.dp else 120.dp)
+                                            contentPadding = if(viewModel.dataListState.isNotEmpty()) PaddingValues(bottom = if(isPortrait) 112.dp else 120.dp)
+                                                             else PaddingValues()
                                         ){
                                             item {
                                                 DataSourceHeader(
@@ -356,7 +376,10 @@ fun HomeScreen(
                                                     DataSourceCard(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                                            .padding(
+                                                                horizontal = 8.dp,
+                                                                vertical = 4.dp
+                                                            ),
                                                         dataState = item,
                                                         isSelected = viewModel.selectedCards.contains(index),
                                                         onLongPress = {
@@ -375,7 +398,7 @@ fun HomeScreen(
                                                     Box(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .height(maxHeight),
+                                                            .height(maxHeight - 90.dp),
                                                         contentAlignment = Alignment.Center
                                                     ){
                                                         Text(

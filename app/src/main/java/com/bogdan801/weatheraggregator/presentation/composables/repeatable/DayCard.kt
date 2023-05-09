@@ -17,19 +17,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.data.util.toDegree
 import com.bogdan801.weatheraggregator.data.util.toFormattedDate
 import com.bogdan801.weatheraggregator.domain.model.SkyCondition
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.shimmer
+import com.google.accompanist.placeholder.placeholder
 import kotlinx.datetime.LocalDate
 
 @Composable
 fun DayCard(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
+    isLoading: Boolean = false,
     onCardClick: () -> Unit = {},
     date: LocalDate = LocalDate(2023, 1, 6),
     skyCondition: SkyCondition,
@@ -57,7 +60,12 @@ fun DayCard(
         tween(200)
     )
     Card(
-        modifier = modifier,
+        modifier = modifier.placeholder(
+            visible = isLoading,
+            color = MaterialTheme.colors.surface.copy(alpha = 0.5f),
+            shape = MaterialTheme.shapes.medium,
+            highlight = PlaceholderHighlight.shimmer()
+        ),
         shape = MaterialTheme.shapes.medium,
         elevation = elevation,
         border = BorderStroke(1.dp, borderColor),

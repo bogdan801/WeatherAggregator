@@ -15,12 +15,10 @@ import com.bogdan801.weatheraggregator.domain.usecase.GetWeatherDataUseCase
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class HomeScreenViewModel
@@ -69,7 +67,6 @@ constructor(
 
     private val _selectedLocationState = mutableStateOf(Location("", "", "", "", "", 0.0, 0.0))
     val selectedLocation: State<Location>  = _selectedLocationState
-
 
     //data selection
     private val jobs = mutableListOf<Job>()
@@ -142,20 +139,20 @@ constructor(
     private val _selectedDataIndexState = mutableStateOf(0)
     val selectedDataIndexState: State<Int> = _selectedDataIndexState
 
-    val currentData by derivedStateOf {
-        if(_selectedDataIndexState.value == 0) averageData.data
-        else _dataListState[_selectedDataIndexState.value - 1].data
+    val currentDataState by derivedStateOf {
+        if(_selectedDataIndexState.value == 0) averageData
+        else _dataListState[_selectedDataIndexState.value - 1]
     }
 
     fun setSelectedData(index: Int){
-        setSelectedDay(0)
+        println("")
         _selectedDataIndexState.value = index
     }
 
     //day selection
     private val _selectedDayState = mutableStateOf(0)
     val selectedDayState: State<Int> = _selectedDayState
-    val selectedDay get() = if(currentData.weatherByDates.isNotEmpty()) currentData.weatherByDates[_selectedDayState.value] else DayWeatherCondition()
+    val selectedDay get() = if(currentDataState.data.weatherByDates.isNotEmpty()) currentDataState.data.weatherByDates[_selectedDayState.value] else DayWeatherCondition()
 
     fun setSelectedDay(index: Int, slideRight: (Boolean) -> Unit = {}){
         if(selectedDayState.value > index){
@@ -168,18 +165,22 @@ constructor(
         }
     }
 
-    //loading
-    private val _isLoadingState = mutableStateOf(false)
-    val isLoadingState: State<Boolean> = _isLoadingState
+    private val _isDayPanelExpanded = mutableStateOf(false)
+    val isDayPanelExpanded: State<Boolean> = _isDayPanelExpanded
 
+    fun setDayPanelExpansion(state: Boolean){
+        _isDayPanelExpanded.value = state
+    }
+
+    //loading
     private val _isRefreshingState = mutableStateOf(false)
     val isRefreshingState: State<Boolean> = _isRefreshingState
 
     fun refreshAllWeatherData(){
+        setDayPanelExpansion(false)
         viewModelScope.launch {
             _isRefreshingState.value = true
             setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain })
-            //delay(1.seconds)
             _isRefreshingState.value = false
         }
     }

@@ -2,15 +2,13 @@ package com.bogdan801.weatheraggregator.domain.usecase
 
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
+import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.Location
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
-import com.bogdan801.weatheraggregator.domain.util.Resource
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
 class GetWeatherDataUseCase @Inject constructor(
@@ -34,9 +32,12 @@ class GetWeatherDataUseCase @Inject constructor(
         )
 
         val dataFromDB = repository.getWeatherDataByDomain(domain).first()
-        val cachedData = if(dataFromDB.isEmpty) null else dataFromDB
+        val currentDate = getCurrentDate()
+        val cachedData =
+            if(!dataFromDB.isEmpty && dataFromDB.currentDate == currentDate) dataFromDB
+            else WeatherData(domain = domain, url = url)
 
-        emit(WeatherDataState.IsLoading(d = cachedData ?: WeatherData(domain = domain, url = url)))
+        emit(WeatherDataState.IsLoading(d = cachedData))
 
         try {
             val networkData = repository.getWeatherDataFromNetwork(domain, location)
@@ -51,7 +52,7 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Даний населений пункт не знайдено",
-                    d = cachedData ?: WeatherData(domain = domain, url = url)
+                    d = cachedData
                 )
             )
         }
@@ -59,7 +60,7 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Відсутнє з'єднання з інтернетом",
-                    d = cachedData ?: WeatherData(domain = domain, url = url)
+                    d = cachedData
                 )
             )
         }

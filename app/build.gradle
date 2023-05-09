@@ -85,6 +85,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
     //swipe refresh
     implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist_version"
+    //placeholder
+    implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_version"
 
     //hilt
     def hilt_version = "2.44"

@@ -1,7 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -35,19 +34,19 @@ constructor(
 
     private fun searchOblasts(prompt: String){
         viewModelScope.launch {
-            _foundOblasts.value = repository.searchOblasts(prompt)
+            _foundOblasts.value = repository.searchOblasts(prompt.trim())
         }
     }
 
     private fun searchRegions(prompt: String){
         viewModelScope.launch {
-            _foundRegions.value = repository.searchRegions(prompt)
+            _foundRegions.value = repository.searchRegions(prompt.trim())
         }
     }
 
     private fun searchLocations(prompt: String){
         viewModelScope.launch {
-            _foundLocations.value = repository.searchLocations(prompt)
+            _foundLocations.value = repository.searchLocations(prompt.trim())
         }
     }
 
