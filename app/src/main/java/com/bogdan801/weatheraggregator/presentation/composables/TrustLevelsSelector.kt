@@ -104,11 +104,12 @@ fun TrustLevelsSelector(
             }
         }
 
-        levels.subList(0, levels.lastIndex).forEachIndexed { index, level ->
+        levels.subList(0, levels.lastIndex).forEachIndexed { index, _ ->
             val interactionSource = remember { MutableInteractionSource() }
             val isPressed by interactionSource.collectIsPressedAsState()
+            var isCurrentHandleDragged by remember { mutableStateOf(false) }
             val handleWidth by animateDpAsState(
-                targetValue = if(isDragged || isPressed) 11.dp else 1.dp
+                targetValue = if(isCurrentHandleDragged || isPressed) 11.dp else 1.dp
             )
 
             Box(
@@ -148,6 +149,7 @@ fun TrustLevelsSelector(
                         },
                         onDragStarted = {
                             isDragged = true
+                            isCurrentHandleDragged = true
 
                             tempSectionsWidth.value = levels.map { level ->
                                 maxWidth * level.toFloat()
@@ -165,6 +167,7 @@ fun TrustLevelsSelector(
                             }
                             onLevelChanged(newLevels)
                             isDragged = false
+                            isCurrentHandleDragged = false
                         }
                     ),
                 contentAlignment = Alignment.Center

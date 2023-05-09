@@ -90,7 +90,7 @@ fun HomeScreen(
                 SelectDataSourcesSheet(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(500.dp)
+                        .height(400.dp)
                         .background(MaterialTheme.colors.onPrimary),
                     location = viewModel.tempLocation.value,
                     onSourcesSelected = { selectedDomains ->
@@ -198,7 +198,7 @@ fun HomeScreen(
                         isEnabled = isEnabled
                     )
 
-                    if(viewModel.dataListState.isNotEmpty()){
+                    if(viewModel.selectedLocation.value.isNotEmpty()){
                         //pager
                         AdaptivePager(
                             count = 2,
@@ -216,6 +216,7 @@ fun HomeScreen(
                                     //first page
                                     AdaptiveDoubleLayout(
                                         modifier = Modifier.fillMaxSize(),
+                                        placeholderText = if(viewModel.dataListState.isEmpty()) "Please select data sources" else "",
                                         firstPart = {
                                             WeatherOverview(
                                                 modifier = Modifier.fillMaxSize(),
@@ -320,44 +321,70 @@ fun HomeScreen(
                                     }
 
                                     //second page
-                                    LazyColumn(
+                                    BoxWithConstraints(
                                         modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentPadding = PaddingValues(bottom = if(isPortrait) 112.dp else 120.dp)
-                                    ){
-                                        item {
-                                            DataSourceHeader(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 16.dp),
-                                                action = if(viewModel.cardsSelected) HeaderAction.Delete else HeaderAction.Add,
-                                                onActionClick = {
-                                                    viewModel.setTemporaryLocation(viewModel.selectedLocation.value)
-                                                    viewModel.openSelectLocationSheet(false)
-                                                    scope.launch {
-                                                        if(!sheetState.isVisible) sheetState.show()
-                                                    }
-                                                }
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                        }
-                                        viewModel.dataListState.indices.forEach { index ->
+                                            .fillMaxSize()
+                                    ) {
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .fillMaxSize(),
+                                            contentPadding = PaddingValues(bottom = if(isPortrait) 112.dp else 120.dp)
+                                        ){
                                             item {
-                                                DataSourceCard(
+                                                DataSourceHeader(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                                                    dataState = viewModel.dataListState[index],
-                                                    isSelected = viewModel.selectedCards.contains(index),
-                                                    onLongPress = {
-                                                        viewModel.setDataCardSelection(index, true)
-                                                    },
-                                                    onTap = {
-                                                        if(viewModel.cardsSelected){
-                                                            viewModel.setDataCardSelection(index, !viewModel.selectedCards.contains(index))
+                                                        .padding(horizontal = 16.dp),
+                                                    action = if(viewModel.cardsSelected) HeaderAction.Delete else HeaderAction.Add,
+                                                    onActionClick = {
+                                                        if(!viewModel.cardsSelected){
+                                                            viewModel.setTemporaryLocation(viewModel.selectedLocation.value)
+                                                            viewModel.openSelectLocationSheet(false)
+                                                            scope.launch {
+                                                                if(!sheetState.isVisible) sheetState.show()
+                                                            }
+                                                        }
+                                                        else{
+                                                            viewModel.deleteSelectedData()
                                                         }
                                                     }
                                                 )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                            }
+                                            if(viewModel.dataListState.isNotEmpty()){
+                                                itemsIndexed(viewModel.dataListState){ index, item ->
+                                                    DataSourceCard(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                                        dataState = item,
+                                                        isSelected = viewModel.selectedCards.contains(index),
+                                                        onLongPress = {
+                                                            viewModel.setDataCardSelection(index, true)
+                                                        },
+                                                        onTap = {
+                                                            if(viewModel.cardsSelected){
+                                                                viewModel.setDataCardSelection(index, !viewModel.selectedCards.contains(index))
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                            else{
+                                                item {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .height(maxHeight),
+                                                        contentAlignment = Alignment.Center
+                                                    ){
+                                                        Text(
+                                                            text = "Please select data sources",
+                                                            color = MaterialTheme.colors.primary,
+                                                            style = MaterialTheme.typography.h5
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -429,7 +456,9 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
 
+            if(viewModel.selectedLocation.value.isNotEmpty()){
                 //bottom bar
                 BottomBar(
                     modifier = Modifier.align(if(isPortrait) Alignment.BottomCenter else Alignment.CenterEnd),

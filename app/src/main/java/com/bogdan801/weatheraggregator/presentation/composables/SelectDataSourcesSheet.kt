@@ -100,7 +100,7 @@ fun SelectDataSourcesSheet(
 
             Button(
                 modifier = Modifier
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 58.dp)
                     .size(190.dp, 40.dp)
                     .align(Alignment.BottomCenter),
                 onClick = {

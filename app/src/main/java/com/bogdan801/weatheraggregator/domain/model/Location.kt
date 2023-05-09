@@ -9,6 +9,8 @@ data class Location(
     val lat: Double,
     val lon: Double
 ){
+    fun isNotEmpty() = name.isNotBlank()
+
     override fun toString() = "${metaLink}*${sinoptikLink}*${name}*${regionName}*${oblastName}*${lat}*${lon}"
 
     companion object{

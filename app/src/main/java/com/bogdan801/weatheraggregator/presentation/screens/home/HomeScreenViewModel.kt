@@ -208,7 +208,15 @@ constructor(
     }
 
     fun deleteSelectedData(){
-
+        val remainingDomains = _dataListState
+            .filterIndexed { index, _ ->
+                !_selectedCards.contains(index)
+            }
+            .map{
+                it.data.domain
+            }
+        clearSelection()
+        setupDataFlows(_selectedLocationState.value, remainingDomains)
     }
 
 
