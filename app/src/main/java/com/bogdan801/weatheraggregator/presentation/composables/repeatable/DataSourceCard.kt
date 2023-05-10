@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +40,8 @@ fun DataSourceCard(
     modifier: Modifier = Modifier,
     dataState: WeatherDataState,
     isSelected: Boolean = false,
+    isExpanded: Boolean = false,
+    onExpandClick: (Boolean) -> Unit = {},
     onLongPress: (Boolean) -> Unit = {},
     onTap: (Boolean) -> Unit ={}
 ) {
@@ -57,7 +60,7 @@ fun DataSourceCard(
     ){
         when(dataState){
             is WeatherDataState.Data -> {
-                var isExpanded by remember { mutableStateOf(false) }
+
                 val cardHeight by animateDpAsState(
                     targetValue =
                     if(isExpanded) 300.dp
@@ -95,7 +98,7 @@ fun DataSourceCard(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
                                         onClick = {
-                                            if (!isSelected) isExpanded = !isExpanded
+                                            if (!isSelected) onExpandClick(isExpanded)
                                         }
                                     ),
                                 contentAlignment = Alignment.Center

@@ -9,6 +9,7 @@ import com.bogdan801.weatheraggregator.domain.model.WeatherSourceDomain
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
 import kotlinx.coroutines.flow.*
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class GetWeatherDataUseCase @Inject constructor(
@@ -60,6 +61,14 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Відсутнє з'єднання з інтернетом",
+                    d = cachedData
+                )
+            )
+        }
+        catch (e: SocketTimeoutException){
+            emit(
+                WeatherDataState.Error(
+                    message = "Не вдалося отримати дані, спробуйте ще раз",
                     d = cachedData
                 )
             )

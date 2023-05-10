@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -372,7 +373,13 @@ fun HomeScreen(
                                                 Spacer(modifier = Modifier.height(8.dp))
                                             }
                                             if(viewModel.dataListState.isNotEmpty()){
-                                                itemsIndexed(viewModel.dataListState){ index, item ->
+                                                itemsIndexed(
+                                                    items = viewModel.dataListState,
+                                                    key = { _, dataState ->
+                                                        dataState.data.domain.ordinal
+                                                    }
+                                                ){ index, item ->
+                                                    var isExpanded by rememberSaveable { mutableStateOf(false) }
                                                     DataSourceCard(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
@@ -382,6 +389,8 @@ fun HomeScreen(
                                                             ),
                                                         dataState = item,
                                                         isSelected = viewModel.selectedCards.contains(index),
+                                                        isExpanded = isExpanded,
+                                                        onExpandClick = {isExpanded = !it},
                                                         onLongPress = {
                                                             viewModel.setDataCardSelection(index, true)
                                                         },
@@ -474,6 +483,7 @@ fun HomeScreen(
                                 levels = viewModel.trustLevels.value,
                                 onLevelChanged = { newLevels ->
                                     viewModel.setTrustLevels(newLevels)
+                                    viewModel.saveTrustLevels()
                                 }
                             )
                         }

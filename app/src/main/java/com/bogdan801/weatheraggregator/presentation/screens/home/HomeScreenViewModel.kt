@@ -74,7 +74,7 @@ constructor(
     private val _dataListState = mutableStateListOf<WeatherDataState>()
     val dataListState: List<WeatherDataState>  = _dataListState
 
-    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false) {
+    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false, trustLevels: List<Double> = listOf()) {
         if(clearCache) runBlocking { repository.deleteAllWeatherData() }
 
         _selectedLocationState.value = location
@@ -86,7 +86,11 @@ constructor(
         jobs.clear()
         _dataListState.clear()
 
-        setTrustLevels(List(domains.size) { 1 / domains.size.toDouble() })
+        if(trustLevels.isEmpty() || trustLevels.size != domains.size) setTrustLevels(List(domains.size) { 1 / domains.size.toDouble() })
+        else {
+            setTrustLevels(trustLevels)
+            saveTrustLevels()
+        }
 
         domains.forEachIndexed{ id, domain ->
             _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain, url = domain.domain)))
@@ -106,6 +110,19 @@ constructor(
     val trustLevels: State<List<Double>> = _trustLevels
     fun setTrustLevels(newTrustLevels: List<Double>){
         _trustLevels.value = newTrustLevels
+    }
+
+    fun saveTrustLevels(){
+        viewModelScope.launch {
+            context.saveStringToDataStore(
+                "trustLevels",
+                buildString {
+                    _trustLevels.value.forEachIndexed {id, it ->
+                        append(it.toString() + if(id != _trustLevels.value.lastIndex) "_" else "")
+                    }
+                }
+            )
+        }
     }
 
     //average
@@ -145,7 +162,6 @@ constructor(
     }
 
     fun setSelectedData(index: Int){
-        println("")
         _selectedDataIndexState.value = index
     }
 
@@ -180,7 +196,7 @@ constructor(
         setDayPanelExpansion(false)
         viewModelScope.launch {
             _isRefreshingState.value = true
-            setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain })
+            setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain }, trustLevels = _trustLevels.value)
             _isRefreshingState.value = false
         }
     }
@@ -226,6 +242,12 @@ constructor(
             val cachedLocation = Location.fromString(context.readStringFromDataStore("location"))
             if(cachedLocation != null){
                 setupDataFlows(location = cachedLocation, domains = repository.getCachedDomains())
+            }
+
+            val cachedTrustLevels = context.readStringFromDataStore("trustLevels")
+            if(cachedTrustLevels != null){
+                val split = cachedTrustLevels.split("_")
+                setTrustLevels(split.map { it.toDouble() })
             }
         }
     }
