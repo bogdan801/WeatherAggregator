@@ -74,7 +74,7 @@ constructor(
     private val _dataListState = mutableStateListOf<WeatherDataState>()
     val dataListState: List<WeatherDataState>  = _dataListState
 
-    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false, trustLevels: List<Double> = listOf()) {
+    fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false) {
         if(clearCache) runBlocking { repository.deleteAllWeatherData() }
 
         _selectedLocationState.value = location
@@ -86,11 +86,6 @@ constructor(
         jobs.clear()
         _dataListState.clear()
 
-        if(trustLevels.isEmpty() || trustLevels.size != domains.size) setTrustLevels(List(domains.size) { 1 / domains.size.toDouble() })
-        else {
-            setTrustLevels(trustLevels)
-            saveTrustLevels()
-        }
 
         domains.forEachIndexed{ id, domain ->
             _dataListState.add(WeatherDataState.IsLoading(d = WeatherData(domain = domain, url = domain.domain)))
@@ -103,6 +98,7 @@ constructor(
                 }
             )
         }
+        readTrustLevelsForDomains(domains)
     }
 
     //trust levels
@@ -118,7 +114,10 @@ constructor(
                 "trustLevels",
                 buildString {
                     _trustLevels.value.forEachIndexed {id, it ->
-                        append(it.toString() + if(id != _trustLevels.value.lastIndex) "_" else "")
+                        append(
+                            "${dataListState[id].data.domain.ordinal}:${it}" +
+                            if(id != _trustLevels.value.lastIndex) "_" else ""
+                        )
                     }
                 }
             )
@@ -196,7 +195,7 @@ constructor(
         setDayPanelExpansion(false)
         viewModelScope.launch {
             _isRefreshingState.value = true
-            setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain }, trustLevels = _trustLevels.value)
+            setupDataFlows(_selectedLocationState.value, _dataListState.map { it.data.domain })
             _isRefreshingState.value = false
         }
     }
@@ -233,8 +232,66 @@ constructor(
                 it.data.domain
             }
         clearSelection()
-        setupDataFlows(_selectedLocationState.value, remainingDomains)
+        setupDataFlows(location = _selectedLocationState.value, domains = remainingDomains, clearCache = true)
     }
+
+    private fun readTrustLevelsForDomains(domains: List<WeatherSourceDomain>){
+        viewModelScope.launch {
+            val cachedTrustLevels = context.readStringFromDataStore("trustLevels")
+            if(cachedTrustLevels != null && cachedTrustLevels.isNotBlank()){
+                val split = cachedTrustLevels.split("_")
+                val trustLevelsMap = buildMap {
+                    split.forEach {
+                        val pair = it.split(":")
+                        put(pair[0].toInt(), pair[1].toDouble())
+                    }
+                }
+                val newTrustLevels = buildList {
+                    val equalPartSize = 1.0/domains.size
+                    val sizeDifference = domains.size - split.size
+
+                    var sumOfDomainsLeft = 0.0
+                    trustLevelsMap.forEach { (domainID, value) ->
+                        sumOfDomainsLeft += if(domains.contains(WeatherSourceDomain.values()[domainID])) value else 0.0
+                    }
+
+                    domains.forEach { domain ->
+                        if(trustLevelsMap[domain.ordinal] != null){
+                            val level = if(domains.size > split.size){
+                                trustLevelsMap[domain.ordinal]!! * (1.0 - (equalPartSize * sizeDifference))
+                            }
+                            else if(domains.size < split.size){
+                                trustLevelsMap[domain.ordinal]!! * (1.0/sumOfDomainsLeft)
+                            }
+                            else trustLevelsMap[domain.ordinal]!!
+                            add(level)
+                        }
+                        else {
+                            add(equalPartSize)
+                        }
+                    }
+                }
+                setTrustLevels(formatTrustLevels(newTrustLevels))
+            }
+            else{
+                setTrustLevels(List(domains.size) { 1.0/domains.size })
+            }
+            //saveTrustLevels()
+        }
+    }
+
+    private fun formatTrustLevels(levels: List<Double>) = if (levels.any { it < 0.1 }) {
+        val indices = levels.indices.filter { levels[it] < 0.1 }
+        val maxIndex = levels.indexOf(levels.max())
+        val newLevels = levels.toMutableList().apply {
+            indices.forEach { index ->
+                val difference = 0.1 - levels[index]
+                this[index] = 0.1
+                this[maxIndex] -= difference
+            }
+        }
+        newLevels
+    } else levels
 
 
     init {
@@ -243,12 +300,7 @@ constructor(
             if(cachedLocation != null){
                 setupDataFlows(location = cachedLocation, domains = repository.getCachedDomains())
             }
-
-            val cachedTrustLevels = context.readStringFromDataStore("trustLevels")
-            if(cachedTrustLevels != null){
-                val split = cachedTrustLevels.split("_")
-                setTrustLevels(split.map { it.toDouble() })
-            }
+            readTrustLevelsForDomains(dataListState.map { it.data.domain })
         }
     }
 }
