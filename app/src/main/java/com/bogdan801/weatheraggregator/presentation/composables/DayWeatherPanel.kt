@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.presentation.composables
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.domain.model.DayWeatherCondition
@@ -29,6 +31,7 @@ import com.bogdan801.weatheraggregator.presentation.composables.repeatable.Expan
 fun DayWeatherPanel(
     modifier: Modifier = Modifier,
     data: DayWeatherCondition,
+    height: Dp,
     isExpanded: Boolean = false,
     onExpandClick: () -> Unit = {},
     slideRight: Boolean = true
@@ -36,9 +39,11 @@ fun DayWeatherPanel(
     val localDensity = LocalDensity.current
     var columnWidth by remember { mutableStateOf(0.dp) }
     Column(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            columnWidth = with(localDensity) { coordinates.size.width.toDp() }
-        }
+        modifier = modifier
+            .height(height)
+            .onGloballyPositioned { coordinates ->
+                columnWidth = with(localDensity) { coordinates.size.width.toDp() }
+            }
     ) {
         AnimatedContent(
             targetState = data,
@@ -59,6 +64,12 @@ fun DayWeatherPanel(
                 )
             }
         ) { newData ->
+            val slicesHeight = height - 40.dp
+            val heightState = animateDpAsState(
+                targetValue = if (!isExpanded) (slicesHeight / 4f) * 7f else slicesHeight,
+                animationSpec = tween(200)
+            )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,6 +81,7 @@ fun DayWeatherPanel(
                         .fillMaxHeight()
                         .width(100.dp),
                     isExpanded = isExpanded,
+                    externalHeightState = heightState,
                     displayTitles = true
                 )
                 LazyRow(modifier = Modifier
@@ -90,6 +102,7 @@ fun DayWeatherPanel(
                                     else MaterialTheme.colors.secondary
                                 ),
                             isExpanded = isExpanded,
+                            externalHeightState = heightState,
                             data = slice
                         )
                     }

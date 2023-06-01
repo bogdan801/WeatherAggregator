@@ -301,7 +301,6 @@ fun HomeScreen(
                                                     modifier = Modifier
                                                         .align(Alignment.TopCenter)
                                                         .fillMaxWidth()
-                                                        .height(heightOfPanel)
                                                         .placeholder(
                                                             visible = viewModel.currentDataState.isLoading,
                                                             color = MaterialTheme.colors.surface.copy(
@@ -311,6 +310,7 @@ fun HomeScreen(
                                                             highlight = PlaceholderHighlight.shimmer()
                                                         ),
                                                     data = viewModel.selectedDay,
+                                                    height = heightOfPanel,
                                                     isExpanded = viewModel.isDayPanelExpanded.value,
                                                     onExpandClick = {
                                                         if(!viewModel.currentDataState.isLoading) {

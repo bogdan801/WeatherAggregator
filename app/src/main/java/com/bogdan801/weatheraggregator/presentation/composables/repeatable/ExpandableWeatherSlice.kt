@@ -24,23 +24,25 @@ import com.bogdan801.weatheraggregator.domain.model.Wind
 fun ExpandableWeatherSlice(
     modifier: Modifier,
     isExpanded: Boolean = false,
+    externalHeightState: State<Dp>? = null,
     data: WeatherSlice? = null,
     displayTitles: Boolean = data == null,
     displayDayTitle: Boolean = false,
     calculatedItemHeight: (Dp) -> Unit = {}
 ) {
     BoxWithConstraints(modifier = modifier.clipToBounds()) {
-        val columnHeight by animateDpAsState(
-            targetValue = if(!isExpanded) (maxHeight / 4f) * 7f else maxHeight,
-            animationSpec = tween(200)
-        )
+        val columnHeight = externalHeightState
+            ?: animateDpAsState(
+                targetValue = if (!isExpanded) (maxHeight / 4f) * 7f else maxHeight,
+                animationSpec = tween(200)
+            )
         val height = maxHeight / 7
         calculatedItemHeight(height)
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .requiredHeight(columnHeight)
-                .offset(y = (columnHeight - maxHeight) / 2)
+                .requiredHeight(columnHeight.value)
+                .offset(y = (columnHeight.value - maxHeight) / 2)
                 .fillMaxWidth()
                 .padding(start = if (displayTitles) 8.dp else 0.dp),
             horizontalAlignment = if(displayTitles) Alignment.Start else Alignment.CenterHorizontally,
