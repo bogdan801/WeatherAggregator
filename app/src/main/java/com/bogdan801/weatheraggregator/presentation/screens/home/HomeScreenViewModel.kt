@@ -72,7 +72,9 @@ constructor(
     private val jobs = mutableListOf<Job>()
 
     private val _dataListState = mutableStateListOf<WeatherDataState>()
-    val dataListState: List<WeatherDataState>  = _dataListState
+    val dataListState: List<WeatherDataState>  by derivedStateOf {
+        _dataListState
+    }
 
     fun setupDataFlows(location: Location, domains: List<WeatherSourceDomain>, clearCache: Boolean = false) {
         if(clearCache) runBlocking { repository.deleteAllWeatherData() }
@@ -99,6 +101,7 @@ constructor(
             )
         }
         readTrustLevelsForDomains(domains)
+        initExpandedCardsList(_dataListState.size)
     }
 
     //trust levels
@@ -200,7 +203,21 @@ constructor(
         }
     }
 
-    //selected data cards
+    //data source cards
+    private val _expandedCards = mutableStateOf(listOf<Boolean>())
+    val expandedCards: State<List<Boolean>> = _expandedCards
+
+    private fun initExpandedCardsList(size: Int){
+        if(size != 0 && _expandedCards.value.size != size) _expandedCards.value = List(size) { false }
+    }
+
+    fun expandDataSourceCard(state: Boolean, index: Int){
+        if(_expandedCards.value.isNotEmpty()) {
+            _expandedCards.value = _expandedCards.value.toMutableList().apply { this[index] = state }
+        }
+    }
+
+
     private val _selectedCards = mutableStateListOf<Int>()
     val selectedCards by derivedStateOf {
         _selectedCards.toImmutableList()
@@ -276,7 +293,6 @@ constructor(
             else{
                 setTrustLevels(List(domains.size) { 1.0/domains.size })
             }
-            //saveTrustLevels()
         }
     }
 

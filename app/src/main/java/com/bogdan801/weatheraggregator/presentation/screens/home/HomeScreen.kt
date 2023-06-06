@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -281,9 +280,13 @@ fun HomeScreen(
                                                             dataStateList = listOf(viewModel.averageData) + viewModel.dataListState,
                                                             selectedIndex = viewModel.selectedDataIndexState.value,
                                                             onDataSelected = { index, _ ->
+                                                                val prevDaysSize = viewModel.currentDataState.data.weatherByDates.size
                                                                 viewModel.setSelectedData(index)
-                                                                viewModel.setSelectedDay(0) { shouldSlideRight ->
-                                                                    slideRight = shouldSlideRight
+                                                                val newDaysSize = viewModel.currentDataState.data.weatherByDates.size
+                                                                if(prevDaysSize != newDaysSize){
+                                                                    viewModel.setSelectedDay(0) { shouldSlideRight ->
+                                                                        slideRight = shouldSlideRight
+                                                                    }
                                                                 }
                                                             }
                                                         )
@@ -379,7 +382,6 @@ fun HomeScreen(
                                                         dataState.data.domain.ordinal
                                                     }
                                                 ){ index, item ->
-                                                    var isExpanded by rememberSaveable { mutableStateOf(false) }
                                                     DataSourceCard(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
@@ -389,8 +391,8 @@ fun HomeScreen(
                                                             ),
                                                         dataState = item,
                                                         isSelected = viewModel.selectedCards.contains(index),
-                                                        isExpanded = isExpanded,
-                                                        onExpandClick = {isExpanded = !it},
+                                                        isExpanded = if(viewModel.expandedCards.value.isNotEmpty()) viewModel.expandedCards.value[index] else false,
+                                                        onExpandClick = {viewModel.expandDataSourceCard(!viewModel.expandedCards.value[index], index)},
                                                         onLongPress = {
                                                             viewModel.setDataCardSelection(index, true)
                                                         },

@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,8 +62,8 @@ fun DataSourceCard(
 
                 val cardHeight by animateDpAsState(
                     targetValue =
-                    if(isExpanded) 300.dp
-                    else 72.dp,
+                        if(isExpanded) 360.dp
+                        else 72.dp,
                     animationSpec = tween(200)
                 )
                 cardHeightState = cardHeight

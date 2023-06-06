@@ -36,7 +36,7 @@ fun ExpandableWeatherSlice(
                 targetValue = if (!isExpanded) (maxHeight / 4f) * 7f else maxHeight,
                 animationSpec = tween(200)
             )
-        val height = maxHeight / 7
+        val height = if(displayDayTitle) maxHeight / 8 else maxHeight / 7
         calculatedItemHeight(height)
         Column(
             modifier = Modifier
