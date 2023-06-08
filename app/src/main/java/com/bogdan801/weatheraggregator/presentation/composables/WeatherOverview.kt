@@ -23,7 +23,7 @@ import com.google.accompanist.placeholder.placeholder
 @Composable
 fun WeatherOverview(
     modifier: Modifier = Modifier,
-    locationName: String = "Desnianske,\nUkraine",
+    locationName: String = "Kyiv,\nUkraine",
     selectedDay: DayWeatherCondition,
     isLoading: Boolean = false
 ) {
@@ -100,7 +100,7 @@ fun WeatherOverview(
                                 )
                                 Text(
                                     modifier = Modifier.offset(y = (-20).dp),
-                                    text = day.skyCondition.textDescription,
+                                    text = day.skyCondition.getTextDescription(context),
                                     color = MaterialTheme.colors.onSurface,
                                     style = MaterialTheme.typography.h3
                                 )

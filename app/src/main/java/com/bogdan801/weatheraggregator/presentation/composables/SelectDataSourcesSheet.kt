@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.domain.model.Location
@@ -66,7 +67,7 @@ fun SelectDataSourcesSheet(
             contentAlignment = Alignment.Center
         ){
             Text(
-                text = "Select data sources",
+                text = stringResource(R.string.selectDataSources),
                 style = MaterialTheme.typography.subtitle2,
                 color = MaterialTheme.colors.onSurface
             )
@@ -116,7 +117,7 @@ fun SelectDataSourcesSheet(
                 enabled = isButtonEnabled
             ) {
                 Text(
-                    text = "SELECT",
+                    text = stringResource(R.string.select),
                     style = MaterialTheme.typography.body2,
                     color = if(isButtonEnabled) MaterialTheme.colors.onSecondary else MaterialTheme.colors.onSurface
                 )

@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.data.util
 
 import android.content.Context
 import androidx.core.text.isDigitsOnly
+import com.bogdan801.weatheraggregator.R
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import java.time.YearMonth
@@ -25,29 +26,29 @@ fun String.timeToHoursInt(): Int {
 }
 
 fun getShortMonthName(monthNumber: Int, context: Context): String = when(monthNumber){
-    1 ->  "Jan"
-    2 ->  "Feb"
-    3 ->  "Mar"
-    4 ->  "Apr"
-    5 ->  "May"
-    6 ->  "Jun"
-    7 ->  "Jul"
-    8 ->  "Aug"
-    9 ->  "Sep"
-    10 -> "Oct"
-    11 -> "Nov"
-    12 -> "Dec"
+    1 ->  context.getString(R.string.jan)
+    2 ->  context.getString(R.string.feb)
+    3 ->  context.getString(R.string.mar)
+    4 ->  context.getString(R.string.apr)
+    5 ->  context.getString(R.string.may)
+    6 ->  context.getString(R.string.jun)
+    7 ->  context.getString(R.string.jul)
+    8 ->  context.getString(R.string.aug)
+    9 ->  context.getString(R.string.sep)
+    10 -> context.getString(R.string.oct)
+    11 -> context.getString(R.string.nov)
+    12 -> context.getString(R.string.dec)
     else -> ""
 }
 
 fun getShortDayOfWeekName(dayOfWeekNumber: Int, context: Context): String = when(dayOfWeekNumber){
-    1 -> "Mon"
-    2 -> "Tue"
-    3 -> "Wen"
-    4 -> "Thu"
-    5 -> "Fri"
-    6 -> "Sat"
-    7 -> "Sun"
+    1 -> context.getString(R.string.mon)
+    2 -> context.getString(R.string.tue)
+    3 -> context.getString(R.string.wen)
+    4 -> context.getString(R.string.thu)
+    5 -> context.getString(R.string.fri)
+    6 -> context.getString(R.string.sat)
+    7 -> context.getString(R.string.sun)
     else -> ""
 }
 

@@ -1,10 +1,13 @@
 package com.bogdan801.weatheraggregator.domain.model
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.core.text.isDigitsOnly
+import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.domain.model.Cloudiness.*
 
 data class SkyCondition(
@@ -19,20 +22,19 @@ data class SkyCondition(
     val timeOfDay get() = _timeOfDay
     val descriptor get() = imageName.substring(3)
 
-    val textDescription: String
-        get() = when(_precipitation){
+    fun getTextDescription(context: Context): String  = when(_precipitation){
             Precipitation.None -> {
                 when(_cloudiness){
-                    Clear -> "Clear"
-                    LittleCloudy -> "Cloudy"
-                    CloudyWithClearing -> "Cloudy"
-                    Cloudy -> "Cloudy"
-                    Gloomy -> "Gloomy"
+                    Clear -> context.getString(R.string.clear)
+                    LittleCloudy -> context.getString(R.string.сloudy)
+                    CloudyWithClearing -> context.getString(R.string.сloudy)
+                    Cloudy -> context.getString(R.string.сloudy)
+                    Gloomy -> context.getString(R.string.gloomy)
                 }
             }
-            is Precipitation.Rain -> "Rainy"
-            is Precipitation.RainWithSnow -> "Rain With Snow"
-            is Precipitation.Snow -> "Snowy"
+            is Precipitation.Rain -> context.getString(R.string.rainy)
+            is Precipitation.RainWithSnow -> context.getString(R.string.rainWithSnow)
+            is Precipitation.Snow -> context.getString(R.string.snowy)
         }
 
     constructor(descriptor: String):this() {
@@ -146,6 +148,7 @@ data class SkyCondition(
         }
     }
 
+    @SuppressLint("DiscouragedApi")
     @Composable
     fun getPainterResource(): Painter {
         val context = LocalContext.current

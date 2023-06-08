@@ -34,7 +34,6 @@ fun TrustLevelsSelector(
             mutableStateOf(false)
         }
 
-
         val tempSectionsWidth = remember {
             mutableStateOf(
                 levels.map { level ->
@@ -56,19 +55,6 @@ fun TrustLevelsSelector(
                 levels.map { level -> "%,.0f".format((level * 100)) }
             )
         }
-
-        /*LaunchedEffect(key1 = levels){
-            tempSectionsWidth.value = levels.map { level ->
-                maxWidth * level.toFloat()
-            }
-
-            tempHandlesOffsets.value = List(levels.subList(0, levels.lastIndex).size) { index ->
-                maxWidth * levels.subList(0, index + 1).sum().toFloat()
-            }
-
-            tempPercentages.value = levels.map { level -> "%,.0f".format((level * 100)) }
-        }*/
-
 
         Row(modifier = Modifier
             .fillMaxSize()

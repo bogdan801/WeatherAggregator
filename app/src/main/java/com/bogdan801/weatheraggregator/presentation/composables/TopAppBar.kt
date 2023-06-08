@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.presentation.theme.Theme
@@ -43,7 +44,7 @@ fun TopAppBar(
             Row {
                 Icon(painter = painterResource(id = R.drawable.ic_location), contentDescription = "location")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Select location", style = MaterialTheme.typography.h4)
+                Text(text = stringResource(R.string.selectLocation), style = MaterialTheme.typography.h4)
             }
         }
 

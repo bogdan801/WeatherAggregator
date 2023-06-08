@@ -29,7 +29,7 @@ fun DataSourceHeader(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = stringResource(R.string.dataSources),
+            text = stringResource(R.string.dataSourcesTitle),
             color = MaterialTheme.colors.onSurface,
             style = MaterialTheme.typography.h3
         )

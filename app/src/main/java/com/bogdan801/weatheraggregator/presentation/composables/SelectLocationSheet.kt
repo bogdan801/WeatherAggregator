@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,7 +64,7 @@ fun SelectLocationSheet(
                 },
                 placeholder = {
                     Text(
-                        text = "Type location...",
+                        text = stringResource(R.string.typeLocation),
                         color = MaterialTheme.colors.primary,
                         style = MaterialTheme.typography.subtitle1
                     )
