@@ -23,10 +23,12 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.presentation.composables.*
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptiveDoubleLayout
 import com.bogdan801.weatheraggregator.presentation.composables.layout.AdaptivePager
@@ -220,12 +222,16 @@ fun HomeScreen(
                                     //first page
                                     AdaptiveDoubleLayout(
                                         modifier = Modifier.fillMaxSize(),
-                                        placeholderText = if(viewModel.dataListState.isEmpty()) "Please select data sources" else "",
+                                        placeholderText = if(viewModel.dataListState.isEmpty()) stringResource(R.string.plsSelectDataSources) else "",
                                         firstPart = {
                                             WeatherOverview(
                                                 modifier = Modifier.fillMaxSize(),
                                                 selectedDay = viewModel.selectedDay,
-                                                locationName = viewModel.selectedLocation.value.name + ",\nUkraine",
+                                                locationName =
+                                                """
+                                                    ${viewModel.selectedLocation.value.name},
+                                                    ${stringResource(R.string.ukraine)}
+                                                """.trimIndent(),
                                                 isLoading = viewModel.currentDataState.isLoading
                                             )
                                         },
@@ -413,7 +419,7 @@ fun HomeScreen(
                                                         contentAlignment = Alignment.Center
                                                     ){
                                                         Text(
-                                                            text = "Please select data sources",
+                                                            text = stringResource(R.string.plsSelectDataSources),
                                                             color = MaterialTheme.colors.primary,
                                                             style = MaterialTheme.typography.h5
                                                         )
@@ -432,7 +438,7 @@ fun HomeScreen(
                             contentAlignment = Alignment.Center
                         ){
                             Text(
-                                text = "Please select your location",
+                                text = stringResource(R.string.plsSelectLocation),
                                 color = MaterialTheme.colors.primary,
                                 style = MaterialTheme.typography.h5
                             )
@@ -472,7 +478,7 @@ fun HomeScreen(
                                         top = 8.dp,
                                         bottom = 4.dp
                                     ),
-                                text = "Trust levels",
+                                text = stringResource(R.string.trustLevels),
                                 style = MaterialTheme.typography.overline,
                                 color = MaterialTheme.colors.onSurface
                             )

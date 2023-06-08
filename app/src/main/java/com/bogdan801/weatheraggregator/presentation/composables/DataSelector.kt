@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.presentation.screens.home.WeatherDataState
@@ -65,7 +66,7 @@ fun DataSelector(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = weatherDataState.data.domain.name,
+                            text = if(weatherDataState.data.domain.name == "Average") stringResource(R.string.average) else weatherDataState.data.domain.name,
                             maxLines = 1,
                             color = textColor,
                             overflow = TextOverflow.Ellipsis,

@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
@@ -86,7 +87,7 @@ fun BottomBar(
                         }
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = "Weather",
+                            text = stringResource(R.string.weather),
                             style = MaterialTheme.typography.caption,
                             color = MaterialTheme.colors.primary,
                             textAlign = TextAlign.Center
@@ -132,7 +133,7 @@ fun BottomBar(
                         }
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = "Data Sources",
+                            text = stringResource(R.string.dataSources),
                             style = MaterialTheme.typography.caption,
                             color = MaterialTheme.colors.primary
                         )
@@ -196,7 +197,7 @@ fun BottomBar(
                         }
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = "Weather",
+                            text = stringResource(R.string.weather),
                             style = MaterialTheme.typography.caption,
                             color = MaterialTheme.colors.primary,
                             textAlign = TextAlign.Center
@@ -242,7 +243,7 @@ fun BottomBar(
                         }
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = "Data Sources",
+                            text = stringResource(R.string.dataSources),
                             style = MaterialTheme.typography.caption,
                             color = MaterialTheme.colors.primary
                         )

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Погода в Україні</string>
+    <string name="ukraine">Україна</string>
+    <string name="plsSelectDataSources">Будь ласка, оберіть джерела даних</string>
+    <string name="plsSelectLocation">Будь ласка, оберіть ваш населений пункт</string>
+    <string name="trustLevels">Рівень довіри</string>
+    <string name="day">День</string>
+    <string name="time">Час</string>
+    <string name="cloudiness">Хмарність</string>
+    <string name="temperature">Температура</string>
+    <string name="precipitation">Опади, %</string>
+    <string name="pressure">Тиск, мм</string>
+    <string name="humidity">Вологість, %</string>
+    <string name="wind">Вітер, м/с</string>
+    <string name="weather">Погода</string>
+    <string name="dataSources">Джерела даних</string>
+    <string name="average">Сумарно</string>
+    <string name="lessDetails">Менш детально</string>
+    <string name="moreDetails">Більш детально</string>
+</resources>

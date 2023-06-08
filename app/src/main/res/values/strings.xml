@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">Weather Aggregator</string>
+    <string name="app_name">Weather In Ukraine</string>
+    <string name="ukraine">Ukraine</string>
+    <string name="plsSelectDataSources">Please select data sources</string>
+    <string name="plsSelectLocation">Please select your location</string>
+    <string name="trustLevels">Trust levels</string>
+    <string name="day">Day</string>
+    <string name="time">Time</string>
+    <string name="cloudiness">Cloudiness</string>
+    <string name="temperature">Temperature</string>
+    <string name="precipitation">Precipitation, %</string>
+    <string name="pressure">Pressure, mm</string>
+    <string name="humidity">Humidity, %</string>
+    <string name="wind">Wind, m/s</string>
+    <string name="weather">Weather</string>
+    <string name="dataSources">Data Sources</string>
+    <string name="average">Average</string>
+    <string name="lessDetails">Less Details</string>
+    <string name="moreDetails">More Details</string>
 </resources>

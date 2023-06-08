@@ -5,7 +5,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
@@ -14,7 +13,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.bogdan801.weatheraggregator.R
 
 @Composable
 fun DataSourceHeader(
@@ -28,7 +29,7 @@ fun DataSourceHeader(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Data sources",
+            text = stringResource(R.string.dataSources),
             color = MaterialTheme.colors.onSurface,
             style = MaterialTheme.typography.h3
         )

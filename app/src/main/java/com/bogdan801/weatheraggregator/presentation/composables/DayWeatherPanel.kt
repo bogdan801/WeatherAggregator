@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
@@ -135,7 +136,7 @@ fun DayWeatherPanel(
                     }
                 ) { isTextForExpanded ->
                     Text(
-                        text = if(isTextForExpanded) "Less Details" else "More Details",
+                        text = if(isTextForExpanded) stringResource(R.string.lessDetails) else stringResource(R.string.moreDetails),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.65f)
                     )

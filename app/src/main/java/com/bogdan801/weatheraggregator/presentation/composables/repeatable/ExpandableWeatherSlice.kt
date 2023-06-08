@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bogdan801.weatheraggregator.R
@@ -55,7 +56,7 @@ fun ExpandableWeatherSlice(
                         contentAlignment = Alignment.CenterStart
                     ){
                         Text(
-                            text = "Day",
+                            text = stringResource(R.string.day),
                             style = MaterialTheme.typography.h6,
                             color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                         )
@@ -67,7 +68,7 @@ fun ExpandableWeatherSlice(
                     contentAlignment = Alignment.CenterStart
                 ){
                     Text(
-                        text = "Time",
+                        text = stringResource(R.string.time),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -77,7 +78,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Cloudiness",
+                    Text(
+                        text = stringResource(R.string.cloudiness),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -87,7 +89,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Temperature",
+                    Text(
+                        text = stringResource(R.string.temperature),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -97,7 +100,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Precipitation, %",
+                    Text(
+                        text = stringResource(R.string.precipitation),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -107,7 +111,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Pressure, mm",
+                    Text(
+                        text = stringResource(R.string.pressure),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -117,7 +122,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Humidity, %",
+                    Text(
+                        text = stringResource(R.string.humidity),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
@@ -127,7 +133,8 @@ fun ExpandableWeatherSlice(
                     modifier = Modifier.height(height),
                     contentAlignment = Alignment.CenterStart
                 ){
-                    Text(text = "Wind, m/s",
+                    Text(
+                        text = stringResource(R.string.wind),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                     )
