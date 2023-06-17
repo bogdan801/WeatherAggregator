@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik
 
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
+import com.bogdan801.weatheraggregator.data.remote.ParsingException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
@@ -119,10 +120,10 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
 }
 
 private suspend fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): SkyCondition {
-    if(sinoptikDescriptor.length != 4) throw Exception("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
-    if(sinoptikDescriptor[0] != 'd' && sinoptikDescriptor[0] != 'n') throw Exception("Invalid Sinoptik sky descriptor: '${sinoptikDescriptor[0]}'")
-    if(sinoptikDescriptor.filter { it.isDigit() }.length != 3) throw Exception("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
-    if(sinoptikDescriptor[1] == '0' && (sinoptikDescriptor[2] != '0' || sinoptikDescriptor[3] != '0'))  throw Exception("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
+    if(sinoptikDescriptor.length != 4) throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
+    if(sinoptikDescriptor[0] != 'd' && sinoptikDescriptor[0] != 'n') throw ParsingException("Invalid Sinoptik sky descriptor: '${sinoptikDescriptor[0]}'")
+    if(sinoptikDescriptor.filter { it.isDigit() }.length != 3) throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
+    if(sinoptikDescriptor[1] == '0' && (sinoptikDescriptor[2] != '0' || sinoptikDescriptor[3] != '0'))  throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
 
     val timeOfDay= when(sinoptikDescriptor[0]){
         'd' -> TimeOfDay.Day

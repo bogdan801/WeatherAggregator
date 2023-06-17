@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.data.remote.parsing.meta
 
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
+import com.bogdan801.weatheraggregator.data.remote.ParsingException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.*
@@ -103,7 +104,7 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
 
 private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
     val parts = metaDescriptor.split("-")
-    if(parts.size != 3) throw Exception("Invalid Meta sky descriptor: $metaDescriptor")
+    if(parts.size != 3) throw ParsingException("Invalid Meta sky descriptor: $metaDescriptor")
 
     val cloudLevel = parts[1].last().digitToInt()
 
@@ -117,7 +118,7 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
                 3 -> Cloudiness.CloudyWithClearing
                 4 -> Cloudiness.Cloudy
                 5 -> Cloudiness.Gloomy
-                else -> throw Exception("Invalid Meta sky descriptor: ${parts[1]}")
+                else -> throw ParsingException("Invalid Meta sky descriptor: ${parts[1]}")
             }
 
             val precipitationType = parts[2].filter { !it.isDigit() }
@@ -141,7 +142,7 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
                 3 -> Cloudiness.CloudyWithClearing
                 4 -> Cloudiness.CloudyWithClearing
                 5 -> Cloudiness.CloudyWithClearing
-                else -> throw Exception("Invalid Meta sky descriptor: ${parts[1]}")
+                else -> throw ParsingException("Invalid Meta sky descriptor: ${parts[1]}")
             }
 
             val precipitationType = parts[2].filter { !it.isDigit() }
@@ -156,6 +157,6 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
 
             SkyCondition(cloudiness, precipitation, timeOfDay)
         }
-        else -> throw Exception("Invalid Meta sky descriptor: ${parts[0]}")
+        else -> throw ParsingException("Invalid Meta sky descriptor: ${parts[0]}")
     }
 }

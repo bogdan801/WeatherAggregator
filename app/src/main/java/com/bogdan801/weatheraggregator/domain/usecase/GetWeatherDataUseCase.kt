@@ -1,6 +1,7 @@
 package com.bogdan801.weatheraggregator.domain.usecase
 
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
+import com.bogdan801.weatheraggregator.data.remote.ParsingException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
 import com.bogdan801.weatheraggregator.data.util.getCurrentDate
 import com.bogdan801.weatheraggregator.domain.model.Location
@@ -69,6 +70,14 @@ class GetWeatherDataUseCase @Inject constructor(
             emit(
                 WeatherDataState.Error(
                     message = "Не вдалося отримати дані, спробуйте ще раз",
+                    d = cachedData
+                )
+            )
+        }
+        catch (e: ParsingException){
+            emit(
+                WeatherDataState.Error(
+                    message = "Проблема з зчитуванням даних зі сторінки сайту",
                     d = cachedData
                 )
             )
