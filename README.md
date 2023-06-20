@@ -6,10 +6,10 @@ An app to collect, average out and display the weather information from differen
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Features
-- Displaying weather data from diffrent sources
+- Displaying weather data from different sources
 - Easy way to compare weather data between all sources 
-- Averaging out the data to make a forcast you trust
-- Setting trust levels for each data source to influence averaged result
+- Averaging out the data to make a forecast you trust
+- Setting trust levels for each data source to influence the averaged result
 - Night mode support
 
 ## Overview
