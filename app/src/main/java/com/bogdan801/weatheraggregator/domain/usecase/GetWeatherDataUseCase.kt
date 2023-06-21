@@ -82,6 +82,14 @@ class GetWeatherDataUseCase @Inject constructor(
                 )
             )
         }
+        catch (e: Exception){
+            emit(
+                WeatherDataState.Error(
+                    message = (e.message?:"") + "\n"+ e.stackTraceToString(),
+                    d = cachedData
+                )
+            )
+        }
     }
 }
 

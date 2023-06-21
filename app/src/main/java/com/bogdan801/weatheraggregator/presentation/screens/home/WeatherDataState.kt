@@ -1,7 +1,9 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import androidx.annotation.Keep
 import com.bogdan801.weatheraggregator.domain.model.WeatherData
 
+@Keep
 sealed class WeatherDataState(
     val data: WeatherData = WeatherData(),
     val isLoading: Boolean = false,

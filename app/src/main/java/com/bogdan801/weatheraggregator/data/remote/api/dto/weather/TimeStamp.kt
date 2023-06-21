@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
+import androidx.annotation.Keep
 import com.bogdan801.weatheraggregator.data.util.toFormattedTime
 import com.bogdan801.weatheraggregator.domain.model.WeatherSlice
 import kotlinx.datetime.Instant
@@ -7,6 +8,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+@Keep
 data class TimeStamp(
     val clouds: Clouds,
     val dt: Int,

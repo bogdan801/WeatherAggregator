@@ -1,5 +1,8 @@
 package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
+import androidx.annotation.Keep
+
+@Keep
 data class Main(
     val feels_like: Double,
     val grnd_level: Int,

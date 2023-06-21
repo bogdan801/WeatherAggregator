@@ -1,7 +1,9 @@
 package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
+import androidx.annotation.Keep
 import com.bogdan801.weatheraggregator.domain.model.Wind
 
+@Keep
 data class WindInfo(
     val deg: Int,
     val gust: Double,

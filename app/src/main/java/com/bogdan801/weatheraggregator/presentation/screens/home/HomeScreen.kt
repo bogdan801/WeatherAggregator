@@ -2,6 +2,7 @@ package com.bogdan801.weatheraggregator.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -134,13 +135,6 @@ fun HomeScreen(
                 )
             )
         ) {
-            //current tab state
-            val pageFraction by remember {
-                derivedStateOf {
-                    pageState.currentPageOffset + pageState.currentPage.toFloat()
-                }
-            }
-
             val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isRefreshingState.value)
             SwipeRefresh(
                 state = swipeRefreshState,
@@ -335,8 +329,8 @@ fun HomeScreen(
                                     )
                                 }
                                 1 -> {
-                                    LaunchedEffect(pageFraction){
-                                        if(pageFraction < 1f && viewModel.cardsSelected){
+                                    LaunchedEffect(pageState.currentPage){
+                                        if(pageState.currentPage != 1 && viewModel.cardsSelected){
                                             viewModel.clearSelection()
                                         }
                                     }

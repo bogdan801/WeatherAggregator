@@ -1,11 +1,13 @@
 package com.bogdan801.weatheraggregator.data.remote.api.dto.weather
 
+import androidx.annotation.Keep
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDate
 import kotlinx.datetime.toLocalDateTime
 
+@Keep
 data class OpenWeatherDto(
     val city: City,
     val cnt: Int,
