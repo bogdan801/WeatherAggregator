@@ -102,9 +102,16 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
     }
 }
 
-private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
-    val parts = metaDescriptor.split("-")
-    if(parts.size != 3) throw ParsingException("Invalid Meta sky descriptor: $metaDescriptor")
+private fun getSkyConditionFromMeta(metaDescriptor: String): SkyCondition {
+    var parts = metaDescriptor.split("-")
+    var isStorm = false
+    if(parts.size != 3){
+        if(parts.size == 4 && parts[0] == "storm") {
+            parts = parts.subList(1, parts.size)
+            isStorm = true
+        }
+        else throw ParsingException("Invalid Meta sky descriptor: $metaDescriptor")
+    }
 
     val cloudLevel = parts[1].last().digitToInt()
 
@@ -122,7 +129,7 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
             }
 
             val precipitationType = parts[2].filter { !it.isDigit() }
-            val precipitationLevel = parts[2].last().digitToInt()
+            val precipitationLevel = if(isStorm) 6 else parts[2].last().digitToInt()
 
             val precipitation = when(precipitationType){
                 "osad" -> Precipitation.None
@@ -130,7 +137,6 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
                 "snow" -> Precipitation.Snow(SnowLevel.values()[precipitationLevel-1])
                 else   -> Precipitation.None
             }
-
             SkyCondition(cloudiness, precipitation, timeOfDay)
         }
         "night" -> {
@@ -146,7 +152,7 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
             }
 
             val precipitationType = parts[2].filter { !it.isDigit() }
-            val precipitationLevel = parts[2].last().digitToInt()
+            val precipitationLevel = if(isStorm) 6 else parts[2].last().digitToInt()
 
             val precipitation = when(precipitationType){
                 "osad" -> Precipitation.None
@@ -154,7 +160,6 @@ private suspend fun getSkyConditionFromMeta(metaDescriptor: String): SkyConditio
                 "snow" -> Precipitation.Snow(SnowLevel.values()[precipitationLevel-1])
                 else   -> Precipitation.None
             }
-
             SkyCondition(cloudiness, precipitation, timeOfDay)
         }
         else -> throw ParsingException("Invalid Meta sky descriptor: ${parts[0]}")
