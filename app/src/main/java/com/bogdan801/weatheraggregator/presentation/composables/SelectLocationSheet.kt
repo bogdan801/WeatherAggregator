@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -36,6 +37,7 @@ fun SelectLocationSheet(
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = sheetState.isVisible){
         if(!sheetState.isVisible){
@@ -81,15 +83,38 @@ fun SelectLocationSheet(
                     modifier = Modifier.offset(x = (-2).dp),
                     onClick = {
                         if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
-                        else scope.launch { sheetState.hide() }
+                        else {
+                            val deviceLocation = viewModel.getGetDeviceLocation(context)
+                            if(deviceLocation != null){
+                                onLocationSelected(deviceLocation)
+                                scope.launch {
+                                    delay(100)
+                                    viewModel.lazyColumnState.scrollToItem(0)
+                                    viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }
+                            }
+                        }
                     }
                 ) {
-                    Icon(
-                        modifier = Modifier.size(18.dp),
-                        painter = painterResource(id = R.drawable.ic_cancel),
-                        contentDescription = "",
-                        tint = MaterialTheme.colors.primary
-                    )
+                    if(viewModel.searchBarText.value.isNotBlank()){
+                        Icon(
+                            modifier = Modifier.size(18.dp),
+                            painter = painterResource(id = R.drawable.ic_cancel),
+                            contentDescription = "",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                    else {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            painter = painterResource(id = R.drawable.ic_location),
+                            contentDescription = "",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+
                 }
             }
         }

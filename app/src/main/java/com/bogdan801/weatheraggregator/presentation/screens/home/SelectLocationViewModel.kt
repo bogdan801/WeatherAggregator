@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import android.content.Context
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -111,6 +112,10 @@ constructor(
     fun selectLocation(oblastName: String, regionName:String, name: String) = runBlocking {
         delay(200)
         return@runBlocking repository.getLocation(oblastName, regionName, name)[0]
+    }
+
+    fun getGetDeviceLocation(context: Context): Location? {
+        TODO()
     }
 
     init {
