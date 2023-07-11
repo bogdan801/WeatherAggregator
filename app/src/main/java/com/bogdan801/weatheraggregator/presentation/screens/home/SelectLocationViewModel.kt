@@ -1,9 +1,14 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bogdan801.weatheraggregator.domain.model.Location
@@ -115,7 +120,16 @@ constructor(
     }
 
     fun getGetDeviceLocation(context: Context): Location? {
-        TODO()
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // MAGIC //
+
+
+
+
+        // MAGIC //
+
+        return null
     }
 
     init {

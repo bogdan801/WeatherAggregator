@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.presentation.composables
 
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,12 +22,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bogdan801.weatheraggregator.R
+import com.bogdan801.weatheraggregator.data.util.isLocationON
 import com.bogdan801.weatheraggregator.domain.model.Location
 import com.bogdan801.weatheraggregator.presentation.screens.home.SelectLocationViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class,
+    ExperimentalPermissionsApi::class
+)
 @Composable
 fun SelectLocationSheet(
     modifier: Modifier = Modifier,
@@ -79,22 +86,40 @@ fun SelectLocationSheet(
                     .width(60.dp),
                 contentAlignment = Alignment.Center
             ){
+                val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
                 IconButton(
                     modifier = Modifier.offset(x = (-2).dp),
                     onClick = {
                         if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
                         else {
-                            val deviceLocation = viewModel.getGetDeviceLocation(context)
-                            if(deviceLocation != null){
-                                onLocationSelected(deviceLocation)
-                                scope.launch {
-                                    delay(100)
-                                    viewModel.lazyColumnState.scrollToItem(0)
-                                    viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
+                            if(!isLocationON(context)!!){
+                                Toast.makeText(
+                                    context,
+                                    "Щоб автоматично визначити ваш населений пункт спочатку\n" +
+                                         "увімкіть місцезнаходження в налаштуваннях пристрою!",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            else{
+                                if (locationPermissionState.status.isGranted) {
+                                    val deviceLocation = viewModel.getGetDeviceLocation(context)
+                                    if (deviceLocation != null) {
+                                        onLocationSelected(deviceLocation)
+                                        scope.launch {
+                                            delay(100)
+                                            viewModel.lazyColumnState.scrollToItem(0)
+                                            viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
+                                        }
+                                    }
+                                }
+                                else{
+                                    Toast.makeText(context, "Дозвіл ще не надано!", Toast.LENGTH_SHORT).show()
+                                    locationPermissionState.launchPermissionRequest()
                                 }
                             }
+
                         }
                     }
                 ) {
