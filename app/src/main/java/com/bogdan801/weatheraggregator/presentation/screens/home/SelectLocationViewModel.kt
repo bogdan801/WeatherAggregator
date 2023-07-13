@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bogdan801.weatheraggregator.R
 import com.bogdan801.weatheraggregator.domain.model.Location
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -125,16 +126,20 @@ constructor(
         isGettingLocationLoading = true
         repository.getDeviceLocation(context){ location ->
             if (location == null) {
-                Toast.makeText(context, "Не вдалося отримати місцеположення", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.failedToGetLocation), Toast.LENGTH_SHORT).show()
             }
             else {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val determinedLocation = viewModelScope.async {
+                    val determinedLocation = async {
                         repository.getClosestLocation(location.latitude, location.longitude)
                     }
                     determinedLocation.await()
-                        ?.let { onLocationDetermined(it) }
-                        ?: Toast.makeText(context, "Не вдалося отримати місцеположення", Toast.LENGTH_SHORT).show()
+                        ?.let {
+                            launch(Dispatchers.Main){
+                                onLocationDetermined(it)
+                            }
+                        }
+                        ?: Toast.makeText(context, context.getString(R.string.failedToGetLocation), Toast.LENGTH_SHORT).show()
                 }
             }
             isGettingLocationLoading = false

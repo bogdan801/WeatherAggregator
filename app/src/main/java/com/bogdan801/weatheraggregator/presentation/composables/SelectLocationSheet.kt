@@ -28,11 +28,13 @@ import com.bogdan801.weatheraggregator.presentation.screens.home.SelectLocationV
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class,
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalAnimationApi::class,
+    ExperimentalComposeUiApi::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
@@ -94,20 +96,12 @@ fun SelectLocationSheet(
                         onClick = {
                             if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
                             else {
-                                if(!isLocationON(context)!!){
-                                    Toast.makeText(
-                                        context,
-                                        "Щоб автоматично визначити ваш населений пункт спочатку\n" +
-                                                "увімкіть місцезнаходження в налаштуваннях пристрою!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
+                                if(!isLocationON(context)!!)
+                                    Toast.makeText(context, context.getString(R.string.turnOnLocation), Toast.LENGTH_LONG).show()
                                 else{
                                     if (locationPermissionState.status.isGranted) {
                                         viewModel.getGetDeviceLocation(context){ deviceLocation->
-                                            scope.launch(Dispatchers.Main){
-                                                Toast.makeText(context,"Вашу локацію визначено як: " + deviceLocation.name, Toast.LENGTH_LONG).show()
-                                            }
+                                            Toast.makeText(context,context.getString(R.string.locationDeterminedAs) + deviceLocation.name, Toast.LENGTH_LONG).show()
                                             onLocationSelected(deviceLocation)
                                             scope.launch {
                                                 delay(100)
@@ -119,7 +113,7 @@ fun SelectLocationSheet(
                                         }
                                     }
                                     else{
-                                        Toast.makeText(context, "Дозвіл ще не надано!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.permissionNotGranted), Toast.LENGTH_SHORT).show()
                                         locationPermissionState.launchPermissionRequest()
                                     }
                                 }

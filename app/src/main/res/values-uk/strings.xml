@@ -20,7 +20,7 @@
     <string name="moreDetails">Більш детально</string>
     <string name="selectDataSources">Оберіть джерела даних</string>
     <string name="select">ОБРАТИ</string>
-    <string name="typeLocation">Введіть назву...</string>
+    <string name="typeLocation">Введіть назву…</string>
     <string name="selectLocation">Населений пункт</string>
     <string name="clear">Ясно</string>
     <string name="сloudy">Хмарно</string>
@@ -48,4 +48,8 @@
     <string name="sat">Суб</string>
     <string name="sun">Нед</string>
     <string name="dataSourcesTitle">Джерела даних</string>
+    <string name="turnOnLocation">Щоб автоматично визначити ваш населений пункт спочатку\\nувімкніть місцезнаходження в налаштуваннях пристрою!</string>
+    <string name="locationDeterminedAs">Вашу локацію визначено як: </string>
+    <string name="permissionNotGranted">Дозвіл ще не надано!</string>
+    <string name="failedToGetLocation">Не вдалося отримати місцеположення!</string>
 </resources>
