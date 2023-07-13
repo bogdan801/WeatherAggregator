@@ -102,4 +102,7 @@ interface Dao {
 
     @Query("SELECT * FROM LocationEntity WHERE name LIKE '%' || :prompt || '%' ORDER BY LENGTH(name) ASC")
     suspend fun searchLocations(prompt: String): List<LocationEntity>
+
+    @Query("SELECT * FROM LocationEntity ORDER BY ((lat - :latitude)*(lat - :latitude) + (lon - :longitude)*(lon - :longitude)) ASC LIMIT 1")
+    suspend fun getClosestLocation(latitude: Double, longitude: Double): LocationEntity?
 }

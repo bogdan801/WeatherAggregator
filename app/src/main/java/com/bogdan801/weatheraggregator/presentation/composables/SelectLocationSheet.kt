@@ -28,6 +28,7 @@ import com.bogdan801.weatheraggregator.presentation.screens.home.SelectLocationV
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -86,60 +87,68 @@ fun SelectLocationSheet(
                     .width(60.dp),
                 contentAlignment = Alignment.Center
             ){
-                val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
-                IconButton(
-                    modifier = Modifier.offset(x = (-2).dp),
-                    onClick = {
-                        if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
-                        else {
-                            if(!isLocationON(context)!!){
-                                Toast.makeText(
-                                    context,
-                                    "Щоб автоматично визначити ваш населений пункт спочатку\n" +
-                                         "увімкіть місцезнаходження в налаштуваннях пристрою!",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                            else{
-                                if (locationPermissionState.status.isGranted) {
-                                    val deviceLocation = viewModel.getGetDeviceLocation(context)
-                                    if (deviceLocation != null) {
-                                        onLocationSelected(deviceLocation)
-                                        scope.launch {
-                                            delay(100)
-                                            viewModel.lazyColumnState.scrollToItem(0)
-                                            viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
-                                            keyboardController?.hide()
-                                            focusManager.clearFocus()
-                                        }
-                                    }
+                if(!viewModel.isGettingLocationLoading){
+                    val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    IconButton(
+                        modifier = Modifier.offset(x = (-2).dp),
+                        onClick = {
+                            if(viewModel.searchBarText.value.isNotBlank()) viewModel.searchBarTextChanged("")
+                            else {
+                                if(!isLocationON(context)!!){
+                                    Toast.makeText(
+                                        context,
+                                        "Щоб автоматично визначити ваш населений пункт спочатку\n" +
+                                                "увімкіть місцезнаходження в налаштуваннях пристрою!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
                                 }
                                 else{
-                                    Toast.makeText(context, "Дозвіл ще не надано!", Toast.LENGTH_SHORT).show()
-                                    locationPermissionState.launchPermissionRequest()
+                                    if (locationPermissionState.status.isGranted) {
+                                        viewModel.getGetDeviceLocation(context){ deviceLocation->
+                                            scope.launch(Dispatchers.Main){
+                                                Toast.makeText(context,"Вашу локацію визначено як: " + deviceLocation.name, Toast.LENGTH_LONG).show()
+                                            }
+                                            onLocationSelected(deviceLocation)
+                                            scope.launch {
+                                                delay(100)
+                                                viewModel.lazyColumnState.scrollToItem(0)
+                                                viewModel.lazyRowState.scrollToItem(viewModel.path.value.lastIndex)
+                                                keyboardController?.hide()
+                                                focusManager.clearFocus()
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        Toast.makeText(context, "Дозвіл ще не надано!", Toast.LENGTH_SHORT).show()
+                                        locationPermissionState.launchPermissionRequest()
+                                    }
                                 }
                             }
-
+                        }
+                    ) {
+                        if(viewModel.searchBarText.value.isNotBlank()){
+                            Icon(
+                                modifier = Modifier.size(18.dp),
+                                painter = painterResource(id = R.drawable.ic_cancel),
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                        else {
+                            Icon(
+                                modifier = Modifier.size(32.dp),
+                                painter = painterResource(id = R.drawable.ic_location),
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.primary
+                            )
                         }
                     }
-                ) {
-                    if(viewModel.searchBarText.value.isNotBlank()){
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            painter = painterResource(id = R.drawable.ic_cancel),
-                            contentDescription = "",
-                            tint = MaterialTheme.colors.primary
-                        )
-                    }
-                    else {
-                        Icon(
-                            modifier = Modifier.size(32.dp),
-                            painter = painterResource(id = R.drawable.ic_location),
-                            contentDescription = "",
-                            tint = MaterialTheme.colors.primary
-                        )
-                    }
-
+                }
+                else {
+                    CircularProgressIndicator(
+                        modifier = modifier.padding(14.dp),
+                        strokeWidth = 3.dp
+                    )
                 }
             }
         }

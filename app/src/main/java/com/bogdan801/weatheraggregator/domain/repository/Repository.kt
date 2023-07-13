@@ -1,5 +1,7 @@
 package com.bogdan801.weatheraggregator.domain.repository
 
+import android.content.Context
+import com.bogdan801.weatheraggregator.data.localdb.entities.LocationEntity
 import com.bogdan801.weatheraggregator.data.remote.api.OpenWeatherApi
 import com.bogdan801.weatheraggregator.domain.model.*
 import kotlinx.coroutines.flow.Flow
@@ -35,4 +37,8 @@ interface Repository {
     //network
     suspend fun getWeatherDataFromNetwork(domain: WeatherSourceDomain, location: Location): WeatherData
     fun getApi():OpenWeatherApi
+
+    //location
+    fun getDeviceLocation(context: Context, onLocationReceived: (location: android.location.Location?) -> Unit)
+    suspend fun getClosestLocation(latitude: Double, longitude: Double): Location?
 }

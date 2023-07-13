@@ -1,5 +1,7 @@
 package com.bogdan801.weatheraggregator.data.repository
 
+import android.annotation.SuppressLint
+import android.content.Context
 import com.bogdan801.weatheraggregator.BuildConfig
 import com.bogdan801.weatheraggregator.data.localdb.Dao
 import com.bogdan801.weatheraggregator.data.mapper.*
@@ -9,6 +11,11 @@ import com.bogdan801.weatheraggregator.data.remote.parsing.meta.getWeatherDataFr
 import com.bogdan801.weatheraggregator.data.remote.parsing.sinoptik.getWeatherDataFromSinoptik
 import com.bogdan801.weatheraggregator.domain.model.*
 import com.bogdan801.weatheraggregator.domain.repository.Repository
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.OnTokenCanceledListener
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -138,5 +145,21 @@ class RepositoryImpl(private val dao: Dao, private val openWeatherApi: OpenWeath
     }
 
     override fun getApi():OpenWeatherApi = openWeatherApi
+
+    //LOCATION
+    @SuppressLint("MissingPermission")
+    override fun getDeviceLocation(context: Context, onLocationReceived: (location: android.location.Location?) -> Unit) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        fusedLocationClient.getCurrentLocation(
+            LocationRequest.PRIORITY_HIGH_ACCURACY,
+            object : CancellationToken() {
+                override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
+                override fun isCancellationRequested() = false
+            }
+        ).addOnSuccessListener(onLocationReceived)
+    }
+
+    override suspend fun getClosestLocation(latitude: Double, longitude: Double): Location?
+        = dao.getClosestLocation(latitude, longitude)?.toLocation()
 }
 

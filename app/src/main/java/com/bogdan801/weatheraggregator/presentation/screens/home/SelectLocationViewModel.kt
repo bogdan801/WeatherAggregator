@@ -1,22 +1,19 @@
 package com.bogdan801.weatheraggregator.presentation.screens.home
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import android.location.LocationManager
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.app.ActivityCompat
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bogdan801.weatheraggregator.domain.model.Location
 import com.bogdan801.weatheraggregator.domain.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -119,17 +116,29 @@ constructor(
         return@runBlocking repository.getLocation(oblastName, regionName, name)[0]
     }
 
-    fun getGetDeviceLocation(context: Context): Location? {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        // MAGIC //
+    var isGettingLocationLoading by mutableStateOf(false)
+        private set
 
-
-
-
-        // MAGIC //
-
-        return null
+    @SuppressLint("MissingPermission")
+    fun getGetDeviceLocation(context: Context, onLocationDetermined: (Location) -> Unit) {
+        isGettingLocationLoading = true
+        repository.getDeviceLocation(context){ location ->
+            if (location == null) {
+                Toast.makeText(context, "Не вдалося отримати місцеположення", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val determinedLocation = viewModelScope.async {
+                        repository.getClosestLocation(location.latitude, location.longitude)
+                    }
+                    determinedLocation.await()
+                        ?.let { onLocationDetermined(it) }
+                        ?: Toast.makeText(context, "Не вдалося отримати місцеположення", Toast.LENGTH_SHORT).show()
+                }
+            }
+            isGettingLocationLoading = false
+        }
     }
 
     init {
