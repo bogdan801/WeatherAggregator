@@ -1,7 +1,7 @@
 <img src="promo/eng/header/engHeader.png"/>
 
 # Weather in Ukraine
-An app to collect, average out and display the weather information from different weather sites in Ukraine and OpenWeather API
+An app to collect, average out, and display the weather information from different weather sites in Ukraine and OpenWeather API
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -13,7 +13,7 @@ An app to collect, average out and display the weather information from differen
 - Night mode support
 
 ## Overview
-### Weather forcast screen
+### Weather forecast screen
 <img src="promo/eng/phone/1-weather.png" width="270" height="585">
 
 
