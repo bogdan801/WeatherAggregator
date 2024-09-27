@@ -48,7 +48,7 @@
     <string name="sun">Sun</string>
     <string name="dataSourcesTitle">Data Sources</string>
     <string name="locationDeterminedAs">"Your location is determined as: "</string>
-    <string name="turnOnLocation">To automatically determine your place of residence,\\nfirst enable location in the device settings!</string>
+    <string name="turnOnLocation">To automatically determine your location,\\nfirst enable location in the device settings!</string>
     <string name="permissionNotGranted">Permission not yet granted!</string>
     <string name="failedToGetLocation">Failed to get location!</string>
 </resources>

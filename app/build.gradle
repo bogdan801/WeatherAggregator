@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.bogdan801.weatheraggregator"
         minSdk 26
-        targetSdk 33
-        versionCode 2
-        versionName "1.1"
+        targetSdk 34
+        versionCode 6
+        versionName "1.13"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -14,6 +14,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import java.net.UnknownHostException
+import kotlin.math.roundToInt
 
 suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withContext(Dispatchers.IO) {
     val url = "https://ua.sinoptik.ua" + location.sinoptikLink
@@ -29,10 +30,10 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
         val currentLocation = location.name
         val domain = WeatherSourceDomain.Sinoptik
 
-        val currentTemperature = (baseDocument.getElementsByClass("today-temp")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
+        val currentTemperature = (baseDocument.getElementsByClass("_6fYCPKSx")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
 
-        val iconSrc = baseDocument.getElementsByClass("img")[0].childNodes()[1].attributes()["src"]
-        val currentSkyCondition = getSkyConditionFromSinoptik(iconSrc.substring(iconSrc.lastIndex-7..iconSrc.lastIndex-4))
+        val iconSrc = baseDocument.getElementsByClass("kby+TyNs")[0].attributes()["src"]
+        val currentSkyCondition = getSkyConditionFromSinoptik(iconSrc.substring(iconSrc.lastIndex-12..iconSrc.lastIndex-9))
 
         val days = mutableListOf<DayWeatherCondition>()
         for (i in 0..4){
@@ -44,37 +45,40 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
                 .get()
 
 
-            val dayTopPanel = document.getElementById("bd${i+1}")!!
+            val dayTopPanel = document.getElementsByClass("D5LKqju5")[0].childNodes()[i]
 
-            val daySkyCondition = getSkyConditionFromSinoptik(dayTopPanel.getElementsByClass("weatherIco")[0].attributes()["class"].substring(11))
-            val dayTemperature = (dayTopPanel.getElementsByClass("max")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
-            val nightTemperature = (dayTopPanel.getElementsByClass("min")[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
+            val skyDescriptor = decryptIconDescriptor(dayTopPanel.childNodes()[3].childNodes()[0].attributes()["class"].split(" ")[1])
+            val daySkyCondition = getSkyConditionFromSinoptik(skyDescriptor)
+            val dayTemperature = (dayTopPanel.childNodes()[4].childNodes()[1].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
+            val nightTemperature = (dayTopPanel.childNodes()[4].childNodes()[0].childNodes()[1].childNodes()[0] as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
 
             val slices = mutableListOf<WeatherSlice>()
 
-            val weatherDetails = document.getElementsByClass("weatherDetails")[0].childNodes()[3]
+            val weatherDetails = document.getElementsByClass("mK1PSQn1")[0]
 
-            val timeRow = weatherDetails.childNodes()[1]
-            val temperatureRow = weatherDetails.childNodes()[5]
-            val iconsRow = weatherDetails.childNodes()[3]
-            val precipitationProbabilityRow = weatherDetails.childNodes()[15]
-            val pressureRow = weatherDetails.childNodes()[9]
-            val humidityRow = weatherDetails.childNodes()[11]
-            val windRow = weatherDetails.childNodes()[13]
+            val timeRow = weatherDetails.childNodes()[1].childNodes()[1]
+            val temperatureRow = weatherDetails.childNodes()[2].childNodes()[1]
+            val iconsRow = weatherDetails.childNodes()[2].childNodes()[0]
+            val precipitationProbabilityRow = weatherDetails.childNodes()[2].childNodes()[6]
+            val pressureRow = weatherDetails.childNodes()[2].childNodes()[3]
+            val humidityRow = weatherDetails.childNodes()[2].childNodes()[4]
+            val windRow = weatherDetails.childNodes()[2].childNodes()[5]
 
             timeRow.childNodes().forEachIndexed { index, node ->
                 if(node is Element){
                     val time = node.text().filter { it != ' ' }
-                    if(time == "15:00"){
-                        println()
-                    }
                     val temperature = (temperatureRow.childNodes()[index].childNodes()[0] as TextNode).text().filter { it.isDigit() ||  it == '-' }.toInt()
-                    val skyCondition = getSkyConditionFromSinoptik(iconsRow.childNodes()[index].childNodes()[1].attributes()["class"].substring(11))
+                    val descriptor = decryptIconDescriptor(
+                        input = iconsRow.childNodes()[index].childNodes()[0].childNodes()[0].attributes()["class"].split(" ").last(),
+                        isDay = time.split(":")[0].toInt() in 9..21,
+                        isSmall = true
+                    )
+                    val skyCondition = getSkyConditionFromSinoptik(descriptor)
                     val precipitationProbability = (precipitationProbabilityRow.childNodes()[index].childNodes()[0] as TextNode).text()
                     val pressure = (pressureRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
                     val humidity = (humidityRow.childNodes()[index].childNodes()[0] as TextNode).text().toInt()
-                    val windDir = windRow.childNodes()[index].childNodes()[1].attributes()["class"].toString().split('-')[1]
-                    val windPow = (windRow.childNodes()[index].childNodes()[1].childNodes()[0] as TextNode).text().toDouble().toInt()
+                    val windPow = (windRow.childNodes()[index].childNodes()[1] as TextNode).text().toDouble().roundToInt()
+                    val windDir = decryptWindDirection(windRow.childNodes()[index].childNodes()[0].attributes()["class"].split(" ")[1])
                     slices.add(
                         WeatherSlice(
                             time = if(time.length!=5) "0$time" else time,
@@ -115,6 +119,10 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
     }
     catch (e: HttpStatusException){
         throw WrongUrlException("Wrong URL. Status: ${e.statusCode}. URL: ${e.url}")
+    }
+    catch (e: Exception){
+        println(e.message)
+        throw e
     }
 
 }
@@ -175,4 +183,143 @@ private suspend fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): Sky
         precipitation,
         timeOfDay
     )
+}
+
+fun decryptIconDescriptor(input: String, isDay: Boolean = true, isSmall: Boolean = false): String {
+    val day = if(isDay) "d" else "n"
+    val code = if(isSmall){
+        when(input){
+            "mARr-SuW" -> "000"
+            "CeTPIiz1" -> "100"
+            "_0En556HG" -> "103"
+            "_5jY1iL1b" -> "110"
+            "epAkb3+y" -> "111"
+            "ZyLiEuGi" -> "112"
+            "A6rNPZa3" -> "120"
+            "lYvGD-O+" -> "121"
+            "C3OFN+pw" -> "122"
+            "jJGQRRaI" -> "130"
+            "_77vF1hsx" -> "131"
+            "inrriluk" -> "132"
+            "Qt4XNPSI" -> "140"
+            "bkWVwna1" -> "141"
+            "_2KU98Is+" -> "142"
+            "ZUUj4KIC" -> "200"
+            "--KV7Mu5" -> "210"
+            "CoQJVDvm" -> "211"
+            "nSX3SRap" -> "212"
+            "Nh7Vm1Yj" -> "220"
+            "NC+AzP3+" -> "221"
+            "epgsWMkF" -> "222"
+            "HAQxuG3q" -> "230"
+            "n3Fh0MLz" -> "231"
+            "_4WiizYF+" -> "232"
+            "gbqEUD52" -> "240"
+            "ELzveezc" -> "241"
+            "p-7HfLSk" -> "242"
+            "FRfVLUBE" -> "300"
+            "BxZpnMNW" -> "310"
+            "ujTcWkwz" -> "311"
+            "huhh8w0M" -> "312"
+            "XHhDosZ1" -> "320"
+            "b1x46Fkb" -> "321"
+            "i6T8OEuE" -> "322"
+            "xbDCDxN5" -> "330"
+            "_9Xede4hH" -> "331"
+            "jmCqP6R4" -> "332"
+            "H0vGEESC" -> "340"
+            "MfWAgA8v" -> "341"
+            "TK3eWMdo" -> "342"
+            "RUdvrp93" -> "400"
+            "sIgT9+8U" -> "410"
+            "eq2UxJmz" -> "411"
+            "_0GG3WOxj" -> "412"
+            "Z2umynFF" -> "420"
+            "VzrbN4ev" -> "421"
+            "LI2zthRv" -> "422"
+            "Uw0gN5+s" -> "430"
+            "cgKcHrDD" -> "431"
+            "hc0wM4jo" -> "432"
+            "GIekUyaE" -> "440"
+            "_6SsGfCP8" -> "441"
+            "lDpWGRbY" -> "442"
+            "xKt-30Ew" -> "500"
+            "HqSyHbck" -> "600"
+            else -> "000"
+        }
+    }
+    else {
+        when(input){
+            "_3qxUBVmk" -> "000"
+            "_5nCj7Uqa" -> "100"
+            "gWGRRmob" -> "103"
+            "_4Z8P78ae" -> "110"
+            "fEaTteXJ" -> "111"
+            "wKHYDDcL" -> "112"
+            "ucGqEanU" -> "120"
+            "bMFcRHFF" -> "121"
+            "trQO3IjU" -> "122"
+            "EirU3t2w" -> "130"
+            "njaKCinm" -> "131"
+            "+l5q1o2Q" -> "132"
+            "ipu3eVm3" -> "140"
+            "ED3HbrFP" -> "141"
+            "_1fTB63SG" -> "142"
+            "YBtWlRNQ" -> "200"
+            "U0C-qqAg" -> "210"
+            "QfB3RUrq" -> "211"
+            "_5aAqo7kT" -> "212"
+            "dtAUachG" -> "220"
+            "_1XCr2H9k" -> "221"
+            "OM-b0cp7" -> "222"
+            "uRNA8rbW" -> "230"
+            "kzU5a0Hn" -> "231"
+            "jl+hoB5l" -> "232"
+            "auMWfCOu" -> "240"
+            "ScBIrB+c" -> "241"
+            "ViKHDhO0" -> "242"
+            "OIpYZgRB" -> "300"
+            "UCBrppyQ" -> "310"
+            "_1Blb3ELy" -> "311"
+            "etq3tO5h" -> "312"
+            "ow10W+rs" -> "320"
+            "XUlB-x0o" -> "321"
+            "KcDc6Nph" -> "322"
+            "OXNz0hG7" -> "330"
+            "to53ItZd" -> "331"
+            "bpOHc0C-" -> "332"
+            "erQzfPBT" -> "340"
+            "fQY0rO0i" -> "341"
+            "BP0XMWyD" -> "342"
+            "OPA2VJPj" -> "400"
+            "Oqyd4tVk" -> "410"
+            "jr7YF526" -> "411"
+            "cZi-mhve" -> "412"
+            "J5Yif+YJ" -> "420"
+            "q856VOg5" -> "421"
+            "BikLrhTD" -> "422"
+            "dle+K+CW" -> "430"
+            "FvSuS6Zq" -> "431"
+            "TODqwaUS" -> "432"
+            "gSl5Sumg" -> "440"
+            "-Zk1gal3" -> "441"
+            "lBuC1ZI8" -> "442"
+            "unEfI11b" -> "500"
+            "-izVNJaS" -> "600"
+            else -> "000"
+        }
+    }
+    return day + code
+}
+
+fun decryptWindDirection(input: String): Int = when(input) {
+    "h3+v9bod" -> 0
+    "tbzCV4Ko" -> 1
+    "Qj2IQFSf" -> 2
+    "EIlfcmW3" -> 3
+    "kfTsjNwW" -> 4
+    "dmBec6hW" -> 5
+    "_8S3rzjg6" -> 6
+    "vxDsBpVV" -> 7
+    else -> 0
 }

@@ -1,5 +1,6 @@
 package com.bogdan801.weatheraggregator.domain.usecase
 
+import android.util.Log
 import com.bogdan801.weatheraggregator.data.remote.NoConnectionException
 import com.bogdan801.weatheraggregator.data.remote.ParsingException
 import com.bogdan801.weatheraggregator.data.remote.WrongUrlException
@@ -46,14 +47,14 @@ class GetWeatherDataUseCase @Inject constructor(
 
             repository.insertWeatherData(networkData)
 
-            repository.getWeatherDataByDomain(domain).cancellable().collect{ data ->
+            repository.getWeatherDataByDomain(domain).cancellable().collect { data ->
                 emit(WeatherDataState.Data(d = data))
             }
         }
         catch (e: WrongUrlException){
             emit(
                 WeatherDataState.Error(
-                    message = "Даний населений пункт не знайдено",
+                    message = "Виникла помилка з завантаженням даних з цього сайту",
                     d = cachedData
                 )
             )
@@ -83,6 +84,9 @@ class GetWeatherDataUseCase @Inject constructor(
             )
         }
         catch (e: Exception){
+            if(domain == WeatherSourceDomain.Sinoptik){
+                println(e.message)
+            }
             emit(
                 WeatherDataState.Error(
                     message = (e.message?:"") + "\n"+ e.stackTraceToString(),
