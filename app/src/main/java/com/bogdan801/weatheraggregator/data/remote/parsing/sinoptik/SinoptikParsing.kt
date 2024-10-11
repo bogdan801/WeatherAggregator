@@ -33,7 +33,8 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
         val currentTemperature = (baseDocument.getElementsByClass("_6fYCPKSx")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
 
         val iconSrc = baseDocument.getElementsByClass("kby+TyNs")[0].attributes()["src"]
-        val currentSkyCondition = getSkyConditionFromSinoptik(iconSrc.substring(iconSrc.lastIndex-12..iconSrc.lastIndex-9))
+        val d = iconSrc.split("/").last().split("-")[0].padEnd(4, '0')
+        val currentSkyCondition = getSkyConditionFromSinoptik(d)
 
         val days = mutableListOf<DayWeatherCondition>()
         for (i in 0..4){
@@ -128,10 +129,11 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
 }
 
 private suspend fun getSkyConditionFromSinoptik(sinoptikDescriptor: String): SkyCondition {
+    println(sinoptikDescriptor)
     if(sinoptikDescriptor.length != 4) throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
     if(sinoptikDescriptor[0] != 'd' && sinoptikDescriptor[0] != 'n') throw ParsingException("Invalid Sinoptik sky descriptor: '${sinoptikDescriptor[0]}'")
     if(sinoptikDescriptor.filter { it.isDigit() }.length != 3) throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
-    if(sinoptikDescriptor[1] == '0' && (sinoptikDescriptor[2] != '0' || sinoptikDescriptor[3] != '0'))  throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
+    if(sinoptikDescriptor[1] == '0' && (sinoptikDescriptor[2] != '0' || sinoptikDescriptor[3] != '0')) throw ParsingException("Invalid Sinoptik sky descriptor: $sinoptikDescriptor")
 
     val timeOfDay= when(sinoptikDescriptor[0]){
         'd' -> TimeOfDay.Day
@@ -189,6 +191,8 @@ fun decryptIconDescriptor(input: String, isDay: Boolean = true, isSmall: Boolean
     val day = if(isDay) "d" else "n"
     val code = if(isSmall){
         when(input){
+            "VuYyyGC6" -> "000"
+            "y5d1xtsg" -> "000"
             "mARr-SuW" -> "000"
             "CeTPIiz1" -> "100"
             "_0En556HG" -> "103"

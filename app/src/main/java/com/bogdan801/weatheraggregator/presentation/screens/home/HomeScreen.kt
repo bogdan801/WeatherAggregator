@@ -209,6 +209,7 @@ fun HomeScreen(
                                     end = if (!isPortrait) 104.dp else 0.dp
                                 ),
                             state = pageState,
+                            userScrollEnabled = false,
                             isHorizontal = isPortrait
                         ) { index ->
                             when(index){

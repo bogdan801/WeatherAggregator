@@ -11,6 +11,7 @@ fun AdaptivePager(
     count: Int,
     state: PagerState,
     isHorizontal: Boolean = true,
+    userScrollEnabled: Boolean = true,
     content: @Composable (PagerScope.(page: Int) -> Unit)
 ) {
     if(isHorizontal) {
@@ -18,6 +19,7 @@ fun AdaptivePager(
             count = count,
             modifier = modifier,
             state = state,
+            userScrollEnabled = userScrollEnabled,
             content = content
         )
     }
@@ -26,6 +28,7 @@ fun AdaptivePager(
             count = count,
             modifier = modifier,
             state = state,
+            userScrollEnabled = userScrollEnabled,
             content = content
         )
     }

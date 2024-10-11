@@ -76,6 +76,7 @@ class GetWeatherDataUseCase @Inject constructor(
             )
         }
         catch (e: ParsingException){
+            println(e.message)
             emit(
                 WeatherDataState.Error(
                     message = "Проблема з зчитуванням даних зі сторінки сайту",
@@ -84,9 +85,6 @@ class GetWeatherDataUseCase @Inject constructor(
             )
         }
         catch (e: Exception){
-            if(domain == WeatherSourceDomain.Sinoptik){
-                println(e.message)
-            }
             emit(
                 WeatherDataState.Error(
                     message = (e.message?:"") + "\n"+ e.stackTraceToString(),
