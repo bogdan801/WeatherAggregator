@@ -47,7 +47,7 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
                 .referrer("https://pogoda.meta.ua/ua")
                 .get()
 
-            val contents = document.getElementsByClass("city__forecast-col")
+            val contents = document.getElementsByClass("city__forecast-content")[0].children()
             val dayCard = baseDocument.getElementById(date.toString())
 
             val daySkyCondition = getSkyConditionFromMeta(dayCard!!.getElementsByClass("city__day-image")[0].childNodes()[1].attributes()["class"].substring(6))
@@ -56,7 +56,7 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
             val nightTemperature = (dayCard.getElementsByClass("city__day-temperature")[0].childNodes()[3].firstChild() as TextNode).text().filter { it.isDigit() || it == '-' }.toInt()
 
             val slices = mutableListOf<WeatherSlice>()
-            contents.forEach{ slice ->
+            contents.forEach { slice ->
                 val time = (slice.getElementsByClass("city__forecast-time")[0].childNodes()[0] as TextNode).text()
                 val skyCondition = getSkyConditionFromMeta(slice.getElementsByClass("city__forecast-icon icon")[0].childNodes()[1].attributes()["class"].substring(6))
                 val temperature = (slice.getElementsByClass("graph-data__value")[0].childNodes()[0] as TextNode).text().filter { it != ' ' && it != '+' }.toInt()
@@ -66,7 +66,6 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
                 val windPower = (slice.getElementsByClass("city__forecast-wind")[0].childNodes()[0] as TextNode).text().filter { it != ' ' }.toInt()
                 val windDirection = slice.getElementsByClass("city__forecast-wind")[0].childNodes()[1].attributes()["title"]
                 val wind = Wind.create(windDirection, windPower)
-
                 slices.add(
                     WeatherSlice(
                         time = time,
@@ -106,6 +105,10 @@ suspend fun getWeatherDataFromMeta(location: Location): WeatherData = withContex
     }
     catch (e: HttpStatusException){
         throw WrongUrlException("Wrong URL. Status: ${e.statusCode}. URL: ${e.url}")
+    }
+    catch (e: Exception){
+        println(e)
+        throw e
     }
 }
 
