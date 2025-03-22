@@ -30,9 +30,22 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
         val currentLocation = location.name
         val domain = WeatherSourceDomain.Sinoptik
 
-        val currentTemperature = (baseDocument.getElementsByClass("_6fYCPKSx")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
+        val currentState = baseDocument
+            .childNodes()[1]
+            .childNodes()[1]
+            .childNodes()[0]
+            .childNodes()[0]
+            .childNodes()[5]
+            .childNodes()[0]
+            .childNodes()[1]
+            .childNodes()[0]
+            .childNodes()[1]
 
-        val iconSrc = baseDocument.getElementsByClass("kby+TyNs")[0].attributes()["src"]
+        val currentTemperature = (currentState.childNodes()[2].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
+        //val currentTemperature = (baseDocument.getElementsByClass("_6fYCPKSx")[0].childNodes()[0] as TextNode).text().filter { it == '-' || it.isDigit() }.toInt()
+
+        //val iconSrc = baseDocument.getElementsByClass("kby+TyNs")[0].attributes()["src"]
+        val iconSrc = currentState.childNodes()[0].childNodes()[1].attributes()["src"]
         val d = iconSrc.split("/").last().split("-")[0].padEnd(4, '0')
         val currentSkyCondition = getSkyConditionFromSinoptik(d)
 
@@ -46,7 +59,7 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
                 .get()
 
 
-            val dayTopPanel = document.getElementsByClass("D5LKqju5")[0].childNodes()[i]
+            val dayTopPanel = document.getElementsByClass("DMP0kolW")[0].childNodes()[i]
 
             val skyDescriptor = decryptIconDescriptor(dayTopPanel.childNodes()[3].childNodes()[0].attributes()["class"].split(" ")[1])
             val daySkyCondition = getSkyConditionFromSinoptik(skyDescriptor)
@@ -55,7 +68,7 @@ suspend fun getWeatherDataFromSinoptik(location: Location): WeatherData = withCo
 
             val slices = mutableListOf<WeatherSlice>()
 
-            val weatherDetails = document.getElementsByClass("mK1PSQn1")[0]
+            val weatherDetails = document.getElementsByClass("iC5eqyQP")[0]
 
             val timeRow = weatherDetails.childNodes()[1].childNodes()[1]
             val temperatureRow = weatherDetails.childNodes()[2].childNodes()[1]
@@ -191,125 +204,123 @@ fun decryptIconDescriptor(input: String, isDay: Boolean = true, isSmall: Boolean
     val day = if(isDay) "d" else "n"
     val code = if(isSmall){
         when(input){
-            "VuYyyGC6" -> "000"
-            "y5d1xtsg" -> "000"
-            "mARr-SuW" -> "000"
-            "CeTPIiz1" -> "100"
-            "_0En556HG" -> "103"
-            "_5jY1iL1b" -> "110"
-            "epAkb3+y" -> "111"
-            "ZyLiEuGi" -> "112"
-            "A6rNPZa3" -> "120"
-            "lYvGD-O+" -> "121"
-            "C3OFN+pw" -> "122"
-            "jJGQRRaI" -> "130"
-            "_77vF1hsx" -> "131"
-            "inrriluk" -> "132"
-            "Qt4XNPSI" -> "140"
-            "bkWVwna1" -> "141"
-            "_2KU98Is+" -> "142"
-            "ZUUj4KIC" -> "200"
-            "--KV7Mu5" -> "210"
-            "CoQJVDvm" -> "211"
-            "nSX3SRap" -> "212"
-            "Nh7Vm1Yj" -> "220"
-            "NC+AzP3+" -> "221"
-            "epgsWMkF" -> "222"
-            "HAQxuG3q" -> "230"
-            "n3Fh0MLz" -> "231"
-            "_4WiizYF+" -> "232"
-            "gbqEUD52" -> "240"
-            "ELzveezc" -> "241"
-            "p-7HfLSk" -> "242"
-            "FRfVLUBE" -> "300"
-            "BxZpnMNW" -> "310"
-            "ujTcWkwz" -> "311"
-            "huhh8w0M" -> "312"
-            "XHhDosZ1" -> "320"
-            "b1x46Fkb" -> "321"
-            "i6T8OEuE" -> "322"
-            "xbDCDxN5" -> "330"
-            "_9Xede4hH" -> "331"
-            "jmCqP6R4" -> "332"
-            "H0vGEESC" -> "340"
-            "MfWAgA8v" -> "341"
-            "TK3eWMdo" -> "342"
-            "RUdvrp93" -> "400"
-            "sIgT9+8U" -> "410"
-            "eq2UxJmz" -> "411"
-            "_0GG3WOxj" -> "412"
-            "Z2umynFF" -> "420"
-            "VzrbN4ev" -> "421"
-            "LI2zthRv" -> "422"
-            "Uw0gN5+s" -> "430"
-            "cgKcHrDD" -> "431"
-            "hc0wM4jo" -> "432"
-            "GIekUyaE" -> "440"
-            "_6SsGfCP8" -> "441"
-            "lDpWGRbY" -> "442"
-            "xKt-30Ew" -> "500"
-            "HqSyHbck" -> "600"
+            "Y4vZD9qs" -> "000"
+            "cZLpxG-i" -> "100"
+            "qAXHVbEx" -> "103"
+            "W5Saxw6z" -> "110"
+            "TB82NYm3" -> "111"
+            "Sw5E4k8z" -> "112"
+            "i+EFhaNa" -> "120"
+            "Vjt2xQi3" -> "121"
+            "S12PYG6C" -> "122"
+            "_4seFxLui" -> "130"
+            "R7P2gycn" -> "131"
+            "b+pqjIat" -> "132"
+            "L8V8ARHi" -> "140"
+            "o7Fik5zM" -> "141"
+            "gCxa42NF" -> "142"
+            "Yiu4p5pr" -> "200"
+            "HMLbBzuU" -> "210"
+            "JsaQmfCg" -> "211"
+            "QNnTc-A9" -> "212"
+            "rXPRUSWq" -> "220"
+            "nvBqO-h3" -> "221"
+            "_59RY-K7U" -> "222"
+            "JZsniVMw" -> "230"
+            "H5DCoyR4" -> "231"
+            "rOPf1Zz0" -> "232"
+            "rkGtQNN-" -> "240"
+            "omQQdx1k" -> "241"
+            "Fwa6T8au" -> "242"
+            "B+NuAG9v" -> "300"
+            "_3SVMeRHh" -> "310"
+            "lAkiJCl1" -> "311"
+            "ygGKQp0x" -> "312"
+            "Y167c-Ac" -> "320"
+            "PuBjqv8s" -> "321"
+            "XCQGMZzD" -> "322"
+            "+btGxFqY" -> "330"
+            "NU5IUrDO" -> "331"
+            "zf776BVa" -> "332"
+            "IjZnLnEY" -> "340"
+            "XbciYV58" -> "341"
+            "UAhEm13E" -> "342"
+            "UFEKK6vx" -> "400"
+            "YvCnslnn" -> "410"
+            "_82WkSwYw" -> "411"
+            "QzMGtwtU" -> "412"
+            "D0w9l8zR" -> "420"
+            "Zsic8w8T" -> "421"
+            "-W+ZTdAD" -> "422"
+            "JJPJLvCM" -> "430"
+            "Yzh4WQ0Y" -> "431"
+            "vKcGltmr" -> "432"
+            "QKSU98eA" -> "440"
+            "gH8qY1Mp" -> "441"
+            "N3fS6X3n" -> "442"
+            "WDcEBW5-" -> "500"
+            "_39a89iwO" -> "600"
             else -> "000"
         }
     }
     else {
         when(input){
-            "_3qxUBVmk" -> "000"
-            "_5nCj7Uqa" -> "100"
-            "gWGRRmob" -> "103"
-            "_4Z8P78ae" -> "110"
-            "fEaTteXJ" -> "111"
-            "wKHYDDcL" -> "112"
-            "ucGqEanU" -> "120"
-            "bMFcRHFF" -> "121"
-            "trQO3IjU" -> "122"
-            "EirU3t2w" -> "130"
-            "njaKCinm" -> "131"
-            "+l5q1o2Q" -> "132"
-            "ipu3eVm3" -> "140"
-            "ED3HbrFP" -> "141"
-            "_1fTB63SG" -> "142"
-            "YBtWlRNQ" -> "200"
-            "U0C-qqAg" -> "210"
-            "QfB3RUrq" -> "211"
-            "_5aAqo7kT" -> "212"
-            "dtAUachG" -> "220"
-            "_1XCr2H9k" -> "221"
-            "OM-b0cp7" -> "222"
-            "uRNA8rbW" -> "230"
-            "kzU5a0Hn" -> "231"
-            "jl+hoB5l" -> "232"
-            "auMWfCOu" -> "240"
-            "ScBIrB+c" -> "241"
-            "ViKHDhO0" -> "242"
-            "OIpYZgRB" -> "300"
-            "UCBrppyQ" -> "310"
-            "_1Blb3ELy" -> "311"
-            "etq3tO5h" -> "312"
-            "ow10W+rs" -> "320"
-            "XUlB-x0o" -> "321"
-            "KcDc6Nph" -> "322"
-            "OXNz0hG7" -> "330"
-            "to53ItZd" -> "331"
-            "bpOHc0C-" -> "332"
-            "erQzfPBT" -> "340"
-            "fQY0rO0i" -> "341"
-            "BP0XMWyD" -> "342"
-            "OPA2VJPj" -> "400"
-            "Oqyd4tVk" -> "410"
-            "jr7YF526" -> "411"
-            "cZi-mhve" -> "412"
-            "J5Yif+YJ" -> "420"
-            "q856VOg5" -> "421"
-            "BikLrhTD" -> "422"
-            "dle+K+CW" -> "430"
-            "FvSuS6Zq" -> "431"
-            "TODqwaUS" -> "432"
-            "gSl5Sumg" -> "440"
-            "-Zk1gal3" -> "441"
-            "lBuC1ZI8" -> "442"
-            "unEfI11b" -> "500"
-            "-izVNJaS" -> "600"
+            "HuKZu6Vq" -> "000"
+            "XAPDdeWb" -> "100"
+            "ORcsYnzi" -> "103"
+            "hIsY5K1-" -> "110"
+            "i7VN1kaC" -> "111"
+            "hTm+j-co" -> "112"
+            "i7UMyAET" -> "120"
+            "I2IPqIUv" -> "121"
+            "_1JsImpxh" -> "122"
+            "_7lVKyeSo" -> "130"
+            "vYehKRe+" -> "131"
+            "qmrY1wig" -> "132"
+            "XWkOeHVd" -> "140"
+            "yHIvuMk9" -> "141"
+            "vfKriKf9" -> "142"
+            "fTlrxLKq" -> "200"
+            "_6-D3FqXC" -> "210"
+            "MPgmkOIG" -> "211"
+            "_5ZPonkEp" -> "212"
+            "_8Ze+JHip" -> "220"
+            "+6ZDliZy" -> "221"
+            "AIL9S5v6" -> "222"
+            "iOEVWM9X" -> "230"
+            "NTF9KcX6" -> "231"
+            "NCzWRqr-" -> "232"
+            "TOiDEZr5" -> "240"
+            "jMeLsvOF" -> "241"
+            "_3ZP7mVKX" -> "242"
+            "lUUten9f" -> "300"
+            "_5Yfop-55" -> "310"
+            "VJK3IHKS" -> "311"
+            "rvacyS7p" -> "312"
+            "pRnGDksx" -> "320"
+            "tnt9D2uH" -> "321"
+            "_0sse999u" -> "322"
+            "oW7V-GBL" -> "330"
+            "_8h8QObS1" -> "331"
+            "er6WeH-X" -> "332"
+            "B42Qiniq" -> "340"
+            "Dz9xrxo+" -> "341"
+            "ueZtyWTT" -> "342"
+            "N5FMbQtj" -> "400"
+            "XJXMdpgT" -> "410"
+            "urO5TZKb" -> "411"
+            "m5scv-s0" -> "412"
+            "_1r7kWZh1" -> "420"
+            "IQBXDsW7" -> "421"
+            "_9aP+TT-V" -> "422"
+            "s6k5cGbA" -> "430"
+            "PNn7Jy9W" -> "431"
+            "BFQIgPCo" -> "432"
+            "_9TZwchLj" -> "440"
+            "_4-RftSYV" -> "441"
+            "XGrWw4Te" -> "442"
+            "_9o9j6Qhj" -> "500"
+            "IxOLCQoD" -> "600"
             else -> "000"
         }
     }
@@ -317,13 +328,13 @@ fun decryptIconDescriptor(input: String, isDay: Boolean = true, isSmall: Boolean
 }
 
 fun decryptWindDirection(input: String): Int = when(input) {
-    "h3+v9bod" -> 0
-    "tbzCV4Ko" -> 1
-    "Qj2IQFSf" -> 2
-    "EIlfcmW3" -> 3
-    "kfTsjNwW" -> 4
-    "dmBec6hW" -> 5
-    "_8S3rzjg6" -> 6
-    "vxDsBpVV" -> 7
+    "k9cUkpUK" -> 0
+    "tQoAoJaU" -> 1
+    "APkHBCMM" -> 2
+    "xYejJAKL" -> 3
+    "fkJEemEn" -> 4
+    "OF2yP-fN" -> 5
+    "OxL5Wsqz" -> 6
+    "MQSQlO1E" -> 7
     else -> 0
 }
